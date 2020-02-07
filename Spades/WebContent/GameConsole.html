@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<!-- Leave this file alone; it's a teststub for the server -->
+<head>
+<meta charset="UTF-8">
+<title>Spades Game Console</title>
+</head>
+	<script type="application/javascript" src="SocketUtils.js">
+	//	<script "text/javascript" src="SocketUtils.js">
+	'use strict'; 
+	console.log("init...");
+	alert("Init...");
+	initSocketUtils();
+	</script>
+	<script type="application/javascript" src="NewCardUtils.js">	
+	//<script type="text/javascript" src="CardUtils.js">
+		'use strict'; 
+		function wsOpen(message){
+			echoText.value += "Connected ... \n";
+		}
+		function wsSendMessage1(){
+			console.log("Sending:" + message.value);
+			webSocket.send(message.value);
+			echoText.value += "Message sent to the server : " + message.value + "\n";
+			message.value = "";
+		}
+		function wsCloseConnection(){
+			webSocket.close();
+		}
+		function wsGetMessage(message){
+			echoText.value += "Message received from to the server : " + message.data + "\n";
+		}
+		function wsClose(message){
+			echoText.value += "Disconnect ... \n";
+		}
+		// xxxx
+		function wserror(message){
+			echoText.value += "Error ... \n";
+		}
+		initSocketUtils();
+		var webSocket = new WebSocket("ws://localhost:8080/WebSocketServerExample/websocketendpoint");
+		var echoText = document.getElementById("echoText");
+		echoText.value = "";
+		var message = document.getElementById("message");
+		webSocket.onopen = function(message){ wsOpen(message);};
+		webSocket.onmessage = function(message){ wsGetMessage(message);};
+		webSocket.onclose = function(message){ wsClose(message);};
+		webSocket.onerror = function(message){ wsError(message);};
+
+	</script>
+<body>
+	<form>  
+		<input id="message" type="text">
+		<input onclick="wsSendMessage1();" value="Echo" type="button">
+		<input onclick="wsShowFelt();" value="ShowFelt" type="button" >
+		<input onclick="wsShowHand();" value="ShowHand" type="button">
+		<input onclick="turnover1card();" value="Show 1 Card" type="button">
+		<input onclick="wsCloseConnection();" value="Disconnect" type="button" disabled>
+	</form>
+	<br>
+	<textarea id="echoText" rows="15" cols="60"></textarea>
+<br/>
+<var>status...</var>  <div id="statusArea">  Loading...  </div>
+<br/>
+
+</body>
+</html>
