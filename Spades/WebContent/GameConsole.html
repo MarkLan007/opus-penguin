@@ -28,34 +28,19 @@ with import/export work.
 	console.log("init...");
 	alert("Init...");
 	initSocketUtils();
-	function wsOpen(message){
-			echoText.value += "Connected ... \n";
-		}
-	function wsCloseConnection(){
-			webSocket.close();
-		}
-		function wsGetMessage(message){
-			echoText.value += "Message received from to the server : " + message.data + "\n";
-		}
-		function wsClose(message){
-			echoText.value += "Disconnect ... \n";
-		}
-		// xxxx
-		function wserror(message){
-			echoText.value += "Error ... \n";
-		}
-
 
 		openWebSocket();
 		var echoText = document.getElementById("echoText");
+		writeToTextAread("opening");
 		echoText.value = "";
+		/*
 		var message = document.getElementById("message");
 		webSocket.onopen = function(message){ wsOpen(message);};
 		webSocket.onmessage = function(message){ wsGetMessage(message);};
 		webSocket.onclose = function(message){ wsClose(message);};
 		webSocket.onerror = function(message){ wsError(message);};
-
-	document.addEventListener('keydown', keyFilter, false);
+		*/
+	document.addEventListener('keydown', keyFilter, true);
 	document.getElementById('testButton').addEventListener('click', selectButtonPress);
 	//addEventListener("click", function(event) {selectButtonPress(event);});
 
@@ -79,16 +64,19 @@ Need:
 		<input onclick="turnover1card();" value="Show 1 Card" type="button">
 		<input onclick="wsCloseConnection();" value="Disconnect" type="button" disabled>
  -->
-
-	<form>  
-		<input id="message" type="text" onkeydown="keyFilter(event)">
+	<!-- 
+	<form>
+	 -->  
+		<input id="msgText" type="text" onkeydown="keyFilter(event)">
 		<input onclick="wsSendMessage1();" value="Echo" type="button">
 		<br/>
 		<input onclick="wsShowFelt();" value="ShowFelt" type="button" >
 		<input onclick="wsShowHand();" value="ShowHand" type="button">
 		<input onclick="turnover1card();" value="Show 1 Card" type="button">
 		<input onclick="wsCloseConnection();" value="Disconnect" type="button" disabled>
+	<!-- 
 	</form>
+	 -->
 	<br>
 	<textarea id="echoText" rows="15" cols="60"></textarea>
 <br/>
