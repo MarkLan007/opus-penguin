@@ -1,30 +1,37 @@
 <!DOCTYPE html>
 <html>
-<!-- Leave this file alone; it's a teststub for the server -->
+<!-- 
+Use OneUtils.mjs for all utilites. Couldn't make modules 
+with import/export work.
+.mjs seems like a failed approach, at least now. Reverting back to .js
+ -->
 <head>
 <meta charset="UTF-8">
 <title>Spades Game Console</title>
-</head>
-	<script type="application/javascript" src="SocketUtils.js">
-	//	<script "text/javascript" src="SocketUtils.js">
+</head> 
+
+	<!--  onkeydown="keyFilter()" xxx 
+	-->
+<body>
+
+	<script type="text/javascript" src="OneUtils.js">
+	// Key Point: Would prefer to use module and import/export (like this)
+	// But modules dont' actually work as of Chrome 79..
+	//	<script "module" src="SocketUtils.js">
 	'use strict'; 
+	/*
+	import {initSocketUtils, 
+			selectButtonPress } 
+		from "OneUtils.js"
+		// ie: import { export1 } from "module-name";
+		*/
 	console.log("init...");
 	alert("Init...");
 	initSocketUtils();
-	</script>
-	<script type="application/javascript" src="NewCardUtils.js">	
-	//<script type="text/javascript" src="CardUtils.js">
-		'use strict'; 
-		function wsOpen(message){
+	function wsOpen(message){
 			echoText.value += "Connected ... \n";
 		}
-		function wsSendMessage1(){
-			console.log("Sending:" + message.value);
-			webSocket.send(message.value);
-			echoText.value += "Message sent to the server : " + message.value + "\n";
-			message.value = "";
-		}
-		function wsCloseConnection(){
+	function wsCloseConnection(){
 			webSocket.close();
 		}
 		function wsGetMessage(message){
@@ -37,8 +44,9 @@
 		function wserror(message){
 			echoText.value += "Error ... \n";
 		}
-		initSocketUtils();
-		var webSocket = new WebSocket("ws://localhost:8080/WebSocketServerExample/websocketendpoint");
+
+
+		openWebSocket();
 		var echoText = document.getElementById("echoText");
 		echoText.value = "";
 		var message = document.getElementById("message");
@@ -47,11 +55,35 @@
 		webSocket.onclose = function(message){ wsClose(message);};
 		webSocket.onerror = function(message){ wsError(message);};
 
-	</script>
-<body>
+	document.addEventListener('keydown', keyFilter, false);
+	document.getElementById('testButton').addEventListener('click', selectButtonPress);
+	//addEventListener("click", function(event) {selectButtonPress(event);});
+
+	//</script> <script type="module" >
+//src="OneUtils.js"
+//import selectButtonPress;
+//import { selectButtonPress } from "./SocketUtils.js";
+
+// selectButtonPress(null);
+
+</script>
+
+
+<!-- 666
+Need:
+
+
+		<button id="send" onclick="wsSendMessage1();" value="Echo" type="button">
+		<input onclick="wsShowFelt();" value="ShowFelt" type="button" >
+		<input onclick="wsShowHand();" value="ShowHand" type="button">
+		<input onclick="turnover1card();" value="Show 1 Card" type="button">
+		<input onclick="wsCloseConnection();" value="Disconnect" type="button" disabled>
+ -->
+
 	<form>  
-		<input id="message" type="text">
+		<input id="message" type="text" onkeydown="keyFilter(event)">
 		<input onclick="wsSendMessage1();" value="Echo" type="button">
+		<br/>
 		<input onclick="wsShowFelt();" value="ShowFelt" type="button" >
 		<input onclick="wsShowHand();" value="ShowHand" type="button">
 		<input onclick="turnover1card();" value="Show 1 Card" type="button">

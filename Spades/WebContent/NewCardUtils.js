@@ -196,13 +196,4 @@ function showCardImage() {
 	console.log("image loaded");	
 }
 
-function xstatusUpdate(sMsg) {
-	alert(sMsg);
-	// Note: bizarre soul-sucking bug if you try to user InnerHTMl at least on UNIX browsers...
-	document.getElementById("statusArea").textContent 
-		= sMsg ; // this is the only of these that works reliably
-		// = '<var>' + sMsg + '</var>' ;
-		// insertAdjacentText("afterbegin", sMsg);
-		// innterHTML =  sMsg ;
-	return true;
-}
+export {wsShowFelt }
