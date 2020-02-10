@@ -3,11 +3,13 @@ package server.ws;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.concurrent.Future;
 
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
+import javax.websocket.RemoteEndpoint;
 import javax.websocket.RemoteEndpoint.Basic;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
@@ -34,7 +36,8 @@ public class WsServer {
 	ArrayList<String> history=new ArrayList();
 	
 	@OnMessage
-	public String onMessage(String message, boolean last, Session sess){
+	public void onMessage(String message, boolean last, Session sess){
+		sess.setMaxIdleTimeout(1000000);
 		System.out.println("Message from the client: " + message);
 		String echoMsg = "Echo from the Server: " + message;
 		history.add(message);
@@ -43,7 +46,7 @@ public class WsServer {
 		for (String s:history) {
 			broadcast(s);
 			}
-		return echoMsg;
+		return ; // avoid timeout, return nada... echoMsg;
 	}
 
 	@OnError
@@ -57,20 +60,9 @@ public class WsServer {
 		int n=SessionManager.sessionListSize();
 		for (i=0; i<n; i++) {
 			Session sess=SessionManager.getSession(i);
-			Basic br=sess.getBasicRemote();
-			Writer w=null;
-			try {
-				w=br.getSendWriter();
-				} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				}
-			try {
-				w.write(msg);
-				} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				}
+			//Basic br=sess.getBasicRemote();
+			RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 
+			asynchRemote.sendText(msg);
 			if (verbose) {
 				System.out.println("writing(" + i + "):" + msg);
 			}
