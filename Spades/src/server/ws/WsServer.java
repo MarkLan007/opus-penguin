@@ -1,8 +1,3 @@
-/*
-public class WsServer {
-
-}
-*/
 package server.ws;
 
 import javax.websocket.OnClose;
@@ -11,7 +6,7 @@ import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.server.ServerEndpoint;
 
-/*
+/* xxx
  * So apparently the server endpoint sets up the listener on the 
  * server under the subdirectory that is the name of the project.
  * todo: Can this be changed in an xml file somewhere?
