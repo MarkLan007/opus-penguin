@@ -18,7 +18,7 @@ import javax.websocket.server.ServerEndpoint;
  * So apparently the server endpoint sets up the listener on the 
  * server under the subdirectory that is the name of the project.
  * todo: Can this be changed in an xml file somewhere?
- */
+ */ 
 @ServerEndpoint("/websocketendpoint")
 public class WsServer {
 	
@@ -26,6 +26,8 @@ public class WsServer {
 	public void onOpen(Session sess){
 		System.out.println("Open Connection ...");
 		SessionManager.manageSession(sess);
+		// Catch up...
+		retreivePreviousConversation(sess);
 	}
 	
 	@OnClose
@@ -41,14 +43,31 @@ public class WsServer {
 		System.out.println("Message from the client: " + message);
 		String echoMsg = "Echo from the Server: " + message;
 		history.add(message);
+		broadcast(message);
+
+		/*
+		// catch up on the conversation
 		int i=SessionManager.sessionListSize();
 		System.out.println("broadcast(" + i + "):" + message);
 		for (String s:history) {
 			broadcast(s);
+			// Don't broadcast; just write...
 			}
+		*/
 		return ; // avoid timeout, return nada... echoMsg;
 	}
 
+	/*
+	 * retreivePrevious... send everything in history to new attendee
+	 */
+	void retreivePreviousConversation(Session sess) {
+		RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 
+		for (String s:history) {
+			asynchRemote.sendText(s);
+			}
+		
+	}
+	
 	@OnError
 	public void onError(Throwable e){
 		e.printStackTrace();
