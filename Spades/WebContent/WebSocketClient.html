@@ -34,14 +34,15 @@
 			message.value = "";
 		}
 		function wsCloseConnection(){
-			echoText.value += "Connection closed by server: " + message.data + "\n";
+			echoText.value += "Connection closed by user button press. Reconnect to continue.");
 			webSocket.close();
 		}
 		function wsGetMessage(message){
 			echoText.value += "Message received from to the server : " + message.data + "\n";
 		}
 		function wsClose(message){
-			echoText.value += "Disconnect ... \n";
+			echoText.value += "Connection closed by server:\n";
+			echoText.value += "Disconnected. ... \n";
 		}
 
 		function wserror(message){
