@@ -1,24 +1,155 @@
 <!DOCTYPE html>
 <html>
 <!-- 
-Use OneUtils.mjs for all utilites. Couldn't make modules 
-with import/export work.
-.mjs seems like a failed approach, at least now. Reverting back to .js
+ * Use OneUtils.js for all utilites. 
+ * Couldn't make modules with import/export work.
+ * .mjs is a failed approach, at least now. Reverted back to .js
  -->
 <head>
 <meta charset="UTF-8">
 <title>Spades Game Console</title>
-</head> 
+<!-- Define style for menu bar -->
 
-	<!--  onkeydown="keyFilter()" xxx 
-	-->
+<!-- 
+<meta name="viewport" content="width=device-width, initial-scale=1">
+ -->
+ 
+<style>
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.topnav {
+  overflow: hidden;
+  background-color: #333;
+}
+
+.topnav a {
+  float: left;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.topnav a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.topnav a.active {
+  background-color: #4CAF50;
+  color: white;
+}
+</style>
+<style>
+.dropbtn {
+  background-color: #3498DB;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.dropbtn:hover, .dropbtn:focus {
+  background-color: #2980B9;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown a:hover {background-color: #ddd;}
+.show {display: block;}
+
+</style>
+</head> 
 <body>
 
-	<script type="text/javascript" src="OneUtils.js">
+
+<div class="topnav">
+  <a class="active" href="#home">Home</a>
+  <a href="#view">View</a>
+  <a href="#settings">Settings</a>
+  <a href="#about">About</a>
+</div> 
+
+<h2>Clickable Dropdown</h2>
+<p>Click on the button to open the dropdown menu.</p>
+
+<div class="dropdown">
+  <button onclick="dropDown()" class="dropbtn">Dropdown</button>
+  <div id="myDropdown" class="dropdown-content" onmouseleave="mouseExitMenu(this)">
+    <a href="#home">Home</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </div>
+</div>
+
+
+<div style="padding-left:16px">
+  <h2>Game Console Window</h2>
+  <p>Game will connect to server when you submit a command...</p>
+</div>
+
+<script type="text/javascript" src="OneUtils.js">
 	// Key Point: Would prefer to use module and import/export (like this)
 	// But modules dont' actually work as of Chrome 79..
 	//	<script "module" src="SocketUtils.js">
 	'use strict'; 
+	
+	// Dropdown Menu stuff
+
+
+/* Move to OneUtils...
+ * 
+ *When the user clicks on the button, 
+ * toggle between hiding and showing the dropdown content 
+ *...
+function dropDown() {
+	console.log("myDropdown..."); 
+	document.getElementById("myDropdown").classList.toggle("show");
+}
+ */
+
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+	console.log("onclick...");
+
+  if (!event.target.matches('.dropbtn')) {
+	  console.log("Trying to close after select...")
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
+	
 	/*
 	import {initSocketUtils, 
 			selectButtonPress } 
@@ -52,7 +183,7 @@ with import/export work.
 // selectButtonPress(null);
 
 </script>
-
+ 
 
 <!-- 666
 Need:

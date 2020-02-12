@@ -300,7 +300,7 @@ function openWebSocket() {
 }
 
 // sleep for parameter ms milliseconds. 
-function sleep(ms) { 
+function sleep(ms) {  
 	  return new Promise(resolve => setTimeout(resolve, ms));
 	}
 
@@ -379,4 +379,20 @@ function wsSendMessage1(){
 	//serverWrite(message.value);
 	//echoText.value += "Message sent to the server : " + message.value + "\n";
 	//message.value = "";
+}
+
+/* 
+ * dropDown - When the user clicks on the button, 
+ * toggle between hiding and showing the dropdown content 
+ */
+function dropDown() {
+	console.log("myDropdown...");
+	document.getElementById("myDropdown").classList.toggle("show");
+}
+
+function mouseExitMenu(event) {
+	console.log("exit myDropdown.../Do nothing right now...");
+	console.log("arg=" + event);
+	dropDown();	// toggle show value...
+
 }
