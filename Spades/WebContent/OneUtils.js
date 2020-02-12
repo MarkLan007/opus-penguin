@@ -381,6 +381,18 @@ function wsSendMessage1(){
 	//message.value = "";
 }
 
+/*
+ * menuDropdown
+ */
+function menuDropDown() {
+	console.log("menuDropDown...");
+	document.getElementById("item1-menu").classList.toggle("show");
+}
+function mouseExitDropDownMenu(event) {
+	console.log("exit mouseExitDropDownMenu.../Do nothing right now...");
+	console.log("arg=" + event);
+	menuDropDown();	// toggle show value...
+}
 /* 
  * dropDown - When the user clicks on the button, 
  * toggle between hiding and showing the dropdown content 

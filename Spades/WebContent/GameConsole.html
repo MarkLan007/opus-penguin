@@ -89,12 +89,25 @@ body {
 
 
 <div class="topnav">
-  <a class="active" href="#home">Home</a>
+  <a class="active" href="#home" onclick="menuDropDown();">Home</a>
   <a href="#view">View</a>
   <a href="#settings">Settings</a>
   <a href="#about">About</a>
 </div> 
 
+<!-- 
+  <button onclick="dropDown()" class="item1-menu"></button>
+    <button onclick="menuDropDown()" class="tmpbutton">Foobar</button>
+  
+   -->
+<div class="MenubarItem1Dropdown"> 
+  <div id="item1-menu" class="dropdown-content" onclick="menuDropDown()" onmouseleave="mouseExitDropDownMenu(this)">
+    <a href="#home">File Open</a>
+    <a href="#about">Save</a>
+    <a href="#contact">Exit</a>
+    </div>
+  </div>
+  
 <h2>Clickable Dropdown</h2>
 <p>Click on the button to open the dropdown menu.</p>
 
