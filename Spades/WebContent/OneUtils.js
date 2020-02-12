@@ -270,7 +270,7 @@ function selectButtonPress(event) {
 }
 function wsOpen(message){
 	//echoText.value += "Connected ... \n";
-	xStatusUpdate("Connected...");
+	xstatusUpdate("Connected...");
 }
 function wsCloseConnection(){
 	webSocket.close();
@@ -280,7 +280,7 @@ function wsGetMessage(message){
 }
 function wsClose(message){
 	//echoText.value += "Disconnect ... \n";
-	xStatusUpdate("Disconnected..."); 
+	xstatusUpdate("Disconnected..."); 
 }
 // xxxx
 function wserror(message){
@@ -299,20 +299,31 @@ function openWebSocket() {
 	webSocket.onerror = function(message){ wsError(message);};
 }
 
-// returns true on success write; false on error
+// sleep for parameter ms milliseconds. 
+function sleep(ms) { 
+	  return new Promise(resolve => setTimeout(resolve, ms));
+	}
+
+//returns true on successful write; false on error
 function serverWrite(msg){
 	if (webSocket == null) {
 		openWebSocket();
+		sleep(10);
 	}
 	if (webSocket.readystate == 0) {
 		console.log("Still connecting. Try again in a second.");
 		return false;
 	}
-	else if (webSocket.readyState == 1) {
+	else if (webSocket.readyState == 1) {	// Ready. Connection established
 		webSocket.send(msg);
+		return true;
+	} else if (webSocket.readyState == 2 || webSocket.readyState == 3) {
+		xstatusUpdate("Connection to server has been closed. Plese Reconnect.")
+		return false;
 	} else {
-		console.log("unable to write:" + msg);
+		console.log("Unknown status(" + webSocket.readystate + ") unable to write:" + msg);
 		xstatusUpdate("unable to write:{"+msg+"} Network temporarily unavailable. Please try again.")
+		return false;
 	}
 	return true;
 }
