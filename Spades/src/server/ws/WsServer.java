@@ -40,7 +40,7 @@ public class WsServer {
 	public void onClose(Session sess){
 		SessionManager.remove(sess);
 		System.out.println("Close Connection ...");
-	}
+	} 
 	
 	static Vector<String> history=new Vector(10, 5);
 	
