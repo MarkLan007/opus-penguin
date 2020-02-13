@@ -2,17 +2,13 @@
  * Moving SocketUtils and NewCardUtils into one file
  * to avoid the module import/export bugs
  */
-/** XXX XX
+/** 
  * CardUtils - card data structures and utility functions
  */
 
 'use strict'; 
 console.warn("OneUtils.js used [.mjs version experiment failed.]")
-const DaysOfWeek = {
-		MONDAY: 1,
-		TUESDAY: 2,
-		THURSDAY: 3
-};
+
 const Rank = {
 		ACE: 	1,
 		DEUCE: 	2,
@@ -28,20 +24,65 @@ const Rank = {
 		QUEEN:	12,
 		KING:	13		
 };
+
+const CLUBS="CLUBS";
+const DIAMONDS="DIAMONDS";
+const HEARTS="HEARTS";
+const SPADES="SPADES";
+
 const Suit = {
-		CLUBS:	1,
+		CLUBS:		1,
 		DIAMONDS:	2,
 		HEARTS:		3,
 		SPADES:		4
 };
 
+/* Failed experiment
+const Suits=[
+		CLUBS="CLUBS",
+		DIAMONDS="DIAMONDS"
+			//,
+		//HEARTS,
+		//SPADES
+			];
+	*/
+// then use index of CardSuits to get the index, use the names as constants
+
+/* failed experiment...
+const Suit = {
+		CLUBS=		: "CLUBS", ord: 0},
+		DIAMONDS=	{name: "DIAMONDS", ord: 1},
+		HEARTS=		{name: "HEARTS", ord:2},
+		SPADES=		{name: "SPADES", ord:3}
+};
+Object.freeze(Suit);
+*/
+/*
+ * Doesn't work the way it should...
+ *
+const Suit = {
+		CLUBS:		1,
+		DIAMONDS:	2,
+		HEARTS:		3,
+		SPADES:		4
+};
+*/
+
 class Card {
 	//var cardindex;
 	//var rank;
 	//var suit;
-	constructor(r, s) {
+	//var suitimage
+	// var xoffset, yoffset
+	// var width, height
+	// XXX
+	constructor(r, s, cardindex) {
 		this.rank = r;
-		this.suit = s;		
+		this.suit = s;
+		// this should be computed something like this, but I'm too dumb to make this work right now
+		//this.cardIndex = (s.value - 1) * 4 + (r.value - 1);
+		this.cardIndex = cardindex;
+		this.suitImage = null; // put suitimage in when actually displayed
 	};
 	
 }
@@ -49,20 +90,22 @@ class Card {
 var theDeck = new Array();
 
 function initializeTheDeck() {
+	var cardindex=0;
 	for (var suit in Suit) {
 		for (var rank in Rank) {
 			var card;
 			//console.log("creating:"+rank+suit);
-			card = new Card(rank, suit);
+			card = new Card(rank, suit, cardindex);
 			theDeck.push(card);
+			cardindex ++;
 		}
 	}
 	// Add card images for each card
-	// xxx
+	// ... not here. In constructor
 	var verboseInit=false;
 	for (var i=0; i<theDeck.length; i++) {
 		if (verboseInit)
-			console.log("created: " + theDeck[i].rank + theDeck[i].suit);
+			console.log("created: " + theDeck[i].rank + theDeck[i].Suit.name);
 	}
 }
 
@@ -86,6 +129,10 @@ function wsShowHand() {
 var feltWindow=null;
 var feltCanvas=null;
 var suitcardImages=null;
+var clubsCardImages=null;
+var diamondsCardImages=null;
+var heartsCardImages=null;
+var spadesCardImages=null;
 var feltContext=null;
 
 //
@@ -135,11 +182,22 @@ function wsShowFelt() {
 				// There doesn't seem to be a way to create subimages.
 				// Maybe I should use the suitcard image and pass coordinates for the
 				// particular card being accessed. So pass offsets...
+				//
+				// Ok, so should use deferred processing for this.
+				// store cardimage as null.
+				// when needed put in a reference to the actual image
 				suitcardImages = feltWindow.document.getElementById("ClubsImage");
+				clubsCardImages = suitcardImages; // first one... clean this up...
+				clubsCardImages = feltWindow.document.getElementById("ClubsImage");
+				diamondsCardImages = feltWindow.document.getElementById("DiamondsImage");
+				heartsCardImages = feltWindow.document.getElementById("HeartsImage");
+				spadesCardImages = feltWindow.document.getElementById("SpadesImage");
+				suitcardImages = diamondsCardImages;	// temp hack for testing...
 				if (suitcardImages == null) 
 					alert("Failed to obtain card image file");
 				else {
 					// just draw the first card for now...
+					/*
 					var width=suitcardImages.width;
 					var height=suitcardImages.height;
 					console.log("width:" + suitcardImages.width + "->" + cardwidth);					
@@ -149,7 +207,7 @@ function wsShowFelt() {
 							0, 0, cardwidth, cardheight, // source rectangle
 							0, 0, cardwidth, cardheight	// destination rectangle
 							);
-							
+						*/	
 					}
 				
 			}
@@ -184,7 +242,10 @@ function cardYoffset(card) {
 	return pixels;
 }
 
-function turnover1card() {
+/*
+ * turnover1card -- doesn't really use the deck; temporary func to just display a cardface
+ */
+function turnover1cardOld() {
 	var card=jrandom(15); // random card on a suit page...
 	console.log("Card:" + card);
 	feltContext = feltCanvas.getContext("2d");
@@ -200,11 +261,86 @@ function turnover1card() {
 			);
 }
 
-function showCardImage() {
-	//alert("Image loaded?");
-	console.log("image loaded");	
+/*
+ * turnover1card - rebuilt turnover1card using cards not just the face
+ * xxx
+ */
+var indexCheck=true;
+
+function getCardImageFile(card) {
+
+	var x=card.suit;
+	switch (card.suit) {	// xxx
+	case CLUBS:
+		if (clubsCardImages == null)
+			clubsCardImages = feltWindow.document.getElementById("ClubsImage");
+		return clubsCardImages;
+	case DIAMONDS:
+		if (diamondsCardImages == null)
+			diamondsCardImages = feltWindow.document.getElementById("DiamondsImage");
+		return diamondsCardImages;
+	case HEARTS:
+		if (heartsCardImages == null)
+			heartsCardImages = feltWindow.document.getElementById("HeartsImage");
+		return heartsCardImages;
+	case SPADES:
+		if (spadesCardImages == null)
+			spadesCardImages = feltWindow.document.getElementById("SpadesImage");
+		return spadesCardImages;
+	default:
+		return suitcardImages;
+	}
+}
+function turnover1card() {
+	//var cardindex=jrandom(52); // random card from deck
+	//var randomcard=cardindex;	// just clubs for now...
+	var randomcard=jrandom(52);	// pick a card, any card.
+	var card=theDeck[randomcard];
+	//cardindex=card.cardIndex;
+	if (indexCheck == true)
+		console.log("Card.index=", card.cardIndex, "for (suit,rank)=", card.suit, card.rank);
+	console.log("Card:" + card.cardIndex);
+	feltContext = feltCanvas.getContext("2d");
+	var lastx, lasty;
+	//var firstx=cardXoffset(card.cardIndex);
+	//var firsty=cardYoffset(card.cardIndex);
+	//
+	// All cards are packed into their files the same way, so 
+	// it's based on their rank.
+	// Also note that Arrays are 0-based, and the offsets are 1-based
+	var firstx=cardXoffset(Rank[card.rank] - 1);
+	var firsty=cardYoffset(Rank[card.rank] - 1);
+
+	console.log("xy-source["+firstx+", "+firsty+"]");
+	console.log("width-height["+cardwidth+", " + cardheight + "]");
+
+	if (card.cardImage == null) {
+		card.cardImage = getCardImageFile(card); // yyy
+	}
+	// should be card.cardImage,... doesn't work.
+	waitForImageLoad();
+	feltContext.drawImage(card.cardImage, 
+			firstx, firsty, cardwidth, cardheight, // source rectangle
+			cardwidth+xmarginwidth, 0 , cardwidth, cardheight		// destination rectangle
+			);
 }
 
+var imageFilesLoaded=0;	// number of image files loaded
+function logCardImage() {
+	//alert("Image loaded?");
+	imageFilesLoaded++;
+	console.log("image files loaded=" + imageFilesLoaded);	
+}
+
+function waitForImageLoad() {
+	var sleeps=10;
+	var i;
+	for (i=0; i<sleeps; i++) {
+		if (imageFilesLoaded <4)
+			return;
+		sleep(100);
+		}
+}
 
 
 /**
@@ -282,7 +418,7 @@ function wsClose(message){
 	//echoText.value += "Disconnect ... \n";
 	xstatusUpdate("Disconnected..."); 
 }
-// xxxx
+// obsolete: wserror -- superceded by xstatusUpdate
 function wserror(message){
 	echoText.value += "Error ... \n";
 }

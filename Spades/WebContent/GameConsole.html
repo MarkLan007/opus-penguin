@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
-<!-- 
- * Use OneUtils.js for all utilites. 
+<!-- touch here to cause rebuild v1xx
+ * Use OneUtils.js for all utilities. 
  * Couldn't make modules with import/export work.
  * .mjs is a failed approach, at least now. Reverted back to .js
  -->
@@ -212,7 +212,8 @@ Need:
 	<form>
 	 -->  
 		<input id="msgText" type="text" onkeydown="keyFilter(event)">
-		<input onclick="wsSendMessage1();" value="Submit" type="button">
+		<input title="Game will connect to server when you submit a command.." 
+			onclick="wsSendMessage1();" value="Submit" type="button">
 		<br/>
 		<input onclick="wsShowFelt();" value="ShowFelt" type="button" >
 		<input onclick="wsShowHand();" value="ShowHand" type="button">
