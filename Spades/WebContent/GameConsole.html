@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<!-- touch here to cause rebuild v1xx
+<!-- touch here to cause rebuild v2a xx
  * Use OneUtils.js for all utilities. 
  * Couldn't make modules with import/export work.
  * .mjs is a failed approach, at least now. Reverted back to .js
@@ -131,7 +131,16 @@ body {
 	// But modules dont' actually work as of Chrome 79..
 	//	<script "module" src="SocketUtils.js">
 	'use strict'; 
-	
+	/* xxxxxxxxx
+	 * I have no idea why these logging functinos don't produce visible output...
+	*/
+	console.log("Now in GameConsole.html back from loading OneUtils.js...");
+	alert("logging load...");
+	/*console.log(versionString1);
+	const consoleVersion="v0.01a";
+	console.log(versionString2);
+	console.log(versionString1 + consoleVersion + versionString2);
+	*/
 	// Dropdown Menu stuff
 
 

@@ -7,7 +7,13 @@
  */
 
 'use strict'; 
-console.warn("OneUtils.js used [.mjs version experiment failed.]")
+const minorVersion ="1b" ;
+const versionString1="OneUtils.js version 0." + 
+	minorVersion +
+	"(prerelease) [do not use .mjs experimental version.]";
+//console.warn(VersionString);	// Moved to GameConsole.html
+console.warn(versionString1);
+console.log("Loading OneUtils version 1.0" + minorVersion + "...");
 
 const Rank = {
 		ACE: 	1,
@@ -37,36 +43,23 @@ const Suit = {
 		SPADES:		4
 };
 
-/* Failed experiment
-const Suits=[
-		CLUBS="CLUBS",
-		DIAMONDS="DIAMONDS"
-			//,
-		//HEARTS,
-		//SPADES
-			];
-	*/
-// then use index of CardSuits to get the index, use the names as constants
+//
+// table positions at cardtable
+const Orientation4 = {
+		NORTH:	0,
+		EAST:	1,
+		SOUTH:	2,
+		WEST:	3,
+}
 
-/* failed experiment...
-const Suit = {
-		CLUBS=		: "CLUBS", ord: 0},
-		DIAMONDS=	{name: "DIAMONDS", ord: 1},
-		HEARTS=		{name: "HEARTS", ord:2},
-		SPADES=		{name: "SPADES", ord:3}
-};
-Object.freeze(Suit);
-*/
-/*
- * Doesn't work the way it should...
- *
-const Suit = {
-		CLUBS:		1,
-		DIAMONDS:	2,
-		HEARTS:		3,
-		SPADES:		4
-};
-*/
+const Orientation6 = {
+		NOON: 0,
+		TENMINUTES: 1,
+		TWENTYMINUTES: 2,
+		THIRTYMINUTES: 3,
+		FORTYMINUTES: 4,
+		FIFTYMINUTES: 5
+}
 
 class Card {
 	//var cardindex;
@@ -75,7 +68,6 @@ class Card {
 	//var suitimage
 	// var xoffset, yoffset
 	// var width, height
-	// XXX
 	constructor(r, s, cardindex) {
 		this.rank = r;
 		this.suit = s;
@@ -243,22 +235,74 @@ function cardYoffset(card) {
 }
 
 /*
- * turnover1card -- doesn't really use the deck; temporary func to just display a cardface
+ * turnover1card -- backup version; works for one card
  */
-function turnover1cardOld() {
-	var card=jrandom(15); // random card on a suit page...
-	console.log("Card:" + card);
+var currentCard=0; //badly named; should be cardSeat or something like that
+var nHands=4;
+function turnover1card() {
+	var randomcard=jrandom(52);	// pick a card, any card.
+	var card=theDeck[randomcard];
+	if (indexCheck == true)
+		console.log("Card.index=", card.cardIndex, "for (suit,rank)=", card.suit, card.rank);
+	console.log("Card:" + card.cardIndex);
 	feltContext = feltCanvas.getContext("2d");
 	var lastx, lasty;
-	var firstx=cardXoffset(card);
-	var firsty=cardYoffset(card);
+	// All cards are packed into their files the same way, so 
+	// location is based (symmetrically) on the card's rank.
+	// Also note that Arrays are 0-based, and the offsets are 1-based
+	var firstx=cardXoffset(Rank[card.rank] - 1);
+	var firsty=cardYoffset(Rank[card.rank] - 1);
+
+	console.log("currentCard Seat=" + currentCard);
 	console.log("xy-source["+firstx+", "+firsty+"]");
 	console.log("width-height["+cardwidth+", " + cardheight + "]");
 
-	feltContext.drawImage(suitcardImages, 
+	if (card.cardImage == null) {
+		card.cardImage = getCardImageFile(card);
+	}
+	waitForImageLoad();
+	//
+	// Assume 4handed for now
+	var halfwidth=Math.floor(feltCanvas.width/2);
+	var halfheight=Math.floor(feltCanvas.height/2); 
+	var halfxmarginwidth=Math.floor(xmarginwidth/2);
+	var halfcardwidth=Math.floor(cardwidth/2)
+	//var halfymarginheight=Math.floor(xmarginheight/2);
+	var topy=0;
+	if (halfheight > cardheight)
+		topy = cardheight;
+	else
+		topy = halfheight;
+	switch (currentCard) {
+	case 0:	// North-center
+		feltContext.drawImage(card.cardImage, 
 			firstx, firsty, cardwidth, cardheight, // source rectangle
-			cardwidth+xmarginwidth, 0 , cardwidth, cardheight		// destination rectangle
+			halfwidth-halfcardwidth, 0 , cardwidth, cardheight		// destination rectangle
 			);
+		break;
+	case 1: // East half cardwith shifted left, half screen down
+		feltContext.drawImage(card.cardImage, 
+				firstx, firsty, cardwidth, cardheight, // source rectangle
+				halfwidth+halfcardwidth+xmarginwidth, topy, cardwidth, cardheight		// destination rectangle
+				);
+		break;
+	case 2:	// South rotated 180 upside down.
+		feltContext.drawImage(card.cardImage, 
+				firstx, firsty, cardwidth, cardheight, // source rectangle
+				halfwidth-halfcardwidth, halfheight, cardwidth, cardheight		// destination rectangle
+				);
+		break;
+	case 3:	// West
+		feltContext.drawImage(card.cardImage, 
+				firstx, firsty, cardwidth, cardheight, // source rectangle
+				0, halfheight, cardwidth, cardheight		// destination rectangle
+				);
+		break;
+		default:
+			console.log("Switch: can't happen.");
+	}
+	
+	currentCard = (currentCard + 1) % nHands;
 }
 
 /*
@@ -268,7 +312,6 @@ function turnover1cardOld() {
 var indexCheck=true;
 
 function getCardImageFile(card) {
-
 	var x=card.suit;
 	switch (card.suit) {	// xxx
 	case CLUBS:
@@ -291,22 +334,20 @@ function getCardImageFile(card) {
 		return suitcardImages;
 	}
 }
-function turnover1card() {
-	//var cardindex=jrandom(52); // random card from deck
-	//var randomcard=cardindex;	// just clubs for now...
+/*
+ * cardPos is 0, NORTH at top, clockwise to number of players
+ * xxx
+ */
+function turnover1cardOld() {
 	var randomcard=jrandom(52);	// pick a card, any card.
 	var card=theDeck[randomcard];
-	//cardindex=card.cardIndex;
 	if (indexCheck == true)
-		console.log("Card.index=", card.cardIndex, "for (suit,rank)=", card.suit, card.rank);
+		console.log("Card.index=" + card.cardIndex + "for (suit,rank)=" + card.suit + card.rank);
 	console.log("Card:" + card.cardIndex);
 	feltContext = feltCanvas.getContext("2d");
 	var lastx, lasty;
-	//var firstx=cardXoffset(card.cardIndex);
-	//var firsty=cardYoffset(card.cardIndex);
-	//
 	// All cards are packed into their files the same way, so 
-	// it's based on their rank.
+	// location is based (symmetrically) on the card's rank.
 	// Also note that Arrays are 0-based, and the offsets are 1-based
 	var firstx=cardXoffset(Rank[card.rank] - 1);
 	var firsty=cardYoffset(Rank[card.rank] - 1);
@@ -317,7 +358,6 @@ function turnover1card() {
 	if (card.cardImage == null) {
 		card.cardImage = getCardImageFile(card); // yyy
 	}
-	// should be card.cardImage,... doesn't work.
 	waitForImageLoad();
 	feltContext.drawImage(card.cardImage, 
 			firstx, firsty, cardwidth, cardheight, // source rectangle
@@ -544,3 +584,4 @@ function mouseExitMenu(event) {
 	dropDown();	// toggle show value...
 
 }
+console.log("OneUtils loaded [done].");
