@@ -235,12 +235,12 @@ function cardYoffset(card) {
 }
 
 /*
- * turnover1card -- backup version; works for one card
+ * turnover1card -- Not to bet confused with turnover1cardold...
  */
 var pi=Math.PI;
 var currentCard=0; //badly named; should be cardSeat or something like that
 var nHands=4;
-function turnover1card() {
+function turnover1cardOld() {
 	var randomcard=jrandom(52);	// pick a card, any card.
 	var card=theDeck[randomcard];
 	if (indexCheck == true)
@@ -346,9 +346,9 @@ function getCardImageFile(card) {
 }
 /*
  * cardPos is 0, NORTH at top, clockwise to number of players
- * xxx
+ * xxxx
  */
-function turnover1cardOld() {
+function turnover1card() { // New rotation
 	var randomcard=jrandom(52);	// pick a card, any card.
 	var card=theDeck[randomcard];
 	if (indexCheck == true)
@@ -382,7 +382,7 @@ function turnover1cardOld() {
 		topy = cardheight;
 	else
 		topy = halfheight;
-	var rotation=0;
+	var rotation=(90/180) * pi;	// rotation in radians for 90 degrees
 	switch (currentCard) {
 	case 0:	// North-center
 		feltContext.drawImage(card.cardImage, 
@@ -391,15 +391,19 @@ function turnover1cardOld() {
 			);
 		break;
 	case 1: // East half cardwith shifted left, half screen down
-		rotation = pi/2;
-		//feltContext.translate(halfwidth, halfheight);
-		//feltContext.rotate(rotation);
+		// genius use of 90-degree rotation
+		var upperLeftX=halfwidth+halfcardwidth+xmarginwidth;
+		var upperLeftY=topy;
+		feltContext.translate(halfwidth, halfheight);
+		feltContext.rotate(rotation);
 		feltContext.drawImage(card.cardImage, 
 				firstx, firsty, cardwidth, cardheight, // source rectangle
-				halfwidth+halfcardwidth+xmarginwidth, topy, cardwidth, cardheight		// destination rectangle
+				-cardwidth, -cardheight , // not 0 after rotation...
+					cardwidth, cardheight		// destination rectangle
 				);
-		//feltContext.rotate(-rotation);
-		//feltContext.translate(-halfwidth, -halfheight);
+		// Undo rotation and translation for next seat
+		feltContext.rotate(-rotation);
+		feltContext.translate(-halfwidth, -halfheight);
 		break;
 	case 2:	// South rotated 180 upside down.
 		feltContext.drawImage(card.cardImage, 
@@ -408,13 +412,16 @@ function turnover1cardOld() {
 				);
 		break;
 	case 3:	// West
-		rotation = (45/180)*pi;
-		//feltContext.rotate(rotation);
+		// genius use of 90-degree rotation
+		var upperLeftX=halfwidth+halfcardwidth+xmarginwidth;
+		var upperLeftY=topy;
+		feltContext.rotate(rotation);
 		feltContext.drawImage(card.cardImage, 
 				firstx, firsty, cardwidth, cardheight, // source rectangle
-				0, topy, cardwidth, cardheight		// destination rectangle
+				halfwidth-halfcardwidth, -cardheight , // not 0 after rotation...
+					cardwidth, cardheight		// destination rectangle
 				);
-		//feltContext.rotate(-rotation);
+		feltContext.rotate(-rotation);
 		break;
 		default:
 			console.log("Switch: can't happen.");
