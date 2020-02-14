@@ -237,6 +237,7 @@ function cardYoffset(card) {
 /*
  * turnover1card -- backup version; works for one card
  */
+var pi=Math.PI;
 var currentCard=0; //badly named; should be cardSeat or something like that
 var nHands=4;
 function turnover1card() {
@@ -273,6 +274,7 @@ function turnover1card() {
 		topy = cardheight;
 	else
 		topy = halfheight;
+	var rotation=0;
 	switch (currentCard) {
 	case 0:	// North-center
 		feltContext.drawImage(card.cardImage, 
@@ -281,10 +283,15 @@ function turnover1card() {
 			);
 		break;
 	case 1: // East half cardwith shifted left, half screen down
+		rotation = pi/2;
+		//feltContext.translate(halfwidth, halfheight);
+		//feltContext.rotate(rotation);
 		feltContext.drawImage(card.cardImage, 
 				firstx, firsty, cardwidth, cardheight, // source rectangle
 				halfwidth+halfcardwidth+xmarginwidth, topy, cardwidth, cardheight		// destination rectangle
 				);
+		//feltContext.rotate(-rotation);
+		//feltContext.translate(-halfwidth, -halfheight);
 		break;
 	case 2:	// South rotated 180 upside down.
 		feltContext.drawImage(card.cardImage, 
@@ -293,10 +300,13 @@ function turnover1card() {
 				);
 		break;
 	case 3:	// West
+		rotation = (45/180)*pi;
+		//feltContext.rotate(rotation);
 		feltContext.drawImage(card.cardImage, 
 				firstx, firsty, cardwidth, cardheight, // source rectangle
-				0, halfheight, cardwidth, cardheight		// destination rectangle
+				0, topy, cardwidth, cardheight		// destination rectangle
 				);
+		//feltContext.rotate(-rotation);
 		break;
 		default:
 			console.log("Switch: can't happen.");
@@ -342,7 +352,7 @@ function turnover1cardOld() {
 	var randomcard=jrandom(52);	// pick a card, any card.
 	var card=theDeck[randomcard];
 	if (indexCheck == true)
-		console.log("Card.index=" + card.cardIndex + "for (suit,rank)=" + card.suit + card.rank);
+		console.log("Card.index=", card.cardIndex, "for (suit,rank)=", card.suit, card.rank);
 	console.log("Card:" + card.cardIndex);
 	feltContext = feltCanvas.getContext("2d");
 	var lastx, lasty;
@@ -352,17 +362,65 @@ function turnover1cardOld() {
 	var firstx=cardXoffset(Rank[card.rank] - 1);
 	var firsty=cardYoffset(Rank[card.rank] - 1);
 
+	console.log("currentCard Seat=" + currentCard);
 	console.log("xy-source["+firstx+", "+firsty+"]");
 	console.log("width-height["+cardwidth+", " + cardheight + "]");
 
 	if (card.cardImage == null) {
-		card.cardImage = getCardImageFile(card); // yyy
+		card.cardImage = getCardImageFile(card);
 	}
 	waitForImageLoad();
-	feltContext.drawImage(card.cardImage, 
+	//
+	// Assume 4handed for now
+	var halfwidth=Math.floor(feltCanvas.width/2);
+	var halfheight=Math.floor(feltCanvas.height/2); 
+	var halfxmarginwidth=Math.floor(xmarginwidth/2);
+	var halfcardwidth=Math.floor(cardwidth/2)
+	//var halfymarginheight=Math.floor(xmarginheight/2);
+	var topy=0;
+	if (halfheight > cardheight)
+		topy = cardheight;
+	else
+		topy = halfheight;
+	var rotation=0;
+	switch (currentCard) {
+	case 0:	// North-center
+		feltContext.drawImage(card.cardImage, 
 			firstx, firsty, cardwidth, cardheight, // source rectangle
-			cardwidth+xmarginwidth, 0 , cardwidth, cardheight		// destination rectangle
+			halfwidth-halfcardwidth, 0 , cardwidth, cardheight		// destination rectangle
 			);
+		break;
+	case 1: // East half cardwith shifted left, half screen down
+		rotation = pi/2;
+		//feltContext.translate(halfwidth, halfheight);
+		//feltContext.rotate(rotation);
+		feltContext.drawImage(card.cardImage, 
+				firstx, firsty, cardwidth, cardheight, // source rectangle
+				halfwidth+halfcardwidth+xmarginwidth, topy, cardwidth, cardheight		// destination rectangle
+				);
+		//feltContext.rotate(-rotation);
+		//feltContext.translate(-halfwidth, -halfheight);
+		break;
+	case 2:	// South rotated 180 upside down.
+		feltContext.drawImage(card.cardImage, 
+				firstx, firsty, cardwidth, cardheight, // source rectangle
+				halfwidth-halfcardwidth, halfheight, cardwidth, cardheight		// destination rectangle
+				);
+		break;
+	case 3:	// West
+		rotation = (45/180)*pi;
+		//feltContext.rotate(rotation);
+		feltContext.drawImage(card.cardImage, 
+				firstx, firsty, cardwidth, cardheight, // source rectangle
+				0, topy, cardwidth, cardheight		// destination rectangle
+				);
+		//feltContext.rotate(-rotation);
+		break;
+		default:
+			console.log("Switch: can't happen.");
+	}
+	
+	currentCard = (currentCard + 1) % nHands;
 }
 
 var imageFilesLoaded=0;	// number of image files loaded
