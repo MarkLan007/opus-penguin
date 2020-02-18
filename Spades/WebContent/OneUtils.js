@@ -213,8 +213,16 @@ function wsShowFelt() {
  * routines for table4 and table6 placement (and clear, eventually)
  */
 
+var serializeDeck=true;
 var fakeRandom=0;
 function jrandom(between0andXminus1) {
+	if (serializeDeck) {
+		var t=fakeRandom;
+		fakeRandom ++;
+		if (fakeRandom >= between0andXminus1)
+			fakeRandom = 0;
+		return t;
+	}
 	//return fakeRandom++;
 	var j = Math.random() * between0andXminus1;
 	//if (j < 1) return 1;
@@ -265,14 +273,13 @@ function getCardImageFile(card) {
 }
 /*
  * cardPos is 0, NORTH at top, clockwise to number of players
- * rotate through positions; state is currentCard
+ * rotate through positions; state is currentSeatToPlay
  * xxxx
  */
 /*
  * game state machine 
  */
-var currentCard=0; //badly named; should be cardSeat or something like that
-var nHands=4;
+var currentSeatToPlay=0; //badly named; should be cardSeat or something like that
 var indexCheck=true;
 var nTableSize=4;
 
@@ -288,7 +295,36 @@ function setTableSize(size) {
 	return false;
 }
 
-function turnover1card() { 
+/*
+ * clearCardTable - clear card table and reset trick to zero...
+ */
+function clearCardTable(bResetTrick) {
+	var feltContext = feltCanvas.getContext("2d");
+	feltContext.clearRect(0, 0, feltCanvas.width, feltCanvas.height);
+	feltCanvas = feltWindow.document.getElementById("Canvas1");
+	if (feltCanvas && feltCanvas.getContext) {
+		feltCanvas.width = 600;
+		feltCanvas.height = 600;
+		feltContext = feltCanvas.getContext("2d");
+		if (feltContext) {
+			feltContext.fillStyle = "ForestGreen";
+			feltContext.strokeStyle = "blue";
+			feltContext.lineWidth = 5;
+			var cardWidth=200, cardHeight=500;
+			// what the hell is this crap?
+			for (let i=0; i<52; i++) {
+				feltContext.fillRect(i*cardWidth,0,cardWidth,cardHeight);
+				feltContext.strokeRect(i*cardWidth,0,cardWidth, cardHeight);	
+				
+			}
+		}
+
+	if (bResetTrick)
+		currentSeatToPlay = 0;
+	}
+}
+
+function turnover1card() { //Bug: currently ignores random card and retries it in 1-4 and 1-6...
 	var randomcard=jrandom(52);	// pick a card, any card.
 	var card=theDeck[randomcard];
 	if (indexCheck == true)
@@ -297,21 +333,23 @@ function turnover1card() {
 	// Next, switch on the table size...
 	switch (nTableSize) {
 	case 4:
-		turnover1card4(card, currentCard);
+		turnover1card4(card, currentSeatToPlay);
 		break;
 	case 6:
-		console.log("6 - Not implemented yet");
+		console.log("Recently implemented 6...");
+		turnover1card6(card, currentSeatToPlay);
+		break;
 	default:
 		alert("Unknown table size"+nTableSize);
-		return;	// do not pass go, or change currentCard;
+		return;	// do not pass go, or change currentSeatToPlay;
 	}
 
-	currentCard = (currentCard + 1) % nHands;
+	currentSeatToPlay = (currentSeatToPlay + 1) % nTableSize;
 }
 
 function turnover1card4(card, position) { // New rotation
-	var randomcard=jrandom(52);	// pick a card, any card.
-	var card=theDeck[randomcard];
+	// var randomcard=jrandom(52);	// pick a card, any card.
+	// var card=theDeck[randomcard];
 	if (indexCheck == true)
 		console.log("Card.index=", card.cardIndex, "for (suit,rank)=", card.suit, card.rank);
 	console.log("Card:" + card.cardIndex);
@@ -323,7 +361,7 @@ function turnover1card4(card, position) { // New rotation
 	var firstx=cardXoffset(Rank[card.rank] - 1);
 	var firsty=cardYoffset(Rank[card.rank] - 1);
 
-	console.log("currentCard Seat=" + position);
+	console.log("currentSeatToPlay Seat=" + position);
 	console.log("xy-source["+firstx+", "+firsty+"]");
 	console.log("width-height["+cardwidth+", " + cardheight + "]");
 
@@ -390,6 +428,94 @@ function turnover1card4(card, position) { // New rotation
 	
 }
 
+function turnover1card6(card, position) { // New rotation
+	if (indexCheck == true)
+		console.log("Card.index=", card.cardIndex, "for (suit,rank)=", card.suit, card.rank);
+	console.log("Card:" + card.cardIndex);
+	feltContext = feltCanvas.getContext("2d");
+	var lastx, lasty;
+	// All cards are packed into their files the same way, so 
+	// location is based (symmetrically) on the card's rank.
+	// Also note that Arrays are 0-based, and the offsets are 1-based
+	var firstx=cardXoffset(Rank[card.rank] - 1);
+	var firsty=cardYoffset(Rank[card.rank] - 1);
+
+	console.log("currentSeatToPlay Seat=" + position);
+	console.log("xy-source["+firstx+", "+firsty+"]");
+	console.log("width-height["+cardwidth+", " + cardheight + "]");
+
+	if (card.cardImage == null) {
+		card.cardImage = getCardImageFile(card);
+	}
+	waitForImageLoad();
+	//
+	// 6handed now
+	var halfwidth=Math.floor(feltCanvas.width/2);
+	var halfheight=Math.floor(feltCanvas.height/2); 
+	var halfxmarginwidth=Math.floor(xmarginwidth/2);
+	var halfcardwidth=Math.floor(cardwidth/2);
+	
+	// calcution for position should place position 4 at the top, so...
+	position = (position + 3) % 6;
+	// rotate board 60-degrees times the position, splat card, rotate back
+	var rotation=((position*60)/180) * pi;	// rotation in radians for 90 degrees
+		feltContext.translate(halfwidth, cardheight);
+		feltContext.rotate(rotation);
+	
+	feltContext.drawImage(card.cardImage, 
+			firstx, firsty, cardwidth, cardheight, // source rectangle
+			0, 0, // not 0 after rotation...
+				cardwidth, cardheight		// destination rectangle
+			);
+	// Undo rotation and translation for next seat
+		feltContext.rotate(-rotation);
+		feltContext.translate(-(halfwidth), -cardheight);
+}
+
+// backup - turnover1card6 do not modify...
+function bktv1c6trnover1crd6(card, position) { // New rotation
+	if (indexCheck == true)
+		console.log("Card.index=", card.cardIndex, "for (suit,rank)=", card.suit, card.rank);
+	console.log("Card:" + card.cardIndex);
+	feltContext = feltCanvas.getContext("2d");
+	var lastx, lasty;
+	// All cards are packed into their files the same way, so 
+	// location is based (symmetrically) on the card's rank.
+	// Also note that Arrays are 0-based, and the offsets are 1-based
+	var firstx=cardXoffset(Rank[card.rank] - 1);
+	var firsty=cardYoffset(Rank[card.rank] - 1);
+
+	console.log("currentSeatToPlay Seat=" + position);
+	console.log("xy-source["+firstx+", "+firsty+"]");
+	console.log("width-height["+cardwidth+", " + cardheight + "]");
+
+	if (card.cardImage == null) {
+		card.cardImage = getCardImageFile(card);
+	}
+	waitForImageLoad();
+	//
+	// 6handed now
+	var halfwidth=Math.floor(feltCanvas.width/2);
+	var halfheight=Math.floor(feltCanvas.height/2); 
+	var halfxmarginwidth=Math.floor(xmarginwidth/2);
+	var halfcardwidth=Math.floor(cardwidth/2);
+	
+	// rotate board 60-degrees times the position, splat card, rotate back
+	var rotation=((position*60)/180) * pi;	// rotation in radians for 90 degrees
+		feltContext.translate(halfwidth-halfcardwidth, cardheight);
+		feltContext.rotate(rotation);
+	
+	feltContext.drawImage(card.cardImage, 
+			firstx, firsty, cardwidth, cardheight, // source rectangle
+			0, 0, // not 0 after rotation...
+				cardwidth, cardheight		// destination rectangle
+			);
+	// Undo rotation and translation for next seat
+		feltContext.rotate(-rotation);
+		feltContext.translate(-(halfwidth-halfcardwidth), -cardheight);
+
+}
+
 var imageFilesLoaded=0;	// number of image files loaded
 function logCardImage() {
 	//alert("Image loaded?");
@@ -421,7 +547,7 @@ function turnover1cardOld() {
 	var firstx=cardXoffset(Rank[card.rank] - 1);
 	var firsty=cardYoffset(Rank[card.rank] - 1);
 
-	console.log("currentCard Seat=" + currentCard);
+	console.log("currentSeatToPlay Seat=" + currentSeatToPlay);
 	console.log("xy-source["+firstx+", "+firsty+"]");
 	console.log("width-height["+cardwidth+", " + cardheight + "]");
 
@@ -442,7 +568,7 @@ function turnover1cardOld() {
 	else
 		topy = halfheight;
 	var rotation=0;
-	switch (currentCard) {
+	switch (currentSeatToPlay) {
 	case 0:	// North-center
 		feltContext.drawImage(card.cardImage, 
 			firstx, firsty, cardwidth, cardheight, // source rectangle
@@ -479,7 +605,7 @@ function turnover1cardOld() {
 			console.log("Switch: can't happen.");
 	}
 	
-	currentCard = (currentCard + 1) % nHands;
+	currentSeatToPlay = (currentSeatToPlay + 1) % nTableSize;
 }
 
 /**
@@ -662,8 +788,11 @@ function processLocalCommand(line) {
         	} else {
         		xstatusUpdate("Invalid table parameter. ignored");   	
         	}
-        }	
-	} else {
+        } 
+	} else if (line.includes("clear")) {
+    	clearCardTable(true);
+    	xstatusUpdate("Table Cleared and Reset.");
+    } else {
 		xstatusUpdate("Unrecognized command. ignored");   	
 	} 
 	
