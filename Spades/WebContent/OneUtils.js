@@ -149,7 +149,7 @@ function wsShowHand() {
 		var controlDiv=handWindow.document.getElementById("CardsInHandDiv");
 		var cardBtn;
 		initializeTheDeck(); // if not done already
-		for (i=0; i<=maxCardsInHand; i++) {
+		for (i=0; i<maxCardsInHand; i++) {
 			// only way to do cardBtn = new Button();
 			cardBtn = handWindow.document.createElement("Button");
 			if (cardBtn == null) {
@@ -171,11 +171,11 @@ function wsShowHand() {
 	       cardBtn.innerText = "A1"; // xxx for now
 	       cardBtn.innerText = card.shortName;
 	       cardBtn.setAttribute("name","label" + i);
-	       cardBtn.setAttribute("data-arg1", "foobar");
+	       // cardBtn.setAttribute("data-arg1", "foobar");
 	       cardBtn.setAttribute("textContent", "AceClubs");
 
-	       cardBtn.style.height = "75px";
-	       cardBtn.style.width = "54px";
+	       cardBtn.style.height = "0";
+	       cardBtn.style.width = "0";
 	       cardBtn.style.visibility = "hidden";
 	       /*
 	        * Bug: For no apparent reason adding the event listeners with setAttribute doesn't work.
@@ -216,6 +216,8 @@ function addCardToHand(cardindex) {
 		return false;
 	}
 	card.handButton.style.visibility = "visible";
+    card.handButton.style.height = "75px";
+    card.handButton.style.width = "54px";
 	return true;
 	//card.cardBtn.style.visibility = "visible";
 }
