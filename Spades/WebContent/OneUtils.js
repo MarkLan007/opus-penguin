@@ -75,19 +75,26 @@ class Card {
 		//this.cardIndex = (s.value - 1) * 4 + (r.value - 1);
 		this.cardIndex = cardindex;
 		this.suitImage = null; // put suitimage in when actually displayed
+		this.handButton = null;
+		this.shortName = "";
 	};
 	
 }
 
-var theDeck = new Array();
-
+var theDeck = null;
+var deckInitialized=false;
 function initializeTheDeck() {
+	if (theDeck != null)
+		return;
+	theDeck = new Array();
+	deckInitialized = true;
 	var cardindex=0;
 	for (var suit in Suit) {
 		for (var rank in Rank) {
 			var card;
 			//console.log("creating:"+rank+suit);
 			card = new Card(rank, suit, cardindex);
+			card.shortName = "" + rank + " " + suit;
 			theDeck.push(card);
 			cardindex ++;
 		}
@@ -105,18 +112,114 @@ function initializeTheDeck() {
 
 // show the players hand
 var handWindow=null;
+const maxCardsInHand=52;
+function cardSelected(event) {
+	var t = event.target;
+	var uniqueId = t.type + t.id;
+	var special = t.textContent;
+	console.log("Whoa!" + uniqueId+ "->" + t.textContent);
+	alert("Whoa Nellie! in called with" + t.id + special);
+}
+
+function cardSelected2(event) {
+	var t = event.target;
+	var uniqueId = t.type + t.id;
+	console.log("Double Whoa!" + uniqueid);
+	alert("Whoa Nellie! a doubleclick was seen in:" + t.id);
+}
+// xxx vector
+/*
+ * Array code... Temporary. If it works, fold into creating theDeck
+ * 
+ */
+var buttonList = new Array();
 function wsShowHand() {
-	handWindow=open("about:blank", "example", "width=300,height=300");
+	var i=0;
+	handWindow=open("HandCanvas.html", "example", "width=500,height=400");
 	handWindow.document.title="Player's Hand";
-	handWindow.focus();
+	//handWindow.focus();
 	//alert(handWindow.location.href);
 	handWindow.onload = 
-		function() { let 
+		function() { 
+		/* let 
 		html='<dev style="font-size:30px">Welcome!</div>';
 		handWindow.document.body.insertAdjacentHTML('afterbegin', html);
-		};
+		*/
+	       //Create the search button
+		var controlDiv=handWindow.document.getElementById("CardsInHandDiv");
+		var cardBtn;
+		initializeTheDeck(); // if not done already
+		for (i=0; i<=maxCardsInHand; i++) {
+			// only way to do cardBtn = new Button();
+			cardBtn = handWindow.document.createElement("Button");
+			if (cardBtn == null) {
+				alert("ButtonCreate failed on attempt=" + i);
+				console.log("ButtonCreate failed on attempt=" + i);
+			}
+			buttonList.push(cardBtn);
+			/*
+			 * foreach card in the deck place a handButton to make visible later
+			 */
+		    //theDeck[i].handButton = cardBtn;
+		    var card = theDeck[i];
+		    card.handButton = cardBtn;
+
+	       //Set the attributes
+	       cardBtn.setAttribute("id", "CardButton" + i);
+	       cardBtn.setAttribute("type","button");
+	       cardBtn.setAttribute("value","Search");
+	       cardBtn.innerText = "A1"; // xxx for now
+	       cardBtn.innerText = card.shortName;
+	       cardBtn.setAttribute("name","label" + i);
+	       cardBtn.setAttribute("data-arg1", "foobar");
+	       cardBtn.setAttribute("textContent", "AceClubs");
+
+	       cardBtn.style.height = "75px";
+	       cardBtn.style.width = "54px";
+	       cardBtn.style.visibility = "hidden";
+	       /*
+	        * Bug: For no apparent reason adding the event listeners with setAttribute doesn't work.
+	        * I have no idea why.
+	        */
+	       cardBtn.addEventListener("click", cardSelected);
+	       cardBtn.addEventListener("dblclick", cardSelected2);
+	       cardBtn.setAttribute("data-arg1", "User-Button"+ i);
+	       //cardBtn.style.marginLeft = "20px";
+	       //cardBtn.style.marginTop = "20px";
+	       //Add the button to the div holding cards
+	       
+	       controlDiv.appendChild(cardBtn);
+		}
+		/* stop doing this now that grab works...
+		 * for (i=10; i<maxCardsInHand; i++) {
+			//cardBtn = handWindow.document.getElementById("CardButton" + i);
+			cardBtn = buttonList[i];
+		    cardBtn.style.visibility = "visible";
+		} */
+		}; // lambda function
 	
 }
+
+/*
+ * make card (by cardindex) visible in hand
+ */
+function addCardToHand(cardindex) {
+	//var cardBtn = buttonList[cardindex];
+	//cardBtn.style.visibility = "visible";
+	var card=theDeck[cardindex];
+	if (card == null) {
+		console.log("Error: Somehow can't find cardindex=" + cradindex);
+		return false;
+	}
+	if (card.handButton == null) {
+		console.log("Error: Somehow can't find handbutton, cardindex=" + cardindex);
+		return false;
+	}
+	card.handButton.style.visibility = "visible";
+	return true;
+	//card.cardBtn.style.visibility = "visible";
+}
+
 // show the game felt board
 var feltWindow=null;
 var feltCanvas=null;
@@ -208,6 +311,14 @@ function wsShowFelt() {
 	
 }
 
+// xxx
+function getNewCardImage() {
+	var img = new Image();
+	var card = theDeck[1]; // 2 of clubs for now...
+	// use clubs... clubsCardImage
+	var idata = clubsCardImage;
+	idata = clubsCardImage.getImageData
+}
 /*
  * turnover 1 card game-state machine (for debugging) and
  * routines for table4 and table6 placement (and clear, eventually)
@@ -455,7 +566,7 @@ function turnover1card6(card, position) { // New rotation
 	var halfxmarginwidth=Math.floor(xmarginwidth/2);
 	var halfcardwidth=Math.floor(cardwidth/2);
 	
-	// calcution for position should place position 4 at the top, so...
+	// calculation for position should place position 4 at the top, so...
 	position = (position + 3) % 6;
 	// rotate board 60-degrees times the position, splat card, rotate back
 	var rotation=((position*60)/180) * pi;	// rotation in radians for 90 degrees
@@ -789,6 +900,18 @@ function processLocalCommand(line) {
         		xstatusUpdate("Invalid table parameter. ignored");   	
         	}
         } 
+	} else if (line.includes("grab=")) {
+        var matches = line.match(/(\d+)/); // if a number at all...       
+        if (matches) { 
+        	var text = matches[0];
+        	// parseInt(text,10); not needed??
+        	var n=parseInt(text,10);
+        	if (n >= 0 && n < 52 && addCardToHand(n)) {
+            	xstatusUpdate("grabbing card cardindex=" + n);
+        	} else {
+        		xstatusUpdate("Invalid grab parameter. ignored");   	
+        	}
+        }
 	} else if (line.includes("clear")) {
     	clearCardTable(true);
     	xstatusUpdate("Table Cleared and Reset.");
