@@ -5,6 +5,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -72,12 +74,33 @@ public class WsServer {
 		if (message.startsWith("$")) {
 			processSUCommand(sess, message);
 		}
-		String echoMsg = "Echo from the Server: " + message;
-		history.add(message);
-		broadcast(message);
+		// String echoMsg = "Echo from the Server: " + message;
+		if (isJCL(message)) {
+			// process and write return string to sender, but do not save, echo, or broadcast
+			var returnString = processJCL(message);
+			// write it back... xxx yyy
+			sendLine(sess, returnString);
+		} else {
+			history.add(message);
+			broadcast(message);
+		}
 		return ; // avoid timeout, return nada... echoMsg;
 	}
 
+	String jclPattern = "//";
+	Pattern jclRegex = Pattern.compile(jclPattern);
+	public String processJCL(String com) {
+		return "//+Server processed:" + com;	// for now
+	}
+	
+	public boolean isJCL(String commandString) {
+		Matcher m = jclRegex.matcher(commandString);
+		if (m.find(0)) {
+			return true;
+		}
+		return false;	
+	}
+	
 	/*
 	 * retrievePrevious... send everything in history to new attendee
 	 */
@@ -103,6 +126,20 @@ public class WsServer {
 		e.printStackTrace();
 	}
 
+	/*
+	 * recent addition; don't use; use sendline
+	 *
+	public void write(Session sess, String msg) {
+		RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 			
+		if (verbose) {
+			System.out.println("writing(" + msg + "):");
+		}
+		if (sess.isOpen())
+			asynchRemote.sendText(msg);
+		
+	}
+	*/
+	
 	boolean verbose=true;
 	public void broadcast(String msg) {
 		int i;

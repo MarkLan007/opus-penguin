@@ -785,18 +785,39 @@ function selectButtonPress(event) {
 }
 function wsOpen(message){
 	//echoText.value += "Connected ... \n";
+	setReconnectDisabled(true);
 	xstatusUpdate("Connected...");
 }
 function wsCloseConnection(){
 	webSocket.close();
 }
+function wsReconnect() {
+	openWebSocket();
+}
 function wsGetMessage(message){
 	echoText.value += "server>" + message.data + "\n";
 }
+// xxx
+function setReconnectDisabled(bDisabled) {
+	var button = document.getElementById("reconnectButton");
+	//button.style.visibility = "visible";
+	button.disabled = bDisabled;
+}
+
+/* never tested...
+function setReconnectInactive() {
+	var button = document.getElementById("reconnectButton");
+	//button.style.visibility = "hidden";
+	button.disabled = true;
+}
+*/
+
 function wsClose(message){
 	//echoText.value += "Disconnect ... \n";
+	setReconnectDisabled(false);
 	xstatusUpdate("Disconnected..."); 
 }
+
 // obsolete: wserror -- superceded by xstatusUpdate
 function wserror(message){
 	echoText.value += "Error ... \n";
@@ -810,7 +831,7 @@ function openWebSocket() {
 	var message = document.getElementById("message");
 	webSocket.onopen = function(message){ wsOpen(message);};
 	webSocket.onmessage = function(message){ wsGetMessage(message);};
-	webSocket.onclose = function(message){ wsClose(message);};
+	webSocket.onclose = function(message){ wsClose(message); setReconnectActive(true);};
 	webSocket.onerror = function(message){ wsError(message);};
 }
 
