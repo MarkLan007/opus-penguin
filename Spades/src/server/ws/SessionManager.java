@@ -18,21 +18,45 @@ public class SessionManager {
 	/*
 	 * Upgrade to Vector, which is thread safe.
 	 */
-	static Vector<Session> sessionList=new Vector(20,5);
+	static Vector<UserSession> sessionList=new Vector(20,5);
 	/*
 	 * This should and will be defended by semaphores... 
 	 * Upgrade to using Vector, which is thread safe.
 	 */
 	//static ArrayList<Session> sessionList=new ArrayList();
 	static void manageSession(Session sess) {
-			sessionList.add(sess);
+		int pid=sessionList.size();
+		UserSession userSession=new UserSession(sess, pid);
+		//userSession.setPid(sessionList.size());
+			sessionList.add(userSession);
 		}
 	static int sessionListSize() { return sessionList.size(); }
-	static Session getSession(int index) {
+	static UserSession getUserSession(int index) {
 		return sessionList.get(index);
 	}
-	static void remove(Session sess) {
-		sessionList.remove(sess);
+	static UserSession getUserSession(Session session) {
+		for (UserSession us: sessionList) {
+			if (us.session == session) {
+				return us;
+			}
+		}
+		return null;		
+	}
+	static void remove(UserSession session) {
+		sessionList.remove(session);
+	}
+	
+	static void remove(Session session) {
+		// find the UserSession that has session in it and remove
+		UserSession goner=null;
+		for (UserSession us: sessionList) {
+			if (us.session == session) {
+				goner = us;
+				break;
+			}
+		}
+		if (goner != null)
+			sessionList.remove(goner);
 	}
 
 }

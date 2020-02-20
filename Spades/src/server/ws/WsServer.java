@@ -75,22 +75,48 @@ public class WsServer {
 			processSUCommand(sess, message);
 		}
 		// String echoMsg = "Echo from the Server: " + message;
+		UserSession us=SessionManager.getUserSession(sess);
 		if (isJCL(message)) {
 			// process and write return string to sender, but do not save, echo, or broadcast
-			var returnString = processJCL(message);
+			var returnString = processJCL(message, us);
 			// write it back... xxx yyy
 			sendLine(sess, returnString);
 		} else {
-			history.add(message);
-			broadcast(message);
+			String name="";
+			if (us == null)
+				name = "?>";
+			else
+				name = us.getName() + ">";
+			history.add(name + message);
+			broadcast(name + message);
 		}
 		return ; // avoid timeout, return nada... echoMsg;
 	}
 
 	String jclPattern = "//";
+	String jclSetnamePattern = "setname";
+	String jclIdentifierPattern="[a-zA-Z0-9]+";
 	Pattern jclRegex = Pattern.compile(jclPattern);
-	public String processJCL(String com) {
-		return "//+Server processed:" + com;	// for now
+	Pattern jclSetnameRegex = Pattern.compile(jclSetnamePattern);
+	Pattern jclIdentierRegex = Pattern.compile(jclIdentifierPattern);
+	public String processJCL(String commandString, UserSession us) {
+		Matcher m = jclSetnameRegex.matcher(commandString);
+		if (m.find()) {		// i.e. look for 'setname' then an identifier
+			String sName="user";	// default name string
+			Matcher identifier = jclIdentierRegex.matcher(commandString);
+			for (int i=0; identifier.find(); i++) {
+				switch (i) {
+				case 0:
+					continue;	// the command itself
+				case 1:
+					sName = identifier.group();
+					break;
+				}
+			}
+			us.setName(sName);		
+			return "//+Server setname:(" + sName + ")";	
+		}
+		return "//JCL unimplemented command";		
 	}
 	
 	public boolean isJCL(String commandString) {
@@ -145,14 +171,15 @@ public class WsServer {
 		int i;
 		int n=SessionManager.sessionListSize();
 		for (i=0; i<n; i++) {
-			Session sess=SessionManager.getSession(i);
+			UserSession uSess=SessionManager.getUserSession(i);
+			Session sess=uSess.getSession();
 			//Basic br=sess.getBasicRemote();
 			RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 			
 			if (verbose) {
 				System.out.println("writing(" + i + "):" + msg);
 			}
 			if (sess.isOpen())
-				asynchRemote.sendText(msg);
+				asynchRemote.sendText(uSess.username + ">" + msg);
 		}
 	}
 }
