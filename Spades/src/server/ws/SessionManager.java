@@ -25,9 +25,9 @@ public class SessionManager {
 	 */
 	//static ArrayList<Session> sessionList=new ArrayList();
 	static void manageSession(Session sess) {
-		int pid=sessionList.size();
-		UserSession userSession=new UserSession(sess, pid);
-		//userSession.setPid(sessionList.size());
+		int vc=sessionList.size();
+		UserSession userSession=new UserSession(sess, vc);
+		//userSession.setvc(sessionList.size());
 			sessionList.add(userSession);
 		}
 	static int sessionListSize() { return sessionList.size(); }

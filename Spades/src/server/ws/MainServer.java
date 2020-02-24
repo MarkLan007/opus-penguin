@@ -224,6 +224,43 @@ public class MainServer {
 			if (input == null) {
 				echo("null. quitting...");
 				break;
+			} else if (input.startsWith("/")) { // jcl command test
+				UserJCLCommand jcl=new UserJCLCommand(input);
+				switch(jcl.type) {
+				case JCLJoin:
+					echo("Join a game [parameter checking no implemented...]");
+					break;
+				case JCLRejoin:
+					echo("Rejoin a game as playerid");			
+					String sPlayerId="";
+					if (jcl.argc() < 2)
+						sPlayerId = "0";
+					else
+						sPlayerId = jcl.getValue(1);
+					echo("Rejoin:<"+ sPlayerId + ">");
+					break;
+				case JCLSetname:
+					String sName="";
+					if (jcl.argc() < 2)
+						sName = "user";
+					else
+						sName = jcl.getValue(1);
+					echo("Setname:<"+ sName + ">");
+					break;
+				case JCLWhoAmI:
+					echo("JCLWhoAmI<noargs>");
+					break;
+				case JCLSuperUser:
+					echo("SU:<"+ "no-args" + ">");
+					break;
+				case JCLCommandNotImplemented:
+				case JCLCommandNotRecognized:
+				case JCLError:
+				case JCLNotJCL:
+				default:
+					echo("Error:" + jcl.type);
+					break;			
+				}
 			} else if (input.startsWith("j")) { // join the game
 				String player = input.substring(1);
 				// todo: integrate join

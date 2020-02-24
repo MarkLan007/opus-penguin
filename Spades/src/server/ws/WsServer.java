@@ -18,7 +18,9 @@ import javax.websocket.Session;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 
-/* xxx
+import server.ws.UserJCLCommand.JCLType;
+
+/* 
  * So apparently the server endpoint sets up the listener on the 
  * server under the subdirectory that is the name of the project.
  * todo: Can this be changed in an xml file somewhere?
@@ -54,6 +56,9 @@ public class WsServer {
 	
 	String comHistory="$hist";
 	String comHelp="$help";
+	/*
+	 * todo: make sure that sender has su privs
+	 */
 	void processSUCommand(Session sess, String message) {
 		String msg=message.toLowerCase();
 		if (msg.contains(comHistory))
@@ -76,6 +81,43 @@ public class WsServer {
 		}
 		// String echoMsg = "Echo from the Server: " + message;
 		UserSession us=SessionManager.getUserSession(sess);
+		// begin extensive remodel...
+		UserJCLCommand jcl = new UserJCLCommand(message);
+			switch (jcl.type) {
+			case JCLNotJCL: 
+				// Non-jcl, non SU command
+				// chat function, broadcast to all
+				String echoString = us.username + ">" + message;
+				history.add(echoString);
+				broadcast(echoString);
+				break;
+			case JCLSetname:
+				String sName ;
+				sName = jcl.getValue(1);
+				us.setName(sName);		
+				break;
+			case JCLSuperUser:
+				us.setSuperUser(true);
+				break;
+			case JCLWhoAmI:
+				String s="name=" + us.getName();
+				if (us.superuser()) s=s+"+";
+				write(us, s);
+				break;
+			case JCLError: 					// JCL command but malformed
+			case JCLCommandNotRecognized: 	// Command is not recognized
+			case JCLCommandNotImplemented: 	// Command is not implemented
+			default:
+				write(us, "badcommand:" + jcl.type + 
+						" ignored:" + message);
+				break;				
+			}
+		
+		return ;
+	}
+		
+		// Note that moving this defeats echo at the moment...
+		/*
 		if (isJCL(message)) {
 			// process and write return string to sender, but do not save, echo, or broadcast
 			var returnString = processJCL(message, us);
@@ -116,7 +158,8 @@ public class WsServer {
 			us.setName(sName);		
 			return "//+Server setname:(" + sName + ")";	
 		}
-		return "//JCL unimplemented command";		
+		return "//JCL unimplemented command";
+				
 	}
 	
 	public boolean isJCL(String commandString) {
@@ -126,6 +169,7 @@ public class WsServer {
 		}
 		return false;	
 	}
+	*/
 	
 	/*
 	 * retrievePrevious... send everything in history to new attendee
@@ -167,6 +211,16 @@ public class WsServer {
 	*/
 	
 	boolean verbose=true;
+	public void write(UserSession us, String msg) {
+		Session sess=us.getSession();
+		RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 			
+		if (verbose) {
+			System.out.println("send(" + us.username + "):" + msg);
+		}
+		if (sess.isOpen())
+			asynchRemote.sendText(msg);
+		
+	}
 	public void broadcast(String msg) {
 		int i;
 		int n=SessionManager.sessionListSize();
