@@ -28,6 +28,9 @@ import server.ws.UserJCLCommand.JCLType;
 @ServerEndpoint("/websocketendpoint")
 public class WsServer {
 	
+	public class CardGame {
+
+	}
 	@OnOpen
 	public void onOpen(Session sess){
 		sess.setMaxIdleTimeout(1000000);
@@ -103,6 +106,12 @@ public class WsServer {
 				String s="name=" + us.getName();
 				if (us.superuser()) s=s+"+";
 				write(us, s);
+				break;
+			case JCLJoin:
+				// here is the confluence of the http server and the gameserver
+				// create a game if one does not exist, and insert this session into it
+				// xxx
+				us.join();
 				break;
 			case JCLError: 					// JCL command but malformed
 			case JCLCommandNotRecognized: 	// Command is not recognized
@@ -221,6 +230,18 @@ public class WsServer {
 			asynchRemote.sendText(msg);
 		
 	}
+	// static version of write...
+	static public void send(UserSession us, String msg) {
+		Session sess=us.getSession();
+		boolean verbose=true;	// local version...
+		RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 			
+		if (verbose) {
+			System.out.println("send(" + us.username + "):" + msg);
+		}
+		if (sess.isOpen())
+			asynchRemote.sendText(msg);		
+	}
+	
 	public void broadcast(String msg) {
 		int i;
 		int n=SessionManager.sessionListSize();
