@@ -75,6 +75,7 @@ public class WsServer {
 	/*
 	 * Note:ignoring fragmentation/reassembly
 	 */
+	boolean remoteDebug=true;
 	@OnMessage
 	public void onMessage(String message, boolean last, Session sess){
 
@@ -89,10 +90,32 @@ public class WsServer {
 			switch (jcl.type) {
 			case JCLNotJCL: 
 				// Non-jcl, non SU command
+				// if (is protocol... enqueue to cgk for play...
+				if (ProtocolMessage.isProtocolMessage(message)) {
+					ProtocolMessage pm=new ProtocolMessage(message);
+					// tell the client what protocol message parsed as:
+					// xxx
+					if (remoteDebug) 
+						write(us, "saw:" + pm.type + "sender:" 
+								+ pm.sender + "{" + pm.usertext + "}");
+					us.cgk.enqueue(pm);
+					// now tell the kernel to resume if it is idle...
+					if (us.cgk.isIdle())
+						us.cgk.resume();
+					break;
+				}
+				// otherwise chatstring message
 				// chat function, broadcast to all
 				String echoString = us.username + ">" + message;
 				history.add(echoString);
 				broadcast(echoString);
+				break;
+			case JCLPoke:
+				us.cgk.resume();
+				break;
+			case JCLResume:
+				if (us.cgk.isIdle())
+					us.cgk.resume();
 				break;
 			case JCLSetname:
 				String sName ;
