@@ -132,11 +132,66 @@ function cardSelected2(event) {
  * Array code... Temporary. If it works, fold into creating theDeck
  * 
  */
-// var buttonList = new Array();
+
 function wsShowHand() {
 	var i=0;
-	handWindow=open("HandCanvas.html", "example", "width=500,height=400");
+	//alert(handWindow.location.href);
+		var controlDiv=document.getElementById("CardsInHandDiv");
+		// now in main window...
+		//var controlDiv=document.getElementById("CardsInHandDiv");
+		var cardBtn;
+		initializeTheDeck(); // if not done already
+		for (i=0; i<maxCardsInHand; i++) {
+			// only way to do cardBtn = new Button();
+			cardBtn = document.createElement("Button");
+			if (cardBtn == null) {
+				alert("ButtonCreate failed on attempt=" + i);
+				console.log("ButtonCreate failed on attempt=" + i);
+			}
+			/*
+			 * foreach card in the deck place a handButton to make visible later
+			 */
+		    //theDeck[i].handButton = cardBtn;
+		    var card = theDeck[i];
+		    card.handButton = cardBtn;
+
+	       //Set the attributes on the button
+	       cardBtn.setAttribute("id", "CardButton" + i);
+	       cardBtn.setAttribute("type","button");
+	       cardBtn.setAttribute("value","Search");
+	       cardBtn.innerText = card.shortName;
+	       cardBtn.setAttribute("name","label" + i);
+	       // failed tries...
+	       // cardBtn.setAttribute("data-arg1", "foobar");
+	       // cardBtn.setAttribute("textContent", "AceClubs");
+
+	       cardBtn.style.height = "0";
+	       cardBtn.style.width = "0";
+	       cardBtn.style.visibility = "hidden";
+	       /*
+	        * Bug: For no apparent reason adding the event listeners with setAttribute doesn't work.
+	        * I have no idea why. But addEventListener does work.
+	        */
+	       cardBtn.addEventListener("click", cardSelected);
+	       cardBtn.addEventListener("dblclick", cardSelected2);
+	       cardBtn.setAttribute("data-arg1", "User-Button"+ i);
+	       //cardBtn.style.marginLeft = "20px";
+	       //cardBtn.style.marginTop = "20px";
+	       
+	       //Add the button to the div holding cards	       
+	       controlDiv.appendChild(cardBtn);
+		}
+	
+}
+/*
+ * Old code... when show hand brought up its own window
+ */
+function wsShowHand2() {
+	var i=0;
+	handWindow=document.window;
+	handWindow=open("HandCanvas.html", "example", "alwaysRaised=on,width=500,height=400");
 	handWindow.document.title="Player's Hand";
+	
 	//handWindow.focus();
 	//alert(handWindow.location.href);
 	handWindow.onload = 
@@ -146,7 +201,9 @@ function wsShowHand() {
 		handWindow.document.body.insertAdjacentHTML('afterbegin', html);
 		*/
 	       //Create the search button
-		var controlDiv=handWindow.document.getElementById("CardsInHandDiv");
+		//var controlDiv=handWindow.document.getElementById("CardsInHandDiv");
+		// now in main window...
+		//var controlDiv=document.getElementById("CardsInHandDiv");
 		var cardBtn;
 		initializeTheDeck(); // if not done already
 		for (i=0; i<maxCardsInHand; i++) {
@@ -241,7 +298,7 @@ const xmarginwidth=23;
 const ymarginwidth=16;
 
 function wsShowFelt() {
-	feltWindow=open("FeltCanvas.html", "example", "width=600,height=900");
+	feltWindow=open("FeltCanvas.html", "example", "width=600,height=800");
 	feltWindow.document.title="Game Felt";
 	feltWindow.focus();
 	//alert(handWindow.location.href);
