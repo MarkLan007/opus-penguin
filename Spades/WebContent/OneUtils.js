@@ -108,6 +108,57 @@ function initializeTheDeck() {
 	}
 }
 
+/*
+ * decodeCard - determine a card in the deck by rank and string
+ *  i.e. this is used when reading server protocol messages and 
+ *  placing cards in the hand, deleting them, etc.
+ *  returns the card it finds or null
+ */
+var cardRanks={"A":0, 
+			"1": 0,
+			"2": 1,
+			"3": 2,
+			"4": 3,
+			"5": 4,
+			"6": 5,
+			"7": 6,
+			"8": 7,
+			"9": 8,
+			"0": 9,
+			"T": 9,
+			"J":10, 
+			"Q":11,
+			"K":12,
+			};
+var cardSuits={
+		"C": 0,
+		"D": 1,
+		"H": 2,
+		"S": 3,
+		};
+
+// todo: implement the full set...
+var protocolMessageTypes={
+	"+": true,
+	"-": true,
+};
+
+function decodeCard(sRank, sSuit) {
+	// decode rank
+	var rank=0;
+	var suit=0;
+	if (sRank in cardRanks)
+		rank=cardRanks[sRank];
+	else 
+		return null;
+	if (sSuit in cardSuits) 
+		suit=cardSuits[sSuit];
+	else
+		return null;
+	var cardIndex=suit*13+rank;
+	return theDeck[cardIndex];
+}
+
 // From the HTML page
 
 // show the players hand
@@ -229,7 +280,7 @@ function wsShowHand2() {
 	       cardBtn.setAttribute("id", "CardButton" + i);
 	       cardBtn.setAttribute("type","button");
 	       cardBtn.setAttribute("value","Search");
-	       cardBtn.innerText = "A1"; // xxx for now
+	       cardBtn.innerText = "A1"; // for now
 	       cardBtn.innerText = card.shortName;
 	       cardBtn.setAttribute("name","label" + i);
 	       // failed tries...
@@ -333,7 +384,6 @@ function wsFeltInit() {
 				// Cardwidth=200 cardheight=500
 
 				// Now get the card images loaded on the html page...
-				// xxx
 				// "ClubsImage" 
 				// first put the image on the canvas...
 				// then see if you can take the individual cards out of the image
@@ -407,7 +457,6 @@ function wsShowFelt() {
 				// Cardwidth=200 cardheight=500
 
 				// Now get the card images loaded on the html page...
-				// xxx
 				// "ClubsImage" 
 				// first put the image on the canvas...
 				// then see if you can take the individual cards out of the image
@@ -450,7 +499,6 @@ function wsShowFelt() {
 	
 }
 
-// xxx
 function getNewCardImage() {
 	var img = new Image();
 	var card = theDeck[1]; // 2 of clubs for now...
@@ -524,7 +572,6 @@ function getCardImageFile(card) {
 /*
  * cardPos is 0, NORTH at top, clockwise to number of players
  * rotate through positions; state is currentSeatToPlay
- * xxxx
  */
 /*
  * game state machine 
@@ -874,6 +921,15 @@ function xstatusUpdate(sMsg) {
 	return true;
 }
 
+/*
+ * put a message right above the user's cards in his had
+ */
+function gamestatusUpdate(sMsg) {
+	document.getElementById("gamestatusArea").textContent 
+	= sMsg ;
+	
+}
+
 function writeToTextArea(msg) {
 	appendTextToTextArea("call deprecated:" + msg);
 	/*
@@ -925,10 +981,88 @@ function wsCloseConnection(){
 function wsReconnect() {
 	openWebSocket();
 }
-function wsGetMessage(message){
-	echoText.value += "server>" + message.data + "\n";
-}
+/*
+ * wsGetMessage - the on message received code
+ */
 // xxx
+function someOtherFunction() {
+	
+}
+function wsGetMessage(message){
+	var s="" + message.data + "";
+
+	echoText.value += "server>" + s + "\n";
+	if (isProtocol(s)) {
+		// hand off to protocol manager
+		someOtherFunction(s);
+		pcs(s);
+		// in-line pcs to avoid wierd mind-blowing bug...
+		/*
+		var card=null;
+		var cardString = s;
+		switch(cardString.charAt(0)) {
+		case "+":
+			// char 1 is the user id. Ignore for now
+			//var cardString = s;
+			for (var i=2; i<cardString.length; i+=2) {
+				card = decodeCard(cardString.charAt(i),
+						cardString.charAt(i+1));
+				if (card != null) {// yikes; null check if something bad
+									// happend
+					console.log("Adding:" + card.cardIndex);
+					addCardToHand(card.cardIndex);
+				}
+			}
+			break;
+		case "-":
+			break;
+		default:
+				break;
+		}
+		*/
+		
+	}
+}
+
+/*
+ * Messages of the form
+ * +Cards
+ * -Card
+ */
+function isProtocol(msg) {
+	if (msg.charAt(0) in protocolMessageTypes) {
+		return true;	
+	}
+	return false;
+}
+/*
+ * processCardString -- bizarre bug...
+ */
+function pcs(cardString) {
+	//var cardString="";
+	var card=null;
+	switch(cardString.charAt(0)) {
+	case "+":
+		// char 1 is the user id. Ignore for now
+		//var cardString = s;
+		for (var i=2; i<cardString.length; i+=2) {
+			var card = decodeCard(cardString.charAt(i),
+					cardString.charAt(i+1));
+			if (card != null) {// yikes; null check if something bad
+								// happend
+				console.log("Adding:" + card.cardIndex);
+				addCardToHand(card.cardIndex);
+			}
+		}
+		break;
+	case "-":
+		break;
+	default:
+			break;
+	}
+	
+}
+
 function setReconnectDisabled(bDisabled) {
 	var button = document.getElementById("reconnectButton");
 	//button.style.visibility = "visible";
@@ -962,7 +1096,7 @@ function openWebSocket() {
 	var message = document.getElementById("message");
 	webSocket.onopen = function(message){ wsOpen(message);};
 	webSocket.onmessage = function(message){ wsGetMessage(message);};
-	webSocket.onclose = function(message){ wsClose(message); setReconnectActive(true);};
+	webSocket.onclose = function(message){ wsClose(message); setReconnectDisabled(true);};
 	webSocket.onerror = function(message){ wsError(message);};
 }
 
@@ -1067,6 +1201,22 @@ function processLocalCommand(line) {
         		xstatusUpdate("Invalid grab parameter. ignored");   	
         	}
         }
+	} else if (line.includes("status=")) {
+		// from the 2nd char after the = to the end
+		gamestatusUpdate(line.slice(8)); 
+		/*
+        var matches = line.match(/(\d+)/); // if a number at all...       
+        if (matches) { 
+        	var text = matches[0];
+        	// parseInt(text,10); not needed??
+        	var n=parseInt(text,10);
+        	if (n >= 0 && n < 52 && addCardToHand(n)) {
+            	xstatusUpdate("grabbing card cardindex=" + n);
+        	} else {
+        		xstatusUpdate("Invalid grab parameter. ignored");   	
+        	}
+        }
+        */
 	} else if (line.includes("clear")) {
     	clearCardTable(true);
     	xstatusUpdate("Table Cleared and Reset.");
