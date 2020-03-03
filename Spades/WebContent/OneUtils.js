@@ -301,6 +301,81 @@ const cardheight=250;
 const xmarginwidth=23;
 const ymarginwidth=16;
 
+/*
+ * wsInitFelt - initialize the canvas in the game window
+ */
+var canvasWidth=500;
+var canvasHeight=500;
+function wsFeltInit() {
+	initializeTheDeck();
+
+	/*
+	feltWindow.onload = 
+		function() {
+		*/  
+		// var html='<dev style="font-size:30px">Welcome!</div>';
+		// feltWindow.document.body.insertAdjacentHTML('afterbegin', html);
+		feltCanvas = document.getElementById("Canvas1");
+		if (feltCanvas && feltCanvas.getContext) {
+			feltCanvas.width = canvasWidth;
+			feltCanvas.height = canvasHeight;
+			feltContext = feltCanvas.getContext("2d");
+			if (feltContext) {
+				feltContext.fillStyle = "ForestGreen";
+				feltContext.strokeStyle = "blue";
+				feltContext.lineWidth = 5;
+				var cardWidth=200, cardHeight=500;
+				for (let i=0; i<52; i++) {
+					feltContext.fillRect(i*cardWidth,0,cardWidth,cardHeight);
+					feltContext.strokeRect(i*cardWidth,0,cardWidth, cardHeight);	
+					
+				}
+				// Cardwidth=200 cardheight=500
+
+				// Now get the card images loaded on the html page...
+				// xxx
+				// "ClubsImage" 
+				// first put the image on the canvas...
+				// then see if you can take the individual cards out of the image
+				//  and save them in the card...
+				//
+				// There doesn't seem to be a way to create subimages.
+				// Maybe I should use the suitcard image and pass coordinates for the
+				// particular card being accessed. So pass offsets...
+				//
+				// Ok, so should use deferred processing for this.
+				// store cardimage as null.
+				// when needed put in a reference to the actual image
+				//...suitcardImages = document.getElementById("ClubsImage");
+				//...clubsCardImages = suitcardImages; // first one... clean this up...
+				clubsCardImages = document.getElementById("ClubsImage");
+				diamondsCardImages = document.getElementById("DiamondsImage");
+				heartsCardImages = document.getElementById("HeartsImage");
+				spadesCardImages = document.getElementById("SpadesImage");
+				suitcardImages = diamondsCardImages;	// temp hack for testing...
+				if (suitcardImages == null) 
+					alert("Failed to obtain card image file");
+				else {
+					// just draw the first card for now...
+					/*
+					var width=suitcardImages.width;
+					var height=suitcardImages.height;
+					console.log("width:" + suitcardImages.width + "->" + cardwidth);					
+					console.log("height:" + suitcardImages.height + "->" + cardheight);
+					
+					feltContext.drawImage(suitcardImages, 
+							0, 0, cardwidth, cardheight, // source rectangle
+							0, 0, cardwidth, cardheight	// destination rectangle
+							);
+						*/	
+					}
+				
+			}
+		}
+		/* }; */
+	
+}
+
 function wsShowFelt() {
 	feltWindow=open("FeltCanvas.html", "example", "width=600,height=800");
 	feltWindow.document.title="Game Felt";
@@ -476,10 +551,10 @@ function setTableSize(size) {
 function clearCardTable(bResetTrick) {
 	var feltContext = feltCanvas.getContext("2d");
 	feltContext.clearRect(0, 0, feltCanvas.width, feltCanvas.height);
-	feltCanvas = feltWindow.document.getElementById("Canvas1");
+	feltCanvas = document.getElementById("Canvas1");
 	if (feltCanvas && feltCanvas.getContext) {
-		feltCanvas.width = 600;
-		feltCanvas.height = 600;
+		feltCanvas.width = canvasWidth;
+		feltCanvas.height = canvasHeight;
 		feltContext = feltCanvas.getContext("2d");
 		if (feltContext) {
 			feltContext.fillStyle = "ForestGreen";
