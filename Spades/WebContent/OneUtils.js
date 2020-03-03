@@ -133,7 +133,11 @@ function cardSelected2(event) {
  * 
  */
 
-function wsShowHand() {
+/*
+ * wsHandInit - (was wsShowHand) initialize hand details including
+ *  creating buttons for each card to be added to a hand
+ */
+function wsHandInit() {
 	var i=0;
 	//alert(handWindow.location.href);
 		var controlDiv=document.getElementById("CardsInHandDiv");
@@ -779,14 +783,6 @@ function turnover1cardOld() {
 	currentSeatToPlay = (currentSeatToPlay + 1) % nTableSize;
 }
 
-/**
- * 
- */
-function initSocketUtils() {
-	alert("initSocket: stub");
-	console.log("initSocke: stub");
-}
-
 const sServiceName = "Spades";
 var webSocket = null;
 
@@ -804,8 +800,11 @@ function xstatusUpdate(sMsg) {
 }
 
 function writeToTextArea(msg) {
+	appendTextToTextArea("call deprecated:" + msg);
+	/*
 	var echoText = document.getElementById("echoText");
 	echoText += msg;
+	*/
 }
 
 /*
