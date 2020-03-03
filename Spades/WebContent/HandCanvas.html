@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<!-- Version 1.0a bbbbbb -->
+<head>
+<meta charset="UTF-8">
+<style>
+* {
+  box-sizing: border-box;
+	}
+
+.column1 {
+  	float: left;
+  	width: 25%;
+  	padding: 5px;
+	}
+
+.column2 {
+	float:left;
+	width:75%;
+	padding: 5px;
+	}
+
+/* Clearfix (clear floats) */
+.row::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+</style>
+</head>
+<body>
+
+<h2>Images Side by Side</h2>
+<p>How to create side-by-side images with the CSS float property:</p>
+
+<div class="row1">
+  <div class="column1" id="handControlDiv" >
+	<p> Controls go here... Buttons in a column. </p> <br>
+  </div>
+  <div class="column2" id="CardsInHandDiv">
+	<p> cards as buttons go here. </p> <br>
+  </div>
+</div>
+
+</body>
+</html>
+
