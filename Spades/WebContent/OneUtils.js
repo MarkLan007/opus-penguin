@@ -137,12 +137,6 @@ var cardSuits={
 		"S": 3,
 		};
 
-// todo: implement the full set...
-var protocolMessageTypes={
-	"+": true,
-	"-": true,
-};
-
 function decodeCard(sRank, sSuit) {
 	// decode rank
 	var rank=0;
@@ -333,6 +327,26 @@ function addCardToHand(cardindex) {
     card.handButton.style.width = "54px";
 	return true;
 	//card.cardBtn.style.visibility = "visible";
+}
+/*
+ * deleteCardFromHand - just set to to be not visible
+ */
+function deleteCardFromHand(cardindex) {
+	//var cardBtn = buttonList[cardindex];
+	//cardBtn.style.visibility = "visible";
+	var card=theDeck[cardindex];
+	if (card == null) {
+		console.log("Error: Somehow can't find cardindex=" + cradindex);
+		return false;
+	}
+	if (card.handButton == null) {
+		console.log("Error: Somehow can't find handbutton, cardindex=" + cardindex);
+		return false;
+	}
+	card.handButton.style.visibility = "hidden";
+    //card.handButton.style.height = "75px";
+    //card.handButton.style.width = "54px";
+	return true;
 }
 
 // show the game felt board
@@ -984,45 +998,53 @@ function wsReconnect() {
 /*
  * wsGetMessage - the on message received code
  */
-// xxx
-function someOtherFunction() {
-	
-}
 function wsGetMessage(message){
 	var s="" + message.data + "";
 
 	echoText.value += "server>" + s + "\n";
 	if (isProtocol(s)) {
 		// hand off to protocol manager
-		someOtherFunction(s);
-		pcs(s);
-		// in-line pcs to avoid wierd mind-blowing bug...
-		/*
-		var card=null;
-		var cardString = s;
-		switch(cardString.charAt(0)) {
-		case "+":
-			// char 1 is the user id. Ignore for now
-			//var cardString = s;
-			for (var i=2; i<cardString.length; i+=2) {
-				card = decodeCard(cardString.charAt(i),
-						cardString.charAt(i+1));
-				if (card != null) {// yikes; null check if something bad
-									// happend
-					console.log("Adding:" + card.cardIndex);
-					addCardToHand(card.cardIndex);
-				}
-			}
-			break;
-		case "-":
-			break;
-		default:
-				break;
-		}
-		*/
-		
+		processCardString(s);	
 	}
+	return s;
 }
+// from protocalMessage.java
+/*
+ * Messages are of the form
+ 	[CommandChar][PlayerIDorX][Zero or more RS pairs representing Cards]%[MessageString]
+ Player->G	 	
+ 	= Play Card
+ 	~ Pass Card(S)
+ 	Q Query
+ 	S Text (TBD)
+ G->Player
+ 	+ Card(s)
+ 	- Card(s)
+ 	? Your Turn? [Cards in current trick] <change to ?>
+ 	& Trick Update. Cards(s) in the current trick [Player gets one of these every time someone plays]. 
+ 		// [Cards]%trick flags [Hwwxxyy[.;] [Hh] ww=winner;xx=trickid yy=lead or taker] [,.]
+ 	! Trick Cleared 
+ 	B Broken Suit (i.e. hearts, spades) [Could probably just put this in the trick update...]
+ 	$ %Player.score;Player.score;
+ 	% Player error %Message that can be given to human user i.e.
+ 	[11 core key messages]
+ 	
+ 	ERROR Text messages that should be supported
+ 	%!%Not your turn!
+ 	%2%Must play 2C
+ 	%N%Hearts/Spades are not broken
+ */
+//todo: implement the full set...
+var protocolMessageTypes={
+	'+': true,	// add cards
+	'-': true,	// delete cards
+	'?': true,	// your move
+	'&': true,	// trick update
+	'!': true,	// trick cleared
+	'B': true,	// Broken suit
+	'$': true,	// player scores
+	'%': true,	// player error
+};
 
 /*
  * Messages of the form
@@ -1036,33 +1058,76 @@ function isProtocol(msg) {
 	return false;
 }
 /*
- * processCardString -- bizarre bug...
+ * pcs processCardString -- bizarre bug...
  */
-function pcs(cardString) {
-	//var cardString="";
+function processCardString(cardString) {
 	var card=null;
-	switch(cardString.charAt(0)) {
-	case "+":
+	var bDelete=false;
+	var cUser;
+	var i=0;
+	var c0=cardString.charAt(0);
+	switch(c0) {
+	case "-":
+		bDelete=true;
+	case '+':
 		// char 1 is the user id. Ignore for now
-		//var cardString = s;
-		for (var i=2; i<cardString.length; i+=2) {
-			var card = decodeCard(cardString.charAt(i),
+		// var cardString = s;
+		for (i=2; i<cardString.length; i+=2) {
+			card = decodeCard(cardString.charAt(i),
 					cardString.charAt(i+1));
-			if (card != null) {// yikes; null check if something bad
-								// happend
+			if (card != null) {// yikes; null check if something bad happened
 				console.log("Adding:" + card.cardIndex);
-				addCardToHand(card.cardIndex);
+				if (bDelete)
+					deleteCardFromHand(card.cardIndex);
+				else
+					addCardToHand(card.cardIndex);
 			}
 		}
 		break;
-	case "-":
+	case '?':
+		// tell user: your move xxx
+		cUser = cardString.charAt(1);
+		console.log("? Not yet implementeded");
+		gamestatusUpdate("Your move! seat<"+cUser+">");
+		break;
+	case '&':	// 
+		console.log("Trickupdate under construction");
+		i=2;
+		card = decodeCard(cardString.charAt(i),
+				cardString.charAt(i+1));
+		var user=parseInt(cardString.charAt(1), 10);
+		switch (nTableSize) {
+		case 4:
+			turnover1card4(card, user);
+			break;
+		case 6:
+			console.log("Recently implemented 6...");
+			turnover1card6(card, user);
+			break;
+		default:
+			alert("Unknown table size"+nTableSize);
+			return;	// do not pass go, or change currentSeatToPlay;
+		}
+
+		break;
+	case '%':
+		console.log("%error:" + cardString);
+		gamestatusUpdate("error:" + cUser);
+
+		// put on screen above cards... xxx
 		break;
 	default:
+		console.log("unimplemented protocol msg:" 
+				+ c0 
+				+ " not implemented");
 			break;
 	}
 	
 }
 
+/*
+ * setReconnectDisabled - disable the reconnect button
+ */
 function setReconnectDisabled(bDisabled) {
 	var button = document.getElementById("reconnectButton");
 	//button.style.visibility = "visible";
@@ -1096,7 +1161,7 @@ function openWebSocket() {
 	var message = document.getElementById("message");
 	webSocket.onopen = function(message){ wsOpen(message);};
 	webSocket.onmessage = function(message){ wsGetMessage(message);};
-	webSocket.onclose = function(message){ wsClose(message); setReconnectDisabled(true);};
+	webSocket.onclose = function(message){ wsClose(message);};
 	webSocket.onerror = function(message){ wsError(message);};
 }
 

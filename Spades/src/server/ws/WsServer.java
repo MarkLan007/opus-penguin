@@ -76,6 +76,7 @@ public class WsServer {
 	 * Note:ignoring fragmentation/reassembly
 	 */
 	boolean remoteDebug=true;
+	boolean bBypassKernel=true;	// by pass kernel synchronization; invoke g.process direction
 	@OnMessage
 	public void onMessage(String message, boolean last, Session sess){
 
@@ -98,6 +99,14 @@ public class WsServer {
 					if (remoteDebug) 
 						write(us, "saw:" + pm.type + "sender:" 
 								+ pm.sender + "{" + pm.usertext + "}");
+					if (bBypassKernel) {
+						// sleep before every move to let writes finish
+						// temporary hack...
+						// xxx yyy
+						CardGameKernel.msleep(10);
+						us.game.process(pm);
+						break;
+					}
 					us.cgk.enqueue(pm);
 					// now tell the kernel to resume if it is idle...
 					if (us.cgk.isIdle())
@@ -245,6 +254,8 @@ public class WsServer {
 	boolean verbose=true;
 	public void write(UserSession us, String msg) {
 		Session sess=us.getSession();
+		if (bBypassKernel)
+			CardGameKernel.msleep(10);
 		RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 			
 		if (verbose) {
 			System.out.println("send(" + us.username + "):" + msg);
