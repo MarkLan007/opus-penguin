@@ -76,10 +76,18 @@ class Card {
 		this.cardIndex = cardindex;
 		this.suitImage = null; // put suitimage in when actually displayed
 		this.handButton = null;
+		this.friendlyName = "";
 		this.shortName = "";
 	};
 	
 }
+
+/*
+ * These are the only places that the string values are referenced to encode and decode protocol messages
+ * -- identical code with the server
+ */
+var sRanks="A23456789TJQK";
+var sSuits="CDHS";
 
 var theDeck = null;
 var deckInitialized=false;
@@ -89,22 +97,28 @@ function initializeTheDeck() {
 	theDeck = new Array();
 	deckInitialized = true;
 	var cardindex=0;
+	var r=0, s=0;
 	for (var suit in Suit) {
+		r=0;
 		for (var rank in Rank) {
 			var card;
+			var sRank=""+rank, sSuit=""+suit;
 			//console.log("creating:"+rank+suit);
 			card = new Card(rank, suit, cardindex);
-			card.shortName = "" + rank + " " + suit;
+			card.friendlyName = sRank + sSuit;
+			card.shortName = sRanks.charAt(r) + sSuits.charAt(s);
 			theDeck.push(card);
 			cardindex ++;
+			r++;
 		}
+		s++;
 	}
-	// Add card images for each card
-	// ... not here. In constructor
+
 	var verboseInit=false;
-	for (var i=0; i<theDeck.length; i++) {
-		if (verboseInit)
+	if (verboseInit) {
+		for (var i=0; i<theDeck.length; i++) {
 			console.log("created: " + theDeck[i].rank + theDeck[i].Suit.name);
+		}
 	}
 }
 
@@ -160,10 +174,14 @@ var handWindow=null;
 const maxCardsInHand=52;
 function cardSelected(event) {
 	var t = event.target;
+	var buttonName = event.target.id;
 	var uniqueId = t.type + t.id;
 	var special = t.textContent;
 	console.log("Whoa!" + uniqueId+ "->" + t.textContent);
 	alert("Whoa Nellie! in called with" + t.id + special);
+	var digitString=buttonName.replace(/\D/g,"");
+	var cardIndex = parseInt(digitString);
+	playCardFromButtonPress(cardIndex);
 }
 
 function cardSelected2(event) {
@@ -171,6 +189,7 @@ function cardSelected2(event) {
 	var uniqueId = t.type + t.id;
 	console.log("Double Whoa!" + uniqueid);
 	alert("Whoa Nellie! a doubleclick was seen in:" + t.id);
+	playCardFromButtonPress(parseInt(t.id,10));
 }
 
 /*
@@ -208,7 +227,7 @@ function wsHandInit() {
 	       cardBtn.setAttribute("id", "CardButton" + i);
 	       cardBtn.setAttribute("type","button");
 	       cardBtn.setAttribute("value","Search");
-	       cardBtn.innerText = card.shortName;
+	       cardBtn.innerText = card.friendlyName;
 	       cardBtn.setAttribute("name","label" + i);
 	       // failed tries...
 	       // cardBtn.setAttribute("data-arg1", "foobar");
@@ -275,7 +294,7 @@ function wsShowHand2() {
 	       cardBtn.setAttribute("type","button");
 	       cardBtn.setAttribute("value","Search");
 	       cardBtn.innerText = "A1"; // for now
-	       cardBtn.innerText = card.shortName;
+	       cardBtn.innerText = card.friendlyName;
 	       cardBtn.setAttribute("name","label" + i);
 	       // failed tries...
 	       // cardBtn.setAttribute("data-arg1", "foobar");
@@ -1057,8 +1076,23 @@ function isProtocol(msg) {
 	}
 	return false;
 }
+
+var seatId=-1;
+function setSeatId(seatid) {
+	seatId=seatid + 0;	// make sure it's an int, or can be turned into one
+	console.log("Setting seatid:" + seatId)
+}
+function playCardFromButtonPress(cardindex) {
+	console.log("Sending Card to server:"+cardindex);
+	var card=theDeck[cardindex];
+	var shortname=card.shortName;
+	// make a protocol message, and send to server
+	var msg = "" + "=" + seatId + shortname;
+	serverWrite(msg);
+}
+
 /*
- * pcs processCardString -- bizarre bug...
+ * pcs processCardString -- process a card protocol message from server
  */
 function processCardString(cardString) {
 	var card=null;
@@ -1070,8 +1104,11 @@ function processCardString(cardString) {
 	case "-":
 		bDelete=true;
 	case '+':
-		// char 1 is the user id. Ignore for now
-		// var cardString = s;
+		// char 1 is the user id.
+		if (!bDelete) {
+			// when you are dealt cards set the seat value for future messages
+			setSeatId(parseInt(cardString.charAt(1)));
+		}
 		for (i=2; i<cardString.length; i+=2) {
 			card = decodeCard(cardString.charAt(i),
 					cardString.charAt(i+1));
@@ -1269,19 +1306,6 @@ function processLocalCommand(line) {
 	} else if (line.includes("status=")) {
 		// from the 2nd char after the = to the end
 		gamestatusUpdate(line.slice(8)); 
-		/*
-        var matches = line.match(/(\d+)/); // if a number at all...       
-        if (matches) { 
-        	var text = matches[0];
-        	// parseInt(text,10); not needed??
-        	var n=parseInt(text,10);
-        	if (n >= 0 && n < 52 && addCardToHand(n)) {
-            	xstatusUpdate("grabbing card cardindex=" + n);
-        	} else {
-        		xstatusUpdate("Invalid grab parameter. ignored");   	
-        	}
-        }
-        */
 	} else if (line.includes("clear")) {
     	clearCardTable(true);
     	xstatusUpdate("Table Cleared and Reset.");
