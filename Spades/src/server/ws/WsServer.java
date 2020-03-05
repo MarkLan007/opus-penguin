@@ -255,25 +255,53 @@ public class WsServer {
 	public void write(UserSession us, String msg) {
 		Session sess=us.getSession();
 		if (bBypassKernel)
-			CardGameKernel.msleep(10);
-		RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 			
+			CardGameKernel.msleep(10);	// still necessary?
+		/*
+		 * to prevent the error: 
+		 * 		remote endpoint was in state [TEXT_FULL_WRITING] which is 
+		 * 		an invalid state for called method
+		 * use basic (rather than asynch) and just block and wait
+		 */
+		RemoteEndpoint.Basic basicRemote=sess.getBasicRemote();
+		//RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote();
 		if (verbose) {
 			System.out.println("send(" + us.username + "):" + msg);
 		}
 		if (sess.isOpen())
-			asynchRemote.sendText(msg);
-		
+			try {
+				basicRemote.sendText(msg);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			//asynchRemote.sendText(msg);		
 	}
 	// static version of write...
 	static public void send(UserSession us, String msg) {
 		Session sess=us.getSession();
 		boolean verbose=true;	// local version...
-		RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 			
+		/*RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 			
 		if (verbose) {
 			System.out.println("send(" + us.username + "):" + msg);
 		}
 		if (sess.isOpen())
 			asynchRemote.sendText(msg);		
+		RemoteEndpoint.Basic basicRemote=sess.getBasicRemote();
+		//RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote();
+		if (verbose) {
+			System.out.println("send(" + us.username + "):" + msg);
+		}
+		*/
+		RemoteEndpoint.Basic basicRemote=sess.getBasicRemote();
+		if (sess.isOpen())
+			try {
+				basicRemote.sendText(msg);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			//asynchRemote.sendText(msg);		
+
 	}
 	
 	public void broadcast(String msg) {
@@ -283,12 +311,19 @@ public class WsServer {
 			UserSession uSess=SessionManager.getUserSession(i);
 			Session sess=uSess.getSession();
 			//Basic br=sess.getBasicRemote();
+			RemoteEndpoint.Basic basicRemote=sess.getBasicRemote();
+
 			RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 			
 			if (verbose) {
 				System.out.println("writing(" + i + "):" + msg);
 			}
 			if (sess.isOpen())
-				asynchRemote.sendText(uSess.username + ">" + msg);
+				try {
+					basicRemote.sendText(uSess.username + ">" + msg);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
 	}
 }
