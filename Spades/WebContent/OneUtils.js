@@ -177,8 +177,8 @@ function cardSelected(event) {
 	var buttonName = event.target.id;
 	var uniqueId = t.type + t.id;
 	var special = t.textContent;
-	console.log("Whoa!" + uniqueId+ "->" + t.textContent);
-	alert("Whoa Nellie! in called with" + t.id + special);
+	//console.log("Whoa!" + uniqueId+ "->" + t.textContent);
+	//alert("Whoa Nellie! in called with" + t.id + special);
 	var digitString=buttonName.replace(/\D/g,"");
 	var cardIndex = parseInt(digitString);
 	playCardFromButtonPress(cardIndex);
@@ -610,7 +610,7 @@ function getCardImageFile(card) {
  * game state machine 
  */
 var currentSeatToPlay=0; //badly named; should be cardSeat or something like that
-var indexCheck=true;
+var indexCheck=false;	// debugging variable for console writes
 var nTableSize=4;
 
 function setTableSize(size) {
@@ -676,28 +676,154 @@ function turnover1card() { //Bug: currently ignores random card and retries it i
 
 	currentSeatToPlay = (currentSeatToPlay + 1) % nTableSize;
 }
+var isBusy=false;
+var hurryTransitions = false;
 
+function hurryUp() {
+	hurryTransitions = true;
+}
+function hurryUp(b) {
+	hurryTransitions = b;
+}
+// drawFadeInImage(feltcontext, card.cardImage, firstx, firsty, cardwidth, cardeight,
+// halfwidth=halfcardwidth, 0, cardwith, cardheight);
+function drawFadeInImageXXX(ctx, 
+		rotation, trX, trY,
+		img,
+		x, y, width, height, 
+		tgtx, tgty, tgtwidth, tgtheight) {
+
+	//var img;         // / current image to fade in
+	        var opacity = 0; // / current globalAlpha of canvas
+
+	    // / if we're in a fade exit until done
+	    if (isBusy) return;
+	    isBusy = true;
+
+	    // / what image to use
+	    // img = toggle ? image2 : image;
+
+	    // / fade in
+	    (function fadeIn() {
+	        // / set alpha
+	    	if (hurryTransitions)
+	    		opacity = 1.0;
+	    	
+	    	ctx.globalAlpha = opacity;
+
+			/*feltContext.translate(halfwidth, halfheight);
+			feltContext.rotate(rotation);*/
+
+	        ctx.save();
+	        if (trX != 0 || trY !=0)
+	        	ctx.translate(trX, trY);
+	        if (rotation != 0)
+	        	ctx.rotate(rotation);
+	        // / draw image with current alpha
+	        ctx.drawImage(img, x, y, width, height, 
+	        		tgtx, tgty, tgtwidth, tgtheight);
+	        ctx.restore();
+	        // / increase alpha to 1, then exit resetting isBusy flag
+	        opacity += 0.02;	// was .02
+	        if (opacity < 1)
+	            requestAnimationFrame(fadeIn);
+	        else
+	            isBusy = false;
+	    })();
+
+}
+
+function resolve(p1) {}
+function reject(p1){}
+/*
+ * Use this to try with promise...
+ */
+function drawFadeInImage(ctx, 
+		rotation, trX, trY,
+		img,
+		x, y, width, height, 
+		tgtx, tgty, tgtwidth, tgtheight) {
+
+	//var img,         // / current image to fade in
+	        var opacity = 0; // / current globalAlpha of canvas
+
+	    // / if we're in a fade exit until done
+
+	    // / fade in
+	        let promise = new Promise(function(resolve, reject) {
+		        var opacity = 0; // / current globalAlpha of canvas
+
+	    (function fadeIn() {
+	        // / set alpha
+	    	ctx.globalAlpha = opacity;
+
+			/*feltContext.translate(halfwidth, halfheight);
+			feltContext.rotate(rotation);*/
+
+	        ctx.save();
+	        if (trX != 0 || trY !=0)
+	        	ctx.translate(trX, trY);
+	        if (rotation != 0)
+	        	ctx.rotate(rotation);
+	        // / draw image with current alpha
+	        ctx.drawImage(img, x, y, width, height, 
+	        		tgtx, tgty, tgtwidth, tgtheight);
+	        ctx.restore();
+	        // / increase alpha to 1, then exit resetting isBusy flag
+	        opacity += 0.02;	// was .02
+	        if (opacity < 1.0)
+	            requestAnimationFrame(fadeIn);
+	        else
+	            isBusy = false;
+	    })();
+	        });
+}
+
+// ok, so 
+/*
+ * turnover1card4 show card in position;
+ * if the card is null... turn over a cardback in the position  
+ */
 function turnover1card4(card, position) { // New rotation
-	// var randomcard=jrandom(52);	// pick a card, any card.
+	// var randomcard=jrandom(52); // pick a card, any card.
 	// var card=theDeck[randomcard];
 	if (indexCheck == true)
 		console.log("Card.index=", card.cardIndex, "for (suit,rank)=", card.suit, card.rank);
-	console.log("Card:" + card.cardIndex);
+	// console.log("Card:" + card.cardIndex);
 	feltContext = feltCanvas.getContext("2d");
 	var lastx, lasty;
-	// All cards are packed into their files the same way, so 
+	// All cards are packed into their files the same way, so
 	// location is based (symmetrically) on the card's rank.
 	// Also note that Arrays are 0-based, and the offsets are 1-based
-	var firstx=cardXoffset(Rank[card.rank] - 1);
-	var firsty=cardYoffset(Rank[card.rank] - 1);
-
-	console.log("currentSeatToPlay Seat=" + position);
-	console.log("xy-source["+firstx+", "+firsty+"]");
-	console.log("width-height["+cardwidth+", " + cardheight + "]");
-
-	if (card.cardImage == null) {
-		card.cardImage = getCardImageFile(card);
+	
+	var firstx=0;
+	var firsty=0;
+	var imagefile=null;
+	if (card == null) {	// i.e. display a card back
+		firstx=cardXoffset(14);
+		firsty=cardYoffset(14);
+		imagefile=suitcardImages;
+		// use suitcardImages
+	} else {
+		firstx=cardXoffset(Rank[card.rank] - 1);
+		firsty=cardYoffset(Rank[card.rank] - 1);
 	}
+
+	/*
+	 * console.log("currentSeatToPlay Seat=" + position);
+	 * console.log("xy-source["+firstx+", "+firsty+"]");
+	 * console.log("width-height["+cardwidth+", " + cardheight + "]");
+	 */
+	
+	// xxx
+	if (imagefile != null)
+		;
+	else if (card.cardImage == null) {
+		card.cardImage = getCardImageFile(card);
+		imagefile = card.cardImage;
+	} else {
+		imagefile = card.cardImage;
+			}
 	waitForImageLoad();
 	//
 	// Assume 4handed for now
@@ -705,7 +831,7 @@ function turnover1card4(card, position) { // New rotation
 	var halfheight=Math.floor(feltCanvas.height/2); 
 	var halfxmarginwidth=Math.floor(xmarginwidth/2);
 	var halfcardwidth=Math.floor(cardwidth/2)
-	//var halfymarginheight=Math.floor(xmarginheight/2);
+	// var halfymarginheight=Math.floor(xmarginheight/2);
 	var topy=0;
 	if (halfheight > cardheight)
 		topy = cardheight;
@@ -714,30 +840,47 @@ function turnover1card4(card, position) { // New rotation
 	var rotation=(90/180) * pi;	// rotation in radians for 90 degrees
 	switch (position) {
 	case 0:	// North-center
-		feltContext.drawImage(card.cardImage, 
-			firstx, firsty, cardwidth, cardheight, // source rectangle
-			halfwidth-halfcardwidth, 0 , cardwidth, cardheight		// destination rectangle
-			);
+		drawFadeInImage(feltContext, 0, 0, 0, imagefile, firstx, firsty, cardwidth, cardheight,
+				halfwidth=halfcardwidth, 0, cardwidth, cardheight);
+		
+		/*
+		 * feltContext.drawImage(card.cardImage, firstx, firsty, cardwidth,
+		 * cardheight, // source rectangle halfwidth-halfcardwidth, 0 ,
+		 * cardwidth, cardheight // destination rectangle );
+		 */
 		break;
-	case 1: // East half cardwith shifted left, half screen down
+	case 1: // East half cardwidth shifted left, half screen down
 		// genius use of 90-degree rotation
 		var upperLeftX=halfwidth+halfcardwidth+xmarginwidth;
 		var upperLeftY=topy;
 		feltContext.translate(halfwidth, halfheight);
 		feltContext.rotate(rotation);
-		feltContext.drawImage(card.cardImage, 
+		drawFadeInImage(feltContext, rotation, halfwidth, halfheight, 
+				imagefile, 
 				firstx, firsty, cardwidth, cardheight, // source rectangle
 				-cardwidth, -cardheight , // not 0 after rotation...
 					cardwidth, cardheight		// destination rectangle
-				);
+				); 
+
+		/*
+		 * feltContext.drawImage(card.cardImage, firstx, firsty, cardwidth,
+		 * cardheight, // source rectangle -cardwidth, -cardheight , // not 0
+		 * after rotation... cardwidth, cardheight // destination rectangle );
+		 */
 		// Undo rotation and translation for next seat
 		feltContext.rotate(-rotation);
 		feltContext.translate(-halfwidth, -halfheight);
 		break;
 	case 2:	// South rotated 180 upside down.
-		feltContext.drawImage(card.cardImage, 
+		/*
+		 * feltContext.drawImage(card.cardImage, firstx, firsty, cardwidth,
+		 * cardheight, // source rectangle halfwidth-halfcardwidth, halfheight,
+		 * cardwidth, cardheight // destination rectangle );
+		 */
+		drawFadeInImage(feltContext, 0, 0, 0, imagefile, 
 				firstx, firsty, cardwidth, cardheight, // source rectangle
-				halfwidth-halfcardwidth, halfheight, cardwidth, cardheight		// destination rectangle
+				halfwidth-halfcardwidth, halfheight, cardwidth, cardheight		// destination
+																				// rectangle
 				);
 		break;
 	case 3:	// West
@@ -745,11 +888,20 @@ function turnover1card4(card, position) { // New rotation
 		var upperLeftX=halfwidth+halfcardwidth+xmarginwidth;
 		var upperLeftY=topy;
 		feltContext.rotate(rotation);
-		feltContext.drawImage(card.cardImage, 
+		/*
+		 * feltContext.drawImage(card.cardImage, firstx, firsty, cardwidth,
+		 * cardheight, // source rectangle halfwidth-halfcardwidth, -cardheight , //
+		 * not 0 after rotation... cardwidth, cardheight // destination
+		 * rectangle );
+		 */
+		drawFadeInImage(feltContext, rotation, 0, 0, 
+				imagefile, 
 				firstx, firsty, cardwidth, cardheight, // source rectangle
-				halfwidth-halfcardwidth, -cardheight , // not 0 after rotation...
+				halfwidth-halfcardwidth, -cardheight , // not 0 after
+														// rotation...
 					cardwidth, cardheight		// destination rectangle
-				);
+				)
+		
 		feltContext.rotate(-rotation);
 		break;
 		default:
@@ -850,7 +1002,7 @@ var imageFilesLoaded=0;	// number of image files loaded
 function logCardImage() {
 	//alert("Image loaded?");
 	imageFilesLoaded++;
-	console.log("image files loaded=" + imageFilesLoaded);	
+	//console.log("image files loaded=" + imageFilesLoaded);	
 }
 
 function waitForImageLoad() {
@@ -959,8 +1111,41 @@ function xstatusUpdate(sMsg) {
  */
 function gamestatusUpdate(sMsg) {
 	document.getElementById("gamestatusArea").textContent 
-	= sMsg ;
-	
+	= sMsg ;	
+}
+
+/*
+ * The format of the trick update msg is
+ * !000LWB
+ * !0 seatid
+ * 00LWB[subdeck]
+ * 00=trick number
+ * L=lead
+ * W=Winner
+ * B=hearts broken
+ */
+function clearTrick(sMsg) {
+	document.getElementById("trickArea").textContent 
+	= sMsg ;	
+	// No... use transitions here...
+	// xxx
+	// figure out who took the trick
+	// and display the appropriate animation
+	// ! 00 L W bBroken
+	var leader=parseInt(sMsg.charAt(4));
+	var winner=parseInt(sMsg.charAt(5));
+	console.log("Winner=" + winner);
+	// clearCardTable(false);
+	// draw a card back at the winner's place...
+	switch (nTableSize) {
+	case 4:
+		turnover1card4(null, winner);
+		break;
+	case 6:
+		break;
+	default:
+		console.log("Snark Magic 4:Uh oh...");
+	}
 }
 
 function writeToTextArea(msg) {
@@ -980,7 +1165,7 @@ function keyFilter(event) {
 		console.log('<key=' + event.keyCode + '>');
 	}
 	if (event.keyCode == 13 ) {
-		console.log("return seen. Process!");
+		//console.log("return seen. Process!");
 		var line=getMsgText();
 		xstatusUpdate("[return]Sending{" + line + "} to server...");
 		processSubmitAndClearMsgText();
@@ -992,7 +1177,7 @@ function selectButtonPress(event) {
 		console.log('yea!js:Button Pressed');
 	}
 	//event.preventDefault();
-	console.warn("js:Button Pressed");
+	//console.warn("js:Button Pressed");
 	if (event == null) return;
 	//alert("Button Pressed...");
 	var line=getMsgText();
@@ -1101,7 +1286,7 @@ function processCardString(cardString) {
 	var i=0;
 	var c0=cardString.charAt(0);
 	switch(c0) {
-	case "-":
+	case '-':
 		bDelete=true;
 	case '+':
 		// char 1 is the user id.
@@ -1113,7 +1298,7 @@ function processCardString(cardString) {
 			card = decodeCard(cardString.charAt(i),
 					cardString.charAt(i+1));
 			if (card != null) {// yikes; null check if something bad happened
-				console.log("Adding:" + card.cardIndex);
+				//console.log("Adding:" + card.cardIndex);
 				if (bDelete)
 					deleteCardFromHand(card.cardIndex);
 				else
@@ -1122,13 +1307,16 @@ function processCardString(cardString) {
 		}
 		break;
 	case '?':
-		// tell user: your move xxx
+		// tell user: your move
 		cUser = cardString.charAt(1);
-		console.log("? Not yet implementeded");
 		gamestatusUpdate("Your move! seat<"+cUser+">");
 		break;
 	case '&':	// 
-		console.log("Trickupdate under construction");
+		/*
+		 * Just got a new message... check that transitions are finished
+		 *  before we start another one...
+		 */
+		//console.log("Trickupdate under construction");
 		i=2;
 		card = decodeCard(cardString.charAt(i),
 				cardString.charAt(i+1));
@@ -1136,6 +1324,9 @@ function processCardString(cardString) {
 		switch (nTableSize) {
 		case 4:
 			turnover1card4(card, user);
+			// sleep so that user sees it...
+			// no doesn't really work. Make cleartable use transitions...
+			// sleep(1000);
 			break;
 		case 6:
 			console.log("Recently implemented 6...");
@@ -1147,11 +1338,16 @@ function processCardString(cardString) {
 		}
 
 		break;
+	case '!':
+		console.log("clearTrick under construction");
+		// line.slice(8)
+		clearTrick(cardString);
+		//clearCardTable(true);
+		break;
 	case '%':
-		console.log("%error:" + cardString);
-		gamestatusUpdate("error:" + cUser);
-
-		// put on screen above cards... xxx
+		//console.log("%error:" + cardString);
+		// report user error
+		gamestatusUpdate("error:" + cardString);
 		break;
 	default:
 		console.log("unimplemented protocol msg:" 

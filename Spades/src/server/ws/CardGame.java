@@ -271,14 +271,30 @@ public class CardGame implements GameInterface {
 
 		//while (nCurrentTurn != -1) {
 			ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.YOUR_TURN);
-			/*
-			 * This message should included the cards already played in the trick..
-			 */
 			Player p = playerArray[nCurrentTurn];
 			/*
 			 * check if player has any cards left to play; if not return... ?
 			 */
 			// This sends to client; fine; pause before processing any response when stepping
+			/*
+			 * This message should included the cards already played in the trick..
+			 * xxx
+			 * ,,, No it shouldn't. But it should send a %msg text attachment
+			 *  if first move, ?0%msg: lead the 2c
+			 *  if leading, ?0%msg: your lead
+			 *  else ?0%msg: your turn
+			 */
+			String msg;
+			if (nCurrentTurn == -1
+					&& (currentTrick == null || 
+							currentTrick.subdeck.size() == 0))
+				msg = "%Play the 2 of clubs";
+			else if (currentTrick == null || 
+					currentTrick.subdeck.size() == 0) // i.e. your leading, and not first trick
+				msg = "%Your lead.";
+			else
+				msg = "%Your turn.";
+			pm.setUsertext(msg);
 			p.sendToClient(pm);
 		//}
 		if (nCurrentTurn == -1)

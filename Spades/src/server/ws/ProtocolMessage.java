@@ -22,7 +22,7 @@ public class ProtocolMessage {
 	 G->Player
 	 	+ Card(s)
 	 	- Card(s)
-	 	? Your Turn? [Cards in current trick] <change to ?>
+	 	? Your Turn? [Cards in current trick] <change to ?> %msg:your turn, must play, etc.
 	 	& Trick Update. Cards(s) in the current trick [Player gets one of these every time someone plays]. 
 	 		// [Cards]%trick flags [Hwwxxyy[.;] [Hh] ww=winner;xx=trickid yy=lead or taker] [,.]
 	 	! Trick Cleared 
@@ -122,6 +122,13 @@ public class ProtocolMessage {
 			}
 		return false;
 	}
+
+	//
+	// xxx
+	// setusertext
+	void setUsertext(String s) {
+		usertext = s;
+	}
 	
 	ProtocolMessage(String sMsg) {
 		sMsg = trim(sMsg);
@@ -175,6 +182,7 @@ public class ProtocolMessage {
 		case DELETE_CARDS: 	// CARD+
 		case YOUR_TURN: 	// ?CARD* [cards in trick already played] ??
 			subdeck = new Subdeck(usertext);
+			// your turn doesn't have a subdeck. It should just be the supplemental msgtext
 			break;
 		case TRICK_CLEARED:	// ! nn L W B [subdeck] for trick-id Leader Winner H.Broken [Cards+]
 			
