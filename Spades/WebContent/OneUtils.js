@@ -657,16 +657,17 @@ function clearCardTable(bResetTrick) {
 function turnover1card() { //Bug: currently ignores random card and retries it in 1-4 and 1-6...
 	var randomcard=jrandom(52);	// pick a card, any card.
 	var card=theDeck[randomcard];
-	if (indexCheck == true)
+	if (indexCheck == true) {
 		console.log("Card.index=", card.cardIndex, "for (suit,rank)=", card.suit, card.rank);
-	console.log("Card:" + card.cardIndex);
+		console.log("Card:" + card.cardIndex);
+	}
 	// Next, switch on the table size...
 	switch (nTableSize) {
 	case 4:
 		turnover1card4(card, currentSeatToPlay);
 		break;
 	case 6:
-		console.log("Recently implemented 6...");
+		//console.log("Recently implemented 6...");
 		turnover1card6(card, currentSeatToPlay);
 		break;
 	default:
@@ -913,7 +914,7 @@ function turnover1card4(card, position) { // New rotation
 function turnover1card6(card, position) { // New rotation
 	if (indexCheck == true)
 		console.log("Card.index=", card.cardIndex, "for (suit,rank)=", card.suit, card.rank);
-	console.log("Card:" + card.cardIndex);
+	//console.log("Card:" + card.cardIndex);
 	feltContext = feltCanvas.getContext("2d");
 	var lastx, lasty;
 	// All cards are packed into their files the same way, so 
@@ -922,9 +923,9 @@ function turnover1card6(card, position) { // New rotation
 	var firstx=cardXoffset(Rank[card.rank] - 1);
 	var firsty=cardYoffset(Rank[card.rank] - 1);
 
-	console.log("currentSeatToPlay Seat=" + position);
-	console.log("xy-source["+firstx+", "+firsty+"]");
-	console.log("width-height["+cardwidth+", " + cardheight + "]");
+	//console.log("currentSeatToPlay Seat=" + position);
+	//console.log("xy-source["+firstx+", "+firsty+"]");
+	//console.log("width-height["+cardwidth+", " + cardheight + "]");
 
 	if (card.cardImage == null) {
 		card.cardImage = getCardImageFile(card);
@@ -1140,6 +1141,11 @@ function clearTrick(sMsg) {
 	switch (nTableSize) {
 	case 4:
 		turnover1card4(null, winner);
+		// clear the table, and put the card back in front of the leader
+		clearCardTable(false);
+		turnover1card4(null, winner);		
+		clearCardTable(false);
+		turnover1card4(null, winner);		
 		break;
 	case 6:
 		break;
@@ -1205,7 +1211,10 @@ function wsReconnect() {
 function wsGetMessage(message){
 	var s="" + message.data + "";
 
-	echoText.value += "server>" + s + "\n";
+	// echoText.value += "server>" + s + "\n";
+	// prepend new message to the top of the text box, not bottom
+	echoText.value = "server>" + s + "\n" + echoText.value;
+
 	if (isProtocol(s)) {
 		// hand off to protocol manager
 		processCardString(s);	
@@ -1268,7 +1277,7 @@ function setSeatId(seatid) {
 	console.log("Setting seatid:" + seatId)
 }
 function playCardFromButtonPress(cardindex) {
-	console.log("Sending Card to server:"+cardindex);
+	//console.log("Sending Card to server:"+cardindex);
 	var card=theDeck[cardindex];
 	var shortname=card.shortName;
 	// make a protocol message, and send to server
@@ -1329,7 +1338,7 @@ function processCardString(cardString) {
 			// sleep(1000);
 			break;
 		case 6:
-			console.log("Recently implemented 6...");
+			//console.log("Recently implemented 6...");
 			turnover1card6(card, user);
 			break;
 		default:
@@ -1448,7 +1457,7 @@ function processSubmitAndClearMsgText() {
 	if (processLocalCommand(line)) {	// i.e. a .table=, .clear, etc.
 		;
 	} else {	// otherwise send to the server
-		console.log("full-line:" + line);
+		// console.log("full-line:" + line);
 		// add to the scroll box...
 		appendTextToTextArea("local:" + line + '\n'); // temporary...
 		//
