@@ -1,17 +1,12 @@
 /**
- * Moving SocketUtils and NewCardUtils into one file
- * to avoid the module import/export bugs
- */
-/** 
  * CardUtils - card data structures and utility functions
  */
-
 'use strict'; 
 const minorVersion ="1b" ;
 const versionString1="OneUtils.js version 0." + 
 	minorVersion +
 	"(prerelease) [do not use .mjs experimental version.]";
-//console.warn(VersionString);	// Moved to GameConsole.html
+// console.warn(VersionString); // Moved to GameConsole.html
 console.warn(versionString1);
 console.log("Loading OneUtils version 1.0" + minorVersion + "...");
 
@@ -62,17 +57,18 @@ const Orientation6 = {
 }
 
 class Card {
-	//var cardindex;
-	//var rank;
-	//var suit;
-	//var suitimage
+	// var cardindex;
+	// var rank;
+	// var suit;
+	// var suitimage
 	// var xoffset, yoffset
 	// var width, height
 	constructor(r, s, cardindex) {
 		this.rank = r;
 		this.suit = s;
-		// this should be computed something like this, but I'm too dumb to make this work right now
-		//this.cardIndex = (s.value - 1) * 4 + (r.value - 1);
+		// this should be computed something like this, but I'm too dumb to make
+		// this work right now
+		// this.cardIndex = (s.value - 1) * 4 + (r.value - 1);
 		this.cardIndex = cardindex;
 		this.suitImage = null; // put suitimage in when actually displayed
 		this.handButton = null;
@@ -83,11 +79,44 @@ class Card {
 }
 
 /*
- * These are the only places that the string values are referenced to encode and decode protocol messages
- * -- identical code with the server
+ * These are the only places that the string values are referenced to encode and
+ * decode protocol messages -- identical code with the server
  */
 var sRanks="A23456789TJQK";
 var sSuits="CDHS";
+// this is ignored ZZZ
+/**
+ * Moving SocketUtils and NewCardUtils into one file to avoid the module
+ * import/export bugs Virtual Card and Table added playVirtualCard
+ * clearVirtualTable resetVirtualTable
+ */
+/*
+ * playVirtualCard
+ */
+function playVirtualCard(card, position) {
+	// clear physical table
+	// adjust leader, if necessary
+	// add card to vector at position
+	// set hascards[position] to false
+	// set transition on last card
+}
+/*
+ * clearVirtualTable
+ */
+function clearVirtualTable(positionWinner) {
+	// reset leader and current to -1
+	// foreach element set to null/false
+	// do nothing to table, except to
+	// let transitions run; eventually show who took trick visually
+}
+/*
+ * resetVitualTable
+ */
+function resetVirtualTable() {
+	// blank the board for the first trick
+	// killing off any transitions if they are happening
+}
+// end ignored ZZZ
 
 var theDeck = null;
 var deckInitialized=false;
@@ -103,7 +132,7 @@ function initializeTheDeck() {
 		for (var rank in Rank) {
 			var card;
 			var sRank=""+rank, sSuit=""+suit;
-			//console.log("creating:"+rank+suit);
+			// console.log("creating:"+rank+suit);
 			card = new Card(rank, suit, cardindex);
 			card.friendlyName = sRank + sSuit;
 			card.shortName = sRanks.charAt(r) + sSuits.charAt(s);
@@ -123,10 +152,9 @@ function initializeTheDeck() {
 }
 
 /*
- * decodeCard - determine a card in the deck by rank and string
- *  i.e. this is used when reading server protocol messages and 
- *  placing cards in the hand, deleting them, etc.
- *  returns the card it finds or null
+ * decodeCard - determine a card in the deck by rank and string i.e. this is
+ * used when reading server protocol messages and placing cards in the hand,
+ * deleting them, etc. returns the card it finds or null
  */
 var cardRanks={"A":0, 
 			"1": 0,
@@ -177,8 +205,8 @@ function cardSelected(event) {
 	var buttonName = event.target.id;
 	var uniqueId = t.type + t.id;
 	var special = t.textContent;
-	//console.log("Whoa!" + uniqueId+ "->" + t.textContent);
-	//alert("Whoa Nellie! in called with" + t.id + special);
+	// console.log("Whoa!" + uniqueId+ "->" + t.textContent);
+	// alert("Whoa Nellie! in called with" + t.id + special);
 	var digitString=buttonName.replace(/\D/g,"");
 	var cardIndex = parseInt(digitString);
 	playCardFromButtonPress(cardIndex);
@@ -198,15 +226,15 @@ function cardSelected2(event) {
  */
 
 /*
- * wsHandInit - (was wsShowHand) initialize hand details including
- *  creating buttons for each card to be added to a hand
+ * wsHandInit - (was wsShowHand) initialize hand details including creating
+ * buttons for each card to be added to a hand
  */
 function wsHandInit() {
 	var i=0;
-	//alert(handWindow.location.href);
+	// alert(handWindow.location.href);
 		var controlDiv=document.getElementById("CardsInHandDiv");
 		// now in main window...
-		//var controlDiv=document.getElementById("CardsInHandDiv");
+		// var controlDiv=document.getElementById("CardsInHandDiv");
 		var cardBtn;
 		initializeTheDeck(); // if not done already
 		for (i=0; i<maxCardsInHand; i++) {
@@ -219,11 +247,11 @@ function wsHandInit() {
 			/*
 			 * foreach card in the deck place a handButton to make visible later
 			 */
-		    //theDeck[i].handButton = cardBtn;
+		    // theDeck[i].handButton = cardBtn;
 		    var card = theDeck[i];
 		    card.handButton = cardBtn;
 
-	       //Set the attributes on the button
+	       // Set the attributes on the button
 	       cardBtn.setAttribute("id", "CardButton" + i);
 	       cardBtn.setAttribute("type","button");
 	       cardBtn.setAttribute("value","Search");
@@ -237,16 +265,17 @@ function wsHandInit() {
 	       cardBtn.style.width = "0";
 	       cardBtn.style.visibility = "hidden";
 	       /*
-	        * Bug: For no apparent reason adding the event listeners with setAttribute doesn't work.
-	        * I have no idea why. But addEventListener does work.
-	        */
+			 * Bug: For no apparent reason adding the event listeners with
+			 * setAttribute doesn't work. I have no idea why. But
+			 * addEventListener does work.
+			 */
 	       cardBtn.addEventListener("click", cardSelected);
 	       cardBtn.addEventListener("dblclick", cardSelected2);
 	       cardBtn.setAttribute("data-arg1", "User-Button"+ i);
-	       //cardBtn.style.marginLeft = "20px";
-	       //cardBtn.style.marginTop = "20px";
+	       // cardBtn.style.marginLeft = "20px";
+	       // cardBtn.style.marginTop = "20px";
 	       
-	       //Add the button to the div holding cards	       
+	       // Add the button to the div holding cards
 	       controlDiv.appendChild(cardBtn);
 		}
 	
@@ -260,18 +289,18 @@ function wsShowHand2() {
 	handWindow=open("HandCanvas.html", "example", "alwaysRaised=on,width=500,height=400");
 	handWindow.document.title="Player's Hand";
 	
-	//handWindow.focus();
-	//alert(handWindow.location.href);
+	// handWindow.focus();
+	// alert(handWindow.location.href);
 	handWindow.onload = 
 		function() { 
-		/* let 
-		html='<dev style="font-size:30px">Welcome!</div>';
-		handWindow.document.body.insertAdjacentHTML('afterbegin', html);
-		*/
-	       //Create the search button
-		//var controlDiv=handWindow.document.getElementById("CardsInHandDiv");
+		/*
+		 * let html='<dev style="font-size:30px">Welcome!</div>';
+		 * handWindow.document.body.insertAdjacentHTML('afterbegin', html);
+		 */
+	       // Create the search button
+		// var controlDiv=handWindow.document.getElementById("CardsInHandDiv");
 		// now in main window...
-		//var controlDiv=document.getElementById("CardsInHandDiv");
+		// var controlDiv=document.getElementById("CardsInHandDiv");
 		var cardBtn;
 		initializeTheDeck(); // if not done already
 		for (i=0; i<maxCardsInHand; i++) {
@@ -285,11 +314,11 @@ function wsShowHand2() {
 			/*
 			 * foreach card in the deck place a handButton to make visible later
 			 */
-		    //theDeck[i].handButton = cardBtn;
+		    // theDeck[i].handButton = cardBtn;
 		    var card = theDeck[i];
 		    card.handButton = cardBtn;
 
-	       //Set the attributes on the button
+	       // Set the attributes on the button
 	       cardBtn.setAttribute("id", "CardButton" + i);
 	       cardBtn.setAttribute("type","button");
 	       cardBtn.setAttribute("value","Search");
@@ -304,24 +333,24 @@ function wsShowHand2() {
 	       cardBtn.style.width = "0";
 	       cardBtn.style.visibility = "hidden";
 	       /*
-	        * Bug: For no apparent reason adding the event listeners with setAttribute doesn't work.
-	        * I have no idea why. But addEventListener does work.
-	        */
+			 * Bug: For no apparent reason adding the event listeners with
+			 * setAttribute doesn't work. I have no idea why. But
+			 * addEventListener does work.
+			 */
 	       cardBtn.addEventListener("click", cardSelected);
 	       cardBtn.addEventListener("dblclick", cardSelected2);
 	       cardBtn.setAttribute("data-arg1", "User-Button"+ i);
-	       //cardBtn.style.marginLeft = "20px";
-	       //cardBtn.style.marginTop = "20px";
+	       // cardBtn.style.marginLeft = "20px";
+	       // cardBtn.style.marginTop = "20px";
 	       
-	       //Add the button to the div holding cards	       
+	       // Add the button to the div holding cards
 	       controlDiv.appendChild(cardBtn);
 		}
-		/* stop doing this now that grab works...
-		 * for (i=10; i<maxCardsInHand; i++) {
-			//cardBtn = handWindow.document.getElementById("CardButton" + i);
-			cardBtn = buttonList[i];
-		    cardBtn.style.visibility = "visible";
-		} */
+		/*
+		 * stop doing this now that grab works... for (i=10; i<maxCardsInHand;
+		 * i++) { //cardBtn = handWindow.document.getElementById("CardButton" +
+		 * i); cardBtn = buttonList[i]; cardBtn.style.visibility = "visible"; }
+		 */
 		}; // lambda function
 	
 }
@@ -330,8 +359,8 @@ function wsShowHand2() {
  * make card (by cardindex) visible in hand
  */
 function addCardToHand(cardindex) {
-	//var cardBtn = buttonList[cardindex];
-	//cardBtn.style.visibility = "visible";
+	// var cardBtn = buttonList[cardindex];
+	// cardBtn.style.visibility = "visible";
 	var card=theDeck[cardindex];
 	if (card == null) {
 		console.log("Error: Somehow can't find cardindex=" + cradindex);
@@ -345,14 +374,14 @@ function addCardToHand(cardindex) {
     card.handButton.style.height = "75px";
     card.handButton.style.width = "54px";
 	return true;
-	//card.cardBtn.style.visibility = "visible";
+	// card.cardBtn.style.visibility = "visible";
 }
 /*
  * deleteCardFromHand - just set to to be not visible
  */
 function deleteCardFromHand(cardindex) {
-	//var cardBtn = buttonList[cardindex];
-	//cardBtn.style.visibility = "visible";
+	// var cardBtn = buttonList[cardindex];
+	// cardBtn.style.visibility = "visible";
 	var card=theDeck[cardindex];
 	if (card == null) {
 		console.log("Error: Somehow can't find cardindex=" + cradindex);
@@ -363,8 +392,8 @@ function deleteCardFromHand(cardindex) {
 		return false;
 	}
 	card.handButton.style.visibility = "hidden";
-    //card.handButton.style.height = "75px";
-    //card.handButton.style.width = "54px";
+    // card.handButton.style.height = "75px";
+    // card.handButton.style.width = "54px";
 	return true;
 }
 
@@ -394,9 +423,8 @@ function wsFeltInit() {
 	initializeTheDeck();
 
 	/*
-	feltWindow.onload = 
-		function() {
-		*/  
+	 * feltWindow.onload = function() {
+	 */  
 		// var html='<dev style="font-size:30px">Welcome!</div>';
 		// feltWindow.document.body.insertAdjacentHTML('afterbegin', html);
 		feltCanvas = document.getElementById("Canvas1");
@@ -417,40 +445,44 @@ function wsFeltInit() {
 				// Cardwidth=200 cardheight=500
 
 				// Now get the card images loaded on the html page...
-				// "ClubsImage" 
+				// "ClubsImage"
 				// first put the image on the canvas...
-				// then see if you can take the individual cards out of the image
-				//  and save them in the card...
+				// then see if you can take the individual cards out of the
+				// image
+				// and save them in the card...
 				//
 				// There doesn't seem to be a way to create subimages.
-				// Maybe I should use the suitcard image and pass coordinates for the
+				// Maybe I should use the suitcard image and pass coordinates
+				// for the
 				// particular card being accessed. So pass offsets...
 				//
 				// Ok, so should use deferred processing for this.
 				// store cardimage as null.
 				// when needed put in a reference to the actual image
-				//...suitcardImages = document.getElementById("ClubsImage");
-				//...clubsCardImages = suitcardImages; // first one... clean this up...
+				// ...suitcardImages = document.getElementById("ClubsImage");
+				// ...clubsCardImages = suitcardImages; // first one... clean
+				// this up...
 				clubsCardImages = document.getElementById("ClubsImage");
 				diamondsCardImages = document.getElementById("DiamondsImage");
 				heartsCardImages = document.getElementById("HeartsImage");
 				spadesCardImages = document.getElementById("SpadesImage");
-				suitcardImages = diamondsCardImages;	// temp hack for testing...
+				suitcardImages = diamondsCardImages;	// temp hack for
+														// testing...
 				if (suitcardImages == null) 
 					alert("Failed to obtain card image file");
 				else {
 					// just draw the first card for now...
 					/*
-					var width=suitcardImages.width;
-					var height=suitcardImages.height;
-					console.log("width:" + suitcardImages.width + "->" + cardwidth);					
-					console.log("height:" + suitcardImages.height + "->" + cardheight);
-					
-					feltContext.drawImage(suitcardImages, 
-							0, 0, cardwidth, cardheight, // source rectangle
-							0, 0, cardwidth, cardheight	// destination rectangle
-							);
-						*/	
+					 * var width=suitcardImages.width; var
+					 * height=suitcardImages.height; console.log("width:" +
+					 * suitcardImages.width + "->" + cardwidth);
+					 * console.log("height:" + suitcardImages.height + "->" +
+					 * cardheight);
+					 * 
+					 * feltContext.drawImage(suitcardImages, 0, 0, cardwidth,
+					 * cardheight, // source rectangle 0, 0, cardwidth,
+					 * cardheight // destination rectangle );
+					 */	
 					}
 				
 			}
@@ -463,7 +495,7 @@ function wsShowFelt() {
 	feltWindow=open("FeltCanvas.html", "example", "width=600,height=800");
 	feltWindow.document.title="Game Felt";
 	feltWindow.focus();
-	//alert(handWindow.location.href);
+	// alert(handWindow.location.href);
 	
 	// Initialize card deck
 	initializeTheDeck();
@@ -490,40 +522,44 @@ function wsShowFelt() {
 				// Cardwidth=200 cardheight=500
 
 				// Now get the card images loaded on the html page...
-				// "ClubsImage" 
+				// "ClubsImage"
 				// first put the image on the canvas...
-				// then see if you can take the individual cards out of the image
-				//  and save them in the card...
+				// then see if you can take the individual cards out of the
+				// image
+				// and save them in the card...
 				//
 				// There doesn't seem to be a way to create subimages.
-				// Maybe I should use the suitcard image and pass coordinates for the
+				// Maybe I should use the suitcard image and pass coordinates
+				// for the
 				// particular card being accessed. So pass offsets...
 				//
 				// Ok, so should use deferred processing for this.
 				// store cardimage as null.
 				// when needed put in a reference to the actual image
 				suitcardImages = feltWindow.document.getElementById("ClubsImage");
-				clubsCardImages = suitcardImages; // first one... clean this up...
+				clubsCardImages = suitcardImages; // first one... clean this
+													// up...
 				clubsCardImages = feltWindow.document.getElementById("ClubsImage");
 				diamondsCardImages = feltWindow.document.getElementById("DiamondsImage");
 				heartsCardImages = feltWindow.document.getElementById("HeartsImage");
 				spadesCardImages = feltWindow.document.getElementById("SpadesImage");
-				suitcardImages = diamondsCardImages;	// temp hack for testing...
+				suitcardImages = diamondsCardImages;	// temp hack for
+														// testing...
 				if (suitcardImages == null) 
 					alert("Failed to obtain card image file");
 				else {
 					// just draw the first card for now...
 					/*
-					var width=suitcardImages.width;
-					var height=suitcardImages.height;
-					console.log("width:" + suitcardImages.width + "->" + cardwidth);					
-					console.log("height:" + suitcardImages.height + "->" + cardheight);
-					
-					feltContext.drawImage(suitcardImages, 
-							0, 0, cardwidth, cardheight, // source rectangle
-							0, 0, cardwidth, cardheight	// destination rectangle
-							);
-						*/	
+					 * var width=suitcardImages.width; var
+					 * height=suitcardImages.height; console.log("width:" +
+					 * suitcardImages.width + "->" + cardwidth);
+					 * console.log("height:" + suitcardImages.height + "->" +
+					 * cardheight);
+					 * 
+					 * feltContext.drawImage(suitcardImages, 0, 0, cardwidth,
+					 * cardheight, // source rectangle 0, 0, cardwidth,
+					 * cardheight // destination rectangle );
+					 */	
 					}
 				
 			}
@@ -540,8 +576,8 @@ function getNewCardImage() {
 	idata = clubsCardImage.getImageData
 }
 /*
- * turnover 1 card game-state machine (for debugging) and
- * routines for table4 and table6 placement (and clear, eventually)
+ * turnover 1 card game-state machine (for debugging) and routines for table4
+ * and table6 placement (and clear, eventually)
  */
 
 var serializeDeck=true;
@@ -554,14 +590,14 @@ function jrandom(between0andXminus1) {
 			fakeRandom = 0;
 		return t;
 	}
-	//return fakeRandom++;
+	// return fakeRandom++;
 	var j = Math.random() * between0andXminus1;
-	//if (j < 1) return 1;
+	// if (j < 1) return 1;
 	return Math.floor(j);
 }
 
 // cards are in a 5x3 grid in the .jpg file; result is zero indexed
-//return x-coordinate of serial number (integer) card in pixels
+// return x-coordinate of serial number (integer) card in pixels
 function cardXoffset(card) {
 	// determine the column card is in
 	var cardInCol=Math.floor(card%5);
@@ -570,7 +606,7 @@ function cardXoffset(card) {
 	return pixels;
 }
 
-//return y-coordinate of serial number (integer) card in pixels
+// return y-coordinate of serial number (integer) card in pixels
 function cardYoffset(card) {
 	var cardInRow=Math.floor(card / 5);
 	var pixels=(cardInRow * cardheight) + (cardInRow * ymarginwidth);
@@ -603,13 +639,14 @@ function getCardImageFile(card) {
 	}
 }
 /*
- * cardPos is 0, NORTH at top, clockwise to number of players
- * rotate through positions; state is currentSeatToPlay
+ * cardPos is 0, NORTH at top, clockwise to number of players rotate through
+ * positions; state is currentSeatToPlay
  */
 /*
- * game state machine 
+ * game state machine
  */
-var currentSeatToPlay=0; //badly named; should be cardSeat or something like that
+var currentSeatToPlay=0; // badly named; should be cardSeat or something like
+							// that
 var indexCheck=false;	// debugging variable for console writes
 var nTableSize=4;
 
@@ -654,7 +691,8 @@ function clearCardTable(bResetTrick) {
 	}
 }
 
-function turnover1card() { //Bug: currently ignores random card and retries it in 1-4 and 1-6...
+function turnover1card() { // Bug: currently ignores random card and retries it
+							// in 1-4 and 1-6...
 	var randomcard=jrandom(52);	// pick a card, any card.
 	var card=theDeck[randomcard];
 	if (indexCheck == true) {
@@ -667,7 +705,7 @@ function turnover1card() { //Bug: currently ignores random card and retries it i
 		turnover1card4(card, currentSeatToPlay);
 		break;
 	case 6:
-		//console.log("Recently implemented 6...");
+		// console.log("Recently implemented 6...");
 		turnover1card6(card, currentSeatToPlay);
 		break;
 	default:
@@ -686,7 +724,8 @@ function hurryUp() {
 function hurryUp(b) {
 	hurryTransitions = b;
 }
-// drawFadeInImage(feltcontext, card.cardImage, firstx, firsty, cardwidth, cardeight,
+// drawFadeInImage(feltcontext, card.cardImage, firstx, firsty, cardwidth,
+// cardeight,
 // halfwidth=halfcardwidth, 0, cardwith, cardheight);
 function drawFadeInImageXXX(ctx, 
 		rotation, trX, trY,
@@ -694,7 +733,7 @@ function drawFadeInImageXXX(ctx,
 		x, y, width, height, 
 		tgtx, tgty, tgtwidth, tgtheight) {
 
-	//var img;         // / current image to fade in
+	// var img; // / current image to fade in
 	        var opacity = 0; // / current globalAlpha of canvas
 
 	    // / if we're in a fade exit until done
@@ -712,8 +751,10 @@ function drawFadeInImageXXX(ctx,
 	    	
 	    	ctx.globalAlpha = opacity;
 
-			/*feltContext.translate(halfwidth, halfheight);
-			feltContext.rotate(rotation);*/
+			/*
+			 * feltContext.translate(halfwidth, halfheight);
+			 * feltContext.rotate(rotation);
+			 */
 
 	        ctx.save();
 	        if (trX != 0 || trY !=0)
@@ -725,7 +766,7 @@ function drawFadeInImageXXX(ctx,
 	        		tgtx, tgty, tgtwidth, tgtheight);
 	        ctx.restore();
 	        // / increase alpha to 1, then exit resetting isBusy flag
-	        opacity += 0.02;	// was .02
+	        opacity += fIncrement;	// was .02
 	        if (opacity < 1)
 	            requestAnimationFrame(fadeIn);
 	        else
@@ -734,7 +775,7 @@ function drawFadeInImageXXX(ctx,
 
 }
 
-function resolve(p1) {}
+function resolve(p1){}
 function reject(p1){}
 /*
  * Use this to try with promise...
@@ -745,7 +786,7 @@ function drawFadeInImage(ctx,
 		x, y, width, height, 
 		tgtx, tgty, tgtwidth, tgtheight) {
 
-	//var img,         // / current image to fade in
+	// var img, // / current image to fade in
 	        var opacity = 0; // / current globalAlpha of canvas
 
 	    // / if we're in a fade exit until done
@@ -758,8 +799,10 @@ function drawFadeInImage(ctx,
 	        // / set alpha
 	    	ctx.globalAlpha = opacity;
 
-			/*feltContext.translate(halfwidth, halfheight);
-			feltContext.rotate(rotation);*/
+			/*
+			 * feltContext.translate(halfwidth, halfheight);
+			 * feltContext.rotate(rotation);
+			 */
 
 	        ctx.save();
 	        if (trX != 0 || trY !=0)
@@ -780,14 +823,47 @@ function drawFadeInImage(ctx,
 	        });
 }
 
-// ok, so 
 /*
- * turnover1card4 show card in position;
- * if the card is null... turn over a cardback in the position  
+ * passed an animationScene
  */
+function resolveWithClear() {
+	clearCardTable(false); //xxx
+}
+var fIncrement = .01;
+function fadeOutTrick(scene) {
+
+	   let promise = new Promise(function(resolveWithClear, reject) {
+		   var opacity = 1.0; // / current globalAlpha of canvas
+		   let ctx=feltContext;
+		//
+		// changes the opacity and calls paint in a loop
+	 (function fadeOut() {
+	        // set alpha
+	        //ctx.globalAlpha = opacity;
+	    	scene.paint(ctx, opacity);
+	        if (opacity >= 0.0) {
+		        opacity -= fIncrement;	// was .02
+	            requestAnimationFrame(fadeOut);
+	        } else {
+	            isBusy = false;
+	            scene.paint(ctx, 0.0);
+	            //clearCardTable(false);
+	        }
+	        opacity -= fIncrement;	// was .02
+	    })();
+	        });
+}
+
+// ok, so
+/*
+ * turnover1card4 show card in position; if the card is null... turn over a
+ * cardback in the position
+ */
+var currentScene = null;
 function turnover1card4(card, position) { // New rotation
-	// var randomcard=jrandom(52); // pick a card, any card.
-	// var card=theDeck[randomcard];
+	// if there is no current scene, create one;
+	if (currentScene == null)
+		currentScene = new AnimationScene();
 	if (indexCheck == true)
 		console.log("Card.index=", card.cardIndex, "for (suit,rank)=", card.suit, card.rank);
 	// console.log("Card:" + card.cardIndex);
@@ -839,11 +915,15 @@ function turnover1card4(card, position) { // New rotation
 	else
 		topy = halfheight;
 	var rotation=(90/180) * pi;	// rotation in radians for 90 degrees
+	var pc = null;	// playcard to save in scene
 	switch (position) {
 	case 0:	// North-center
+		// bug: halwdith=halfcardwidth? maybe - etc.?
 		drawFadeInImage(feltContext, 0, 0, 0, imagefile, firstx, firsty, cardwidth, cardheight,
 				halfwidth=halfcardwidth, 0, cardwidth, cardheight);
-		
+
+		pc = new PlayCard(imagefile, 0, 0, 0, firstx, firsty, cardwidth, cardheight,
+				halfwidth=halfcardwidth, 0, cardwidth, cardheight);
 		/*
 		 * feltContext.drawImage(card.cardImage, firstx, firsty, cardwidth,
 		 * cardheight, // source rectangle halfwidth-halfcardwidth, 0 ,
@@ -862,6 +942,8 @@ function turnover1card4(card, position) { // New rotation
 				-cardwidth, -cardheight , // not 0 after rotation...
 					cardwidth, cardheight		// destination rectangle
 				); 
+		pc = new PlayCard(imagefile, rotation, halfwidth, halfheight, firstx, firsty, cardwidth, cardheight,
+				-halfcardwidth, -cardheight, cardwidth, cardheight);
 
 		/*
 		 * feltContext.drawImage(card.cardImage, firstx, firsty, cardwidth,
@@ -883,6 +965,8 @@ function turnover1card4(card, position) { // New rotation
 				halfwidth-halfcardwidth, halfheight, cardwidth, cardheight		// destination
 																				// rectangle
 				);
+		pc = new PlayCard(imagefile, 0, 0, 0, firstx, firsty, cardwidth, cardheight,
+				halfwidth-halfcardwidth, halfheight, cardwidth, cardheight);
 		break;
 	case 3:	// West
 		// genius use of 90-degree rotation
@@ -902,30 +986,32 @@ function turnover1card4(card, position) { // New rotation
 														// rotation...
 					cardwidth, cardheight		// destination rectangle
 				)
+		pc = new PlayCard(imagefile, rotation, 0, 0, firstx, firsty, cardwidth, cardheight,
+				halfwidth-halfcardwidth, -cardheight, cardwidth, cardheight);
 		
 		feltContext.rotate(-rotation);
 		break;
 		default:
 			console.log("Switch: can't happen.");
 	}
-	
+	currentScene.add(pc);
 }
 
 function turnover1card6(card, position) { // New rotation
 	if (indexCheck == true)
 		console.log("Card.index=", card.cardIndex, "for (suit,rank)=", card.suit, card.rank);
-	//console.log("Card:" + card.cardIndex);
+	// console.log("Card:" + card.cardIndex);
 	feltContext = feltCanvas.getContext("2d");
 	var lastx, lasty;
-	// All cards are packed into their files the same way, so 
+	// All cards are packed into their files the same way, so
 	// location is based (symmetrically) on the card's rank.
 	// Also note that Arrays are 0-based, and the offsets are 1-based
 	var firstx=cardXoffset(Rank[card.rank] - 1);
 	var firsty=cardYoffset(Rank[card.rank] - 1);
 
-	//console.log("currentSeatToPlay Seat=" + position);
-	//console.log("xy-source["+firstx+", "+firsty+"]");
-	//console.log("width-height["+cardwidth+", " + cardheight + "]");
+	// console.log("currentSeatToPlay Seat=" + position);
+	// console.log("xy-source["+firstx+", "+firsty+"]");
+	// console.log("width-height["+cardwidth+", " + cardheight + "]");
 
 	if (card.cardImage == null) {
 		card.cardImage = getCardImageFile(card);
@@ -941,7 +1027,8 @@ function turnover1card6(card, position) { // New rotation
 	// calculation for position should place position 4 at the top, so...
 	position = (position + 3) % 6;
 	// rotate board 60-degrees times the position, splat card, rotate back
-	var rotation=((position*60)/180) * pi;	// rotation in radians for 90 degrees
+	var rotation=((position*60)/180) * pi;	// rotation in radians for 90
+											// degrees
 		feltContext.translate(halfwidth, cardheight);
 		feltContext.rotate(rotation);
 	
@@ -962,7 +1049,7 @@ function bktv1c6trnover1crd6(card, position) { // New rotation
 	console.log("Card:" + card.cardIndex);
 	feltContext = feltCanvas.getContext("2d");
 	var lastx, lasty;
-	// All cards are packed into their files the same way, so 
+	// All cards are packed into their files the same way, so
 	// location is based (symmetrically) on the card's rank.
 	// Also note that Arrays are 0-based, and the offsets are 1-based
 	var firstx=cardXoffset(Rank[card.rank] - 1);
@@ -984,7 +1071,8 @@ function bktv1c6trnover1crd6(card, position) { // New rotation
 	var halfcardwidth=Math.floor(cardwidth/2);
 	
 	// rotate board 60-degrees times the position, splat card, rotate back
-	var rotation=((position*60)/180) * pi;	// rotation in radians for 90 degrees
+	var rotation=((position*60)/180) * pi;	// rotation in radians for 90
+											// degrees
 		feltContext.translate(halfwidth-halfcardwidth, cardheight);
 		feltContext.rotate(rotation);
 	
@@ -1001,9 +1089,9 @@ function bktv1c6trnover1crd6(card, position) { // New rotation
 
 var imageFilesLoaded=0;	// number of image files loaded
 function logCardImage() {
-	//alert("Image loaded?");
+	// alert("Image loaded?");
 	imageFilesLoaded++;
-	//console.log("image files loaded=" + imageFilesLoaded);	
+	// console.log("image files loaded=" + imageFilesLoaded);
 }
 
 function waitForImageLoad() {
@@ -1024,7 +1112,7 @@ function turnover1cardOld() {
 	console.log("Card:" + card.cardIndex);
 	feltContext = feltCanvas.getContext("2d");
 	var lastx, lasty;
-	// All cards are packed into their files the same way, so 
+	// All cards are packed into their files the same way, so
 	// location is based (symmetrically) on the card's rank.
 	// Also note that Arrays are 0-based, and the offsets are 1-based
 	var firstx=cardXoffset(Rank[card.rank] - 1);
@@ -1044,7 +1132,7 @@ function turnover1cardOld() {
 	var halfheight=Math.floor(feltCanvas.height/2); 
 	var halfxmarginwidth=Math.floor(xmarginwidth/2);
 	var halfcardwidth=Math.floor(cardwidth/2)
-	//var halfymarginheight=Math.floor(xmarginheight/2);
+	// var halfymarginheight=Math.floor(xmarginheight/2);
 	var topy=0;
 	if (halfheight > cardheight)
 		topy = cardheight;
@@ -1055,34 +1143,37 @@ function turnover1cardOld() {
 	case 0:	// North-center
 		feltContext.drawImage(card.cardImage, 
 			firstx, firsty, cardwidth, cardheight, // source rectangle
-			halfwidth-halfcardwidth, 0 , cardwidth, cardheight		// destination rectangle
+			halfwidth-halfcardwidth, 0 , cardwidth, cardheight		// destination
+																	// rectangle
 			);
 		break;
 	case 1: // East half cardwith shifted left, half screen down
 		rotation = pi/2;
-		//feltContext.translate(halfwidth, halfheight);
-		//feltContext.rotate(rotation);
+		// feltContext.translate(halfwidth, halfheight);
+		// feltContext.rotate(rotation);
 		feltContext.drawImage(card.cardImage, 
 				firstx, firsty, cardwidth, cardheight, // source rectangle
-				halfwidth+halfcardwidth+xmarginwidth, topy, cardwidth, cardheight		// destination rectangle
+				halfwidth+halfcardwidth+xmarginwidth, topy, cardwidth, cardheight		// destination
+																						// rectangle
 				);
-		//feltContext.rotate(-rotation);
-		//feltContext.translate(-halfwidth, -halfheight);
+		// feltContext.rotate(-rotation);
+		// feltContext.translate(-halfwidth, -halfheight);
 		break;
 	case 2:	// South rotated 180 upside down.
 		feltContext.drawImage(card.cardImage, 
 				firstx, firsty, cardwidth, cardheight, // source rectangle
-				halfwidth-halfcardwidth, halfheight, cardwidth, cardheight		// destination rectangle
+				halfwidth-halfcardwidth, halfheight, cardwidth, cardheight		// destination
+																				// rectangle
 				);
 		break;
 	case 3:	// West
 		rotation = (45/180)*pi;
-		//feltContext.rotate(rotation);
+		// feltContext.rotate(rotation);
 		feltContext.drawImage(card.cardImage, 
 				firstx, firsty, cardwidth, cardheight, // source rectangle
 				0, topy, cardwidth, cardheight		// destination rectangle
 				);
-		//feltContext.rotate(-rotation);
+		// feltContext.rotate(-rotation);
 		break;
 		default:
 			console.log("Switch: can't happen.");
@@ -1098,12 +1189,13 @@ var debugXStatus=false;
 function xstatusUpdate(sMsg) { 
 	if (debugXStatus)
 		alert(sMsg);
-	// Note: bizarre soul-sucking bug if you try to user InnerHTMl at least on UNIX browsers...
+	// Note: bizarre soul-sucking bug if you try to user InnerHTMl at least on
+	// UNIX browsers...
 	document.getElementById("statusArea").textContent 
 		= sMsg ; // this is the only of these that works reliably
 		// = '<var>' + sMsg + '</var>' ;
 		// insertAdjacentText("afterbegin", sMsg);
-		// innterHTML =  sMsg ;
+		// innterHTML = sMsg ;
 	return true;
 }
 
@@ -1116,16 +1208,97 @@ function gamestatusUpdate(sMsg) {
 }
 
 /*
- * The format of the trick update msg is
- * !000LWB
- * !0 seatid
- * 00LWB[subdeck]
- * 00=trick number
- * L=lead
- * W=Winner
- * B=hearts broken
+ * The format of the trick update msg is !000LWB !0 seatid 00LWB[subdeck]
+ * 00=trick number L=lead W=Winner B=hearts broken
+ */
+
+// new AnimationScene
+class PlayCard {
+	// compute the geometry of where the card goes
+	constructor(imagefile, rotation, trX, trY, x, y, w, h,
+			tgtx, tgty, tgtwidth, tgtheight) {
+		this.imagefile = imagefile;
+		this.rotation = rotation;
+		this.trX = trX;
+		this.trY = trY;
+		this.x = x;
+		this.y = y;
+		this.width = w;
+		this.height = h;
+		this.tgtx= tgtx;
+		this.tgty = tgty;
+		this.tgtwidth = tgtwidth;
+		this.tgtheight = tgtheight;
+	}
+	
+	// pc = new PlayCard(imagefile, 0, 0, 0, firstx, firsty, cardwidth,
+	// cardheight,
+		// halfwidth=halfcardwidth, 0, cardwidth, cardheight);
+
+}
+
+class AnimationScene {
+	constructor(){
+		this.cards = new Array();	// list of playcards
+	}
+	add(pc) {
+		this.cards.push(pc);
+	}
+	// takes a graphic context and opacity
+	// and paint a single frame (called 60 times per second by caller
+	paint(ctx, opacity) {
+		var i, c;
+		ctx.globalAlpha = opacity;
+		for (i=0; i<this.cards.length; i++) {
+			ctx.save();
+			c = this.cards[i];
+			if (c.rotation != 0)
+				ctx.rotate(c.rotation);
+			if (c.trX != 0 || c.trY != 0)
+				ctx.translate(c.trX, c.trY);
+			ctx.drawImage(c.imagefile, 
+					c.x,	c.y,
+					c.width, c.height, 
+					c.tgtx, c.tgty, 
+					c.tgtwidth, c.tgtheight);
+			ctx.restore();
+		}
+	}
+};
+/*
+ * clearTrick - first routine to use the new AnimationScene object
  */
 function clearTrick(sMsg) {
+	document.getElementById("trickArea").textContent 
+	= sMsg ;	
+	var i;
+	// No... use transitions here...
+	// xxx
+	// figure out who took the trick
+	// and display the appropriate animation
+	// ! 00 L W bBroken
+	var leader=parseInt(sMsg.charAt(4));
+	var winner=parseInt(sMsg.charAt(5));
+	console.log("Winner=" + winner);
+	// clearCardTable(false);
+	// draw a card back at the winner's place...
+	switch (nTableSize) {
+	case 4:
+		fadeOutTrick(currentScene);
+		turnover1card4(null, winner);		
+		// then draw a null card in the winner's space...
+		// could interfere with creating a new trick...
+		currentScene = null;
+		break;
+	case 6:
+		break;
+	default:
+		console.log("Snark Magic 4:Uh oh...");
+
+	}
+}
+
+function clearTrickSave(sMsg) {
 	document.getElementById("trickArea").textContent 
 	= sMsg ;	
 	// No... use transitions here...
@@ -1157,9 +1330,8 @@ function clearTrick(sMsg) {
 function writeToTextArea(msg) {
 	appendTextToTextArea("call deprecated:" + msg);
 	/*
-	var echoText = document.getElementById("echoText");
-	echoText += msg;
-	*/
+	 * var echoText = document.getElementById("echoText"); echoText += msg;
+	 */
 }
 
 /*
@@ -1171,7 +1343,7 @@ function keyFilter(event) {
 		console.log('<key=' + event.keyCode + '>');
 	}
 	if (event.keyCode == 13 ) {
-		//console.log("return seen. Process!");
+		// console.log("return seen. Process!");
 		var line=getMsgText();
 		xstatusUpdate("[return]Sending{" + line + "} to server...");
 		processSubmitAndClearMsgText();
@@ -1182,20 +1354,20 @@ function selectButtonPress(event) {
 	if (verboseGUIIO == true) {
 		console.log('yea!js:Button Pressed');
 	}
-	//event.preventDefault();
-	//console.warn("js:Button Pressed");
+	// event.preventDefault();
+	// console.warn("js:Button Pressed");
 	if (event == null) return;
-	//alert("Button Pressed...");
+	// alert("Button Pressed...");
 	var line=getMsgText();
 	xstatusUpdate("[submit]Sending{" + line + "} to server...");
 	processSubmitAndClearMsgText();
-	//var s = document.getElementById("msgText").value;
-	//console.warn("js: textvalue =" + s);
-	//appendTextToTextArea(s);
-	//xstatusUpdate("[ButtonPress]Sending to server...");
+	// var s = document.getElementById("msgText").value;
+	// console.warn("js: textvalue =" + s);
+	// appendTextToTextArea(s);
+	// xstatusUpdate("[ButtonPress]Sending to server...");
 }
 function wsOpen(message){
-	//echoText.value += "Connected ... \n";
+	// echoText.value += "Connected ... \n";
 	setReconnectDisabled(true);
 	xstatusUpdate("Connected...");
 }
@@ -1223,31 +1395,20 @@ function wsGetMessage(message){
 }
 // from protocalMessage.java
 /*
- * Messages are of the form
- 	[CommandChar][PlayerIDorX][Zero or more RS pairs representing Cards]%[MessageString]
- Player->G	 	
- 	= Play Card
- 	~ Pass Card(S)
- 	Q Query
- 	S Text (TBD)
- G->Player
- 	+ Card(s)
- 	- Card(s)
- 	? Your Turn? [Cards in current trick] <change to ?>
- 	& Trick Update. Cards(s) in the current trick [Player gets one of these every time someone plays]. 
- 		// [Cards]%trick flags [Hwwxxyy[.;] [Hh] ww=winner;xx=trickid yy=lead or taker] [,.]
- 	! Trick Cleared 
- 	B Broken Suit (i.e. hearts, spades) [Could probably just put this in the trick update...]
- 	$ %Player.score;Player.score;
- 	% Player error %Message that can be given to human user i.e.
- 	[11 core key messages]
- 	
- 	ERROR Text messages that should be supported
- 	%!%Not your turn!
- 	%2%Must play 2C
- 	%N%Hearts/Spades are not broken
+ * Messages are of the form [CommandChar][PlayerIDorX][Zero or more RS pairs
+ * representing Cards]%[MessageString] Player->G = Play Card ~ Pass Card(S) Q
+ * Query S Text (TBD) G->Player + Card(s) - Card(s) ? Your Turn? [Cards in
+ * current trick] <change to ?> & Trick Update. Cards(s) in the current trick
+ * [Player gets one of these every time someone plays]. // [Cards]%trick flags
+ * [Hwwxxyy[.;] [Hh] ww=winner;xx=trickid yy=lead or taker] [,.] ! Trick Cleared
+ * B Broken Suit (i.e. hearts, spades) [Could probably just put this in the
+ * trick update...] $ %Player.score;Player.score; % Player error %Message that
+ * can be given to human user i.e. [11 core key messages]
+ * 
+ * ERROR Text messages that should be supported %!%Not your turn! %2%Must play
+ * 2C %N%Hearts/Spades are not broken
  */
-//todo: implement the full set...
+// todo: implement the full set...
 var protocolMessageTypes={
 	'+': true,	// add cards
 	'-': true,	// delete cards
@@ -1260,9 +1421,7 @@ var protocolMessageTypes={
 };
 
 /*
- * Messages of the form
- * +Cards
- * -Card
+ * Messages of the form +Cards -Card
  */
 function isProtocol(msg) {
 	if (msg.charAt(0) in protocolMessageTypes) {
@@ -1277,7 +1436,7 @@ function setSeatId(seatid) {
 	console.log("Setting seatid:" + seatId)
 }
 function playCardFromButtonPress(cardindex) {
-	//console.log("Sending Card to server:"+cardindex);
+	// console.log("Sending Card to server:"+cardindex);
 	var card=theDeck[cardindex];
 	var shortname=card.shortName;
 	// make a protocol message, and send to server
@@ -1307,7 +1466,7 @@ function processCardString(cardString) {
 			card = decodeCard(cardString.charAt(i),
 					cardString.charAt(i+1));
 			if (card != null) {// yikes; null check if something bad happened
-				//console.log("Adding:" + card.cardIndex);
+				// console.log("Adding:" + card.cardIndex);
 				if (bDelete)
 					deleteCardFromHand(card.cardIndex);
 				else
@@ -1322,10 +1481,10 @@ function processCardString(cardString) {
 		break;
 	case '&':	// 
 		/*
-		 * Just got a new message... check that transitions are finished
-		 *  before we start another one...
+		 * Just got a new message... check that transitions are finished before
+		 * we start another one...
 		 */
-		//console.log("Trickupdate under construction");
+		// console.log("Trickupdate under construction");
 		i=2;
 		card = decodeCard(cardString.charAt(i),
 				cardString.charAt(i+1));
@@ -1338,7 +1497,7 @@ function processCardString(cardString) {
 			// sleep(1000);
 			break;
 		case 6:
-			//console.log("Recently implemented 6...");
+			// console.log("Recently implemented 6...");
 			turnover1card6(card, user);
 			break;
 		default:
@@ -1351,10 +1510,10 @@ function processCardString(cardString) {
 		console.log("clearTrick under construction");
 		// line.slice(8)
 		clearTrick(cardString);
-		//clearCardTable(true);
+		// clearCardTable(true);
 		break;
 	case '%':
-		//console.log("%error:" + cardString);
+		// console.log("%error:" + cardString);
 		// report user error
 		gamestatusUpdate("error:" + cardString);
 		break;
@@ -1372,20 +1531,18 @@ function processCardString(cardString) {
  */
 function setReconnectDisabled(bDisabled) {
 	var button = document.getElementById("reconnectButton");
-	//button.style.visibility = "visible";
+	// button.style.visibility = "visible";
 	button.disabled = bDisabled;
 }
 
-/* never tested...
-function setReconnectInactive() {
-	var button = document.getElementById("reconnectButton");
-	//button.style.visibility = "hidden";
-	button.disabled = true;
-}
-*/
+/*
+ * never tested... function setReconnectInactive() { var button =
+ * document.getElementById("reconnectButton"); //button.style.visibility =
+ * "hidden"; button.disabled = true; }
+ */
 
 function wsClose(message){
-	//echoText.value += "Disconnect ... \n";
+	// echoText.value += "Disconnect ... \n";
 	setReconnectDisabled(false);
 	xstatusUpdate("Disconnected..."); 
 }
@@ -1407,12 +1564,12 @@ function openWebSocket() {
 	webSocket.onerror = function(message){ wsError(message);};
 }
 
-// sleep for parameter ms milliseconds. 
+// sleep for parameter ms milliseconds.
 function sleep(ms) {  
 	  return new Promise(resolve => setTimeout(resolve, ms));
 	}
 
-//returns true on successful write; false on error
+// returns true on successful write; false on error
 function serverWrite(msg){
 	if (webSocket == null) {
 		openWebSocket();
@@ -1443,8 +1600,8 @@ function getMsgText() {
 	return line;
 }
 
-//get text string, append, and clear box
-//Handle <return> and submit button the same way
+// get text string, append, and clear box
+// Handle <return> and submit button the same way
 function processSubmitAndClearMsgText() {
 	var line = getMsgText();
 	if (line == null) {
@@ -1465,26 +1622,27 @@ function processSubmitAndClearMsgText() {
 			return;		// i.e. exit before clearing text box
 	}
 	//
-	// clear text box And set the focus to the text area... 
+	// clear text box And set the focus to the text area...
 	document.getElementById("msgText").value = "";
 	document.getElementById("msgText").focus();
 }
 
 /*
- * processLocalCommand - process a typed-in line locally 
+ * processLocalCommand - process a typed-in line locally
  */
 function processLocalCommand(line) {
-	// var commandStatus=false;	// assume failure...
+	// var commandStatus=false; // assume failure...
 	
 	 // pick off lines beginning with .
-	if (line.startsWith(".")) // as soon as you know .Something you will eat and process the line
+	if (line.startsWith(".")) // as soon as you know .Something you will eat
+								// and process the line
 		 ;
 	else
 		return false;
 
 	if (line.includes("table=")) { // .table={4,6}
 		// extract number from string
-        var matches = line.match(/(\d+)/); // if a number at all...       
+        var matches = line.match(/(\d+)/); // if a number at all...
         if (matches) { 
         	var text = matches[0];
         	// not yet... xstatusUpdate("Setting table param=" + n);
@@ -1497,7 +1655,7 @@ function processLocalCommand(line) {
         	}
         } 
 	} else if (line.includes("grab=")) {
-        var matches = line.match(/(\d+)/); // if a number at all...       
+        var matches = line.match(/(\d+)/); // if a number at all...
         if (matches) { 
         	var text = matches[0];
         	// parseInt(text,10); not needed??
@@ -1512,7 +1670,8 @@ function processLocalCommand(line) {
 		// from the 2nd char after the = to the end
 		gamestatusUpdate(line.slice(8)); 
 	} else if (line.includes("clear")) {
-    	clearCardTable(true);
+		fadeOutTrick(currentScene);
+    	//clearCardTable(true);
     	xstatusUpdate("Table Cleared and Reset.");
     } else {
 		xstatusUpdate("Unrecognized command. ignored");   	
@@ -1527,12 +1686,12 @@ function appendTextToTextArea(newtext) {
 }
 		
 /*
- * export/import at this time are failed features.
- * reverting to text/javascript and assuming macro-style importing
- *
-export {openWebSocket, selectButtonPress, keyFilter };
-// I don't know why import doesn't have a semicolon but export does. Go figure.
-*/
+ * export/import at this time are failed features. reverting to text/javascript
+ * and assuming macro-style importing
+ * 
+ * export {openWebSocket, selectButtonPress, keyFilter }; // I don't know why
+ * import doesn't have a semicolon but export does. Go figure.
+ */
 
 // The functions called directly from HTML... Last...
 
@@ -1541,10 +1700,10 @@ function wsSendMessage1(){
 	xstatusUpdate("[submit-button]Sending{" + line + "} to server...");
 	processSubmitAndClearMsgText();
 	// console.log("Sending:" + message.value);
-	//webSocket.send(message.value);
-	//serverWrite(message.value);
-	//echoText.value += "Message sent to the server : " + message.value + "\n";
-	//message.value = "";
+	// webSocket.send(message.value);
+	// serverWrite(message.value);
+	// echoText.value += "Message sent to the server : " + message.value + "\n";
+	// message.value = "";
 }
 
 /*
@@ -1559,9 +1718,9 @@ function mouseExitDropDownMenu(event) {
 	console.log("arg=" + event);
 	menuDropDown();	// toggle show value...
 }
-/* 
- * dropDown - When the user clicks on the button, 
- * toggle between hiding and showing the dropdown content 
+/*
+ * dropDown - When the user clicks on the button, toggle between hiding and
+ * showing the dropdown content
  */
 function dropDown() {
 	console.log("myDropdown...");
