@@ -436,12 +436,14 @@ function wsFeltInit() {
 				feltContext.fillStyle = "ForestGreen";
 				feltContext.strokeStyle = "blue";
 				feltContext.lineWidth = 5;
+				feltContext.fillRect(0,0, canvasWidth, canvasHeight);
+
 				var cardWidth=200, cardHeight=500;
+				/*
 				for (let i=0; i<52; i++) {
 					feltContext.fillRect(i*cardWidth,0,cardWidth,cardHeight);
-					feltContext.strokeRect(i*cardWidth,0,cardWidth, cardHeight);	
-					
-				}
+					feltContext.strokeRect(i*cardWidth,0,cardWidth, cardHeight);						
+				} */
 				// Cardwidth=200 cardheight=500
 
 				// Now get the card images loaded on the html page...
@@ -513,12 +515,15 @@ function wsShowFelt() {
 				feltContext.fillStyle = "ForestGreen";
 				feltContext.strokeStyle = "blue";
 				feltContext.lineWidth = 5;
+				// splat the playing felt
+				feltContext.fillRect(0,0, canvasWidth, canvasHeight);
 				var cardWidth=200, cardHeight=500;
+				/*
 				for (let i=0; i<52; i++) {
 					feltContext.fillRect(i*cardWidth,0,cardWidth,cardHeight);
 					feltContext.strokeRect(i*cardWidth,0,cardWidth, cardHeight);	
 					
-				}
+				} */
 				// Cardwidth=200 cardheight=500
 
 				// Now get the card images loaded on the html page...
@@ -677,12 +682,12 @@ function clearCardTable(bResetTrick) {
 			feltContext.fillStyle = "ForestGreen";
 			feltContext.strokeStyle = "blue";
 			feltContext.lineWidth = 5;
+			feltContext.fillRect(0,0, canvasWidth, canvasHeight);
 			var cardWidth=200, cardHeight=500;
 			// what the hell is this crap?
 			for (let i=0; i<52; i++) {
 				feltContext.fillRect(i*cardWidth,0,cardWidth,cardHeight);
-				feltContext.strokeRect(i*cardWidth,0,cardWidth, cardHeight);	
-				
+				//feltContext.strokeRect(i*cardWidth,0,cardWidth, cardHeight);					
 			}
 		}
 
@@ -832,24 +837,54 @@ function resolveWithClear() {
 var fIncrement = .01;
 function fadeOutTrick(scene) {
 
+	if (scene == null)
+		return;
+	
 	   let promise = new Promise(function(resolveWithClear, reject) {
-		   var opacity = 1.0; // / current globalAlpha of canvas
+		   var opacity = 0.0; // / current globalAlpha of canvas
 		   let ctx=feltContext;
 		//
 		// changes the opacity and calls paint in a loop
 	 (function fadeOut() {
 	        // set alpha
 	        //ctx.globalAlpha = opacity;
-	    	scene.paint(ctx, opacity);
-	        if (opacity >= 0.0) {
-		        opacity -= fIncrement;	// was .02
+	    	scene.paint(true, ctx, opacity);
+	        if (opacity <= 1.0) {
+		        opacity += fIncrement;	// was .02
 	            requestAnimationFrame(fadeOut);
 	        } else {
 	            isBusy = false;
-	            scene.paint(ctx, 0.0);
+	            //scene.paint(ctx, 0.0);
 	            //clearCardTable(false);
 	        }
-	        opacity -= fIncrement;	// was .02
+	        opacity += fIncrement;	// was .02
+	    })();
+	        });
+}
+
+// repaint...
+function repaint(scene) {
+
+	//clearCardTable(true);
+	if (scene == null)
+		return;
+	
+	   let promise = new Promise(function(resolve, reject) {
+		   var opacity = 0.0; // / current globalAlpha of canvas
+		   let ctx=feltContext;
+		//
+		// fade in the entire trick so far...
+	 (function rp() {
+	    	scene.paint(false, ctx, opacity);
+	        if (opacity <= 1.0) {
+		        opacity += fIncrement;	// was .02
+	            requestAnimationFrame(rp);
+	        } else {
+	            isBusy = false;
+	            //scene.paint(ctx, 0.0);
+	            //clearCardTable(false);
+	        }
+	        opacity += fIncrement;	// was .02
 	    })();
 	        });
 }
@@ -860,6 +895,7 @@ function fadeOutTrick(scene) {
  * cardback in the position
  */
 var currentScene = null;
+var saveScene=null;
 function turnover1card4(card, position) { // New rotation
 	// if there is no current scene, create one;
 	if (currentScene == null)
@@ -942,8 +978,9 @@ function turnover1card4(card, position) { // New rotation
 				-cardwidth, -cardheight , // not 0 after rotation...
 					cardwidth, cardheight		// destination rectangle
 				); 
-		pc = new PlayCard(imagefile, rotation, halfwidth, halfheight, firstx, firsty, cardwidth, cardheight,
-				-halfcardwidth, -cardheight, cardwidth, cardheight);
+		pc = new PlayCard(imagefile, rotation, halfwidth, halfheight, 
+				firstx, firsty, cardwidth, cardheight,
+				-cardwidth, -cardheight, cardwidth, cardheight);
 
 		/*
 		 * feltContext.drawImage(card.cardImage, firstx, firsty, cardwidth,
@@ -1246,21 +1283,27 @@ class AnimationScene {
 	}
 	// takes a graphic context and opacity
 	// and paint a single frame (called 60 times per second by caller
-	paint(ctx, opacity) {
+	paint(bBackground, ctx, opacity) {
 		var i, c;
 		ctx.globalAlpha = opacity;
 		for (i=0; i<this.cards.length; i++) {
 			ctx.save();
 			c = this.cards[i];
-			if (c.rotation != 0)
-				ctx.rotate(c.rotation);
 			if (c.trX != 0 || c.trY != 0)
 				ctx.translate(c.trX, c.trY);
-			ctx.drawImage(c.imagefile, 
-					c.x,	c.y,
-					c.width, c.height, 
-					c.tgtx, c.tgty, 
-					c.tgtwidth, c.tgtheight);
+			if (c.rotation != 0)
+				ctx.rotate(c.rotation);
+			if (bBackground) {
+				ctx.fillStyle = "ForestGreen";
+				ctx.fillRect(c.tgtx, c.tgty, c.tgtwidth, c.tgtheight);
+			}
+			else {
+				ctx.drawImage(c.imagefile, 
+				c.x,	c.y,
+				c.width, c.height, 
+				c.tgtx, c.tgty, 
+				c.tgtwidth, c.tgtheight);				
+			}
 			ctx.restore();
 		}
 	}
@@ -1288,6 +1331,7 @@ function clearTrick(sMsg) {
 		turnover1card4(null, winner);		
 		// then draw a null card in the winner's space...
 		// could interfere with creating a new trick...
+		saveScene = currentScene;
 		currentScene = null;
 		break;
 	case 6:
@@ -1670,9 +1714,20 @@ function processLocalCommand(line) {
 		// from the 2nd char after the = to the end
 		gamestatusUpdate(line.slice(8)); 
 	} else if (line.includes("clear")) {
+		clearCardTable(false)
 		fadeOutTrick(currentScene);
     	//clearCardTable(true);
     	xstatusUpdate("Table Cleared and Reset.");
+    } else if (line.includes("repaint")) {
+		clearCardTable(false);
+    	if (currentScene == null)
+    		repaint(saveScene);
+    	else 
+    		repaint(currentScene);
+    	xstatusUpdate("Repainting...");
+    } else if (line.includes("last")) {
+    	repaint(saveScene);
+    	xstatusUpdate("Last trick...");
     } else {
 		xstatusUpdate("Unrecognized command. ignored");   	
 	} 
