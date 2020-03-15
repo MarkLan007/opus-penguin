@@ -77,140 +77,102 @@ public class WsServer {
 	 */
 	boolean remoteDebug=true;
 	boolean bBypassKernel=true;	// by pass kernel synchronization; invoke g.process direction
+
 	@OnMessage
-	public void onMessage(String message, boolean last, Session sess){
+	public void onMessage(String message, boolean last, Session sess) {
 
 		System.out.println("Message from the client: " + message);
 		if (message.startsWith("$")) {
 			processSUCommand(sess, message);
 		}
 		// String echoMsg = "Echo from the Server: " + message;
-		UserSession us=SessionManager.getUserSession(sess);
+		UserSession us = SessionManager.getUserSession(sess);
 		// begin extensive remodel...
 		UserJCLCommand jcl = new UserJCLCommand(message);
-			switch (jcl.type) {
-			case JCLNotJCL: 
-				// Non-jcl, non SU command
-				// if (is protocol... enqueue to cgk for play...
-				if (ProtocolMessage.isProtocolMessage(message)) {
-					ProtocolMessage pm=new ProtocolMessage(message);
-					// tell the client what protocol message parsed as:
-					// xxx
-					if (remoteDebug) 
-						write(us, "saw:" + pm.type + "sender:" 
-								+ pm.sender + "{" + pm.usertext + "}");
-					if (bBypassKernel) {
-						// sleep before every move to let writes finish
-						// temporary hack...
-						// xxx yyy
-						CardGameKernel.msleep(10);
-						us.game.process(pm);
-						break;
-					}
-					us.cgk.enqueue(pm);
-					// now tell the kernel to resume if it is idle...
-					if (us.cgk.isIdle())
-						us.cgk.resume();
+		switch (jcl.type) {
+		case JCLNotJCL:
+			// Non-jcl, non SU command
+			// if (is protocol... enqueue to cgk for play...
+			if (ProtocolMessage.isProtocolMessage(message)) {
+				ProtocolMessage pm = new ProtocolMessage(message);
+				// tell the client what protocol message parsed as:
+				if (remoteDebug)
+					write(us, "saw:" + pm.type + "sender:" + pm.sender + "{" + pm.usertext + "}");
+				if (bBypassKernel) {
+					// sleep before every move to let writes finish
+					// temporary hack...
+					// xxx yyy
+					CardGameKernel.msleep(10);
+					us.game.process(pm);
 					break;
 				}
-				// otherwise chatstring message
-				// chat function, broadcast to all
-				String echoString = us.username + ">" + message;
-				history.add(echoString);
-				broadcast(echoString);
-				break;
-			case JCLPoke:
-				us.cgk.resume();
-				break;
-			case JCLResume:
+				us.cgk.enqueue(pm);
+				// now tell the kernel to resume if it is idle...
 				if (us.cgk.isIdle())
 					us.cgk.resume();
 				break;
-			case JCLSetname:
-				String sName ;
-				sName = jcl.getValue(1);
-				us.setName(sName);		
-				break;
-			case JCLSuperUser:
-				us.setSuperUser(true);
-				break;
-			case JCLWhoAmI:
-				String s="name=" + us.getName();
-				if (us.superuser()) s=s+"+";
-				write(us, s);
-				break;
-			case JCLJoin:
-				// here is the confluence of the http server and the gameserver
-				// create a game if one does not exist, and insert this session into it
-				// xxx
-				us.join();
-				break;
-			case JCLError: 					// JCL command but malformed
-			case JCLCommandNotRecognized: 	// Command is not recognized
-			case JCLCommandNotImplemented: 	// Command is not implemented
-			default:
-				write(us, "badcommand:" + jcl.type + 
-						" ignored:" + message);
-				break;				
 			}
-		
-		return ;
-	}
-		
-		// Note that moving this defeats echo at the moment...
-		/*
-		if (isJCL(message)) {
-			// process and write return string to sender, but do not save, echo, or broadcast
-			var returnString = processJCL(message, us);
-			// write it back... xxx yyy
-			sendLine(sess, returnString);
-		} else {
-			String name="";
-			if (us == null)
-				name = "?>";
-			else
-				name = us.getName() + ">";
-			history.add(name + message);
-			broadcast(name + message);
-		}
-		return ; // avoid timeout, return nada... echoMsg;
-	}
+			// otherwise chatstring message
+			// chat function, broadcast to all
+			String echoString = us.username + ">" + message;
+			history.add(echoString);
+			broadcast(echoString);
+			break;
+		case JCLPoke:
+			us.cgk.resume();
+			break;
+		case JCLResume:
+			if (us.cgk.isIdle())
+				us.cgk.resume();
+			break;
+		case JCLSetname:
+			String sName;
+			sName = jcl.getValue(1);
+			us.setName(sName);
+			break;
+		case JCLSuperUser:
+			us.setSuperUser(true);
+			break;
+		case JCLWhoAmI:
+			String s = "name=" + us.getName();
+			if (us.superuser())
+				s = s + "+";
+			write(us, s);
+			break;
+		case JCLJoin:
+			// here is the confluence of the http server and the gameserver
+			// create a game if one does not exist, and insert this session into it
+			// xxx
+			System.out.println("User:" + us.username + "Joining...");
 
-	String jclPattern = "//";
-	String jclSetnamePattern = "setname";
-	String jclIdentifierPattern="[a-zA-Z0-9]+";
-	Pattern jclRegex = Pattern.compile(jclPattern);
-	Pattern jclSetnameRegex = Pattern.compile(jclSetnamePattern);
-	Pattern jclIdentierRegex = Pattern.compile(jclIdentifierPattern);
-	public String processJCL(String commandString, UserSession us) {
-		Matcher m = jclSetnameRegex.matcher(commandString);
-		if (m.find()) {		// i.e. look for 'setname' then an identifier
-			String sName="user";	// default name string
-			Matcher identifier = jclIdentierRegex.matcher(commandString);
-			for (int i=0; identifier.find(); i++) {
-				switch (i) {
-				case 0:
-					continue;	// the command itself
-				case 1:
-					sName = identifier.group();
-					break;
-				}
+			if (!us.join()) {
+				System.out.println("New User cannot join.");
+				// Uh oh...
+				// xxx
 			}
-			us.setName(sName);		
-			return "//+Server setname:(" + sName + ")";	
+			break;
+		case JCLReset:
+			System.out.println("Reset game ordered...");
+			if (us.game == null) {
+				System.out.println("No game to reset.");
+				break;
+			}
+			us.game.reset();
+			break;
+		case JCLResend:
+			us.game.resend(us);
+			break;
+		case JCLError: // JCL command but malformed
+		case JCLCommandNotRecognized: // Command is not recognized
+		case JCLCommandNotImplemented: // Command is not implemented
+		default:
+			write(us, "badcommand:" + jcl.type + " ignored:" + message);
+			System.out.println("Bad JCL:" + message);
+			break;
 		}
-		return "//JCL unimplemented command";
-				
+
+		return;
 	}
-	
-	public boolean isJCL(String commandString) {
-		Matcher m = jclRegex.matcher(commandString);
-		if (m.find(0)) {
-			return true;
-		}
-		return false;	
-	}
-	*/
 	
 	/*
 	 * retrievePrevious... send everything in history to new attendee

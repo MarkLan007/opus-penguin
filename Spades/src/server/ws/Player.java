@@ -20,6 +20,8 @@ public class Player /*implements PlayerInterface */{
 	 */
 	private boolean isAsynch=false;
 	private boolean isRobotPlayer=true;
+	UserSession userSession=null;
+
 	void setAsynch(boolean b) { isAsynch = b; }
 	boolean getAsynch() { return isAsynch ; }
 	void setIsRobot(boolean b) { isRobotPlayer = b; }

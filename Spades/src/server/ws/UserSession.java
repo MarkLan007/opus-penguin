@@ -31,6 +31,10 @@ public class UserSession {	// wrapper for data to keep with Session
 	public void setSuperUser(boolean flag) {
 		bSuperUser = flag;
 	}
+
+	public void setpid(int n) {
+		pid = n;
+	}
 	
 	/*
 	 * setName - user-declared name
@@ -50,23 +54,43 @@ public class UserSession {	// wrapper for data to keep with Session
 	}
 	
 	/*
-	 * joine - join or create a game
+	 * join - join or create a game
 	 * todo: params type of game, robot players, in progress, etc
 	 *  eventually store games in progress
 	 */
-	CardGame theGame=null;
-	//CardGameKernel thecgk=null;
-	public void join() {
-		CardGame g = new CardGame();
-		game = g;
-		game.join(this);
-		cgk = new CardGameKernel();
-		cgk.setCardGame(game);
-		game.reset();
-		//CardGame.theGame = g;
-		// And give this to the message processor
-
+	static CardGame theGame=null;
+	static CardGameKernel thecgk=null;
+	public boolean join() {
+		boolean bNewGame=false;
+		if (theGame == null) {
+			bNewGame = true;
+			CardGame g = new CardGame();
+			game = g;
+			theGame = g;
+			System.out.println("New Game.");
+		}
+		else {
+			game = theGame;
+			System.out.println("Game in progress:" + 
+					game.gameName);
+		}
+		if (!game.join(this)) {
+			return false;
+		}
+		if (bNewGame || thecgk == null) {
+			cgk = new CardGameKernel();
+			thecgk = cgk;
+			cgk.setCardGame(game);
+		} else {
+			cgk = thecgk;
+		}
+		if (bNewGame)
+			game.reset();
+		else
+			game.resend(this);
+		return true;
 	}
+	
 	public void resume() {
 		// check if idle?
 		cgk.resume();

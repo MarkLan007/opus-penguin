@@ -20,6 +20,7 @@ public class UserJCLCommand {
 		JCLSetname, // set the name attached to user
 		JCLJoin, // Join, Rejoin games
 		JCLRejoin, JCLSuperUser, // SuperUser
+		JCLResend, JCLReset,
 		JCLPoke, JCLResume, 	// poke or resume the server
 		JCLWhoAmI,
 	}
@@ -84,7 +85,9 @@ public class UserJCLCommand {
 	String jclPoke = "poke";
 	String jclResume = "resume";
 	String jclSuperUser = "su";
-
+	String jclResend = "resend";
+	String jclReset = "reset";
+	
 	String jclIdentifierPattern = "[a-zA-Z0-9]+";
 	Pattern jclRegex = Pattern.compile(jclPattern);
 	Pattern jclSetnameRegex = Pattern.compile(jclSetnamePattern);
@@ -94,6 +97,8 @@ public class UserJCLCommand {
 	Pattern jclSuperUserRegex = Pattern.compile(jclSuperUser);
 	Pattern jclResumeRegex = Pattern.compile(jclResume);
 	Pattern jclPokeRegex = Pattern.compile(jclPoke);
+	Pattern jclResendRegex = Pattern.compile(jclResend);
+	Pattern jclResetRegex = Pattern.compile(jclReset);
 	
 	Pattern jclIdentierRegex = Pattern.compile(jclIdentifierPattern);
 
@@ -173,6 +178,38 @@ public class UserJCLCommand {
 				}
 			}
 			return; // "//+Join game(" + sName + ")";
+		}
+		m = jclResendRegex.matcher(commandString);
+		if (m.find()) { // i.e. look for 'setname' then an identifier
+			type = JCLType.JCLResend;
+			String sName = "player0"; // default name string
+			Matcher identifier = jclIdentierRegex.matcher(commandString);
+			for (int i = 0; identifier.find(); i++) {
+				switch (i) {
+				case 0:
+					continue; // the command itself
+				case 1:
+					sName = identifier.group();
+					break;
+				}
+			}
+			return; // "//+resend game(" + sName + ")";
+		}
+		m = jclResetRegex.matcher(commandString);
+		if (m.find()) { // i.e. look for 'setname' then an identifier
+			type = JCLType.JCLReset;
+			String sName = "shuffle"; // default name string
+			Matcher identifier = jclIdentierRegex.matcher(commandString);
+			for (int i = 0; identifier.find(); i++) {
+				switch (i) {
+				case 0:
+					continue; // the command itself
+				case 1:
+					sName = identifier.group();
+					break;
+				}
+			}
+			return; // "//+reset game(" + sName + "=false)";
 		}
 		m = jclWhoAmIRegex.matcher(commandString);
 		if (m.find()) { // i.e. look for 'setname' then an identifier

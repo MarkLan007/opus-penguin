@@ -133,15 +133,30 @@ public class CardGame implements GameInterface {
 	 * TODO: (join functions are for remote human players when I implement them)
 	 * TODO: Fix join. join is completely bogus now... 
 	 *  so... if playertype is robot player, then replace with human player...
+	 *  TODO: this should synchonize so that robot player isn't moving or something
 	 */
 	boolean join(Player p) {
 		int i;
-		for (i = 0; i < nPlayers; i++)
+		// Obsolete... This should not get called, right?
+		// xxx
+		System.out.println("Obsolete function called:" + "join");
+		for (i = 0; i < nPlayers; i++) {
 			if (playerArray[i] == null) {
 				playerArray[i] = p;
 				p.setPID(i);
 				return true;
-				}
+			}
+			//
+			// kick out first robot player I find and replace, taking the subdeck, and move
+			Player cp = playerArray[i];
+			if (cp.isRobot()) {
+				p.subdeck = cp.subdeck;
+				p.score = cp.score;
+				p.setPID(cp.pid);
+				playerArray[i] = p;
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -188,10 +203,33 @@ public class CardGame implements GameInterface {
 		return join(p);
 	}
 
-	void join(UserSession us) {
+	void copyPlayer(Player from, Player to) {
+		to.pid = from.pid;
+		to.bIsMyMove = from.bIsMyMove;
+		to.subdeck = from.subdeck;
+		to.score = from.score;
+	}
+	
+	boolean join(UserSession us) {
 		HumanPlayer hp=new HumanPlayer(us);
 		// todo: multiple human players...
-		playerArray[0] = hp;
+		// find a robot player to displace
+		// xxx
+		int i;
+		for (i=0; i<nPlayers; i++) {
+			Player p = playerArray[i];
+			// take over the robot players seat
+			// set the pid, and take the cards, and turn
+			if (p.isRobot()) {
+				copyPlayer(p,hp);
+				playerArray[i] = hp;
+				us.setpid(i);
+				return true;
+				}
+			
+		}
+		return false;
+		//console.log("Cannot add player...")
 	}
 	/*
 	 * TODO: actually use getPlayer instead of pulling things out of PlayerArray
@@ -205,6 +243,28 @@ public class CardGame implements GameInterface {
 	void reset(Boolean shuffle) {
 		bShuffle = shuffle;
 		reset();
+	}
+
+	/*
+	 * resend the cards and game situation to us
+	 */
+	void resend(UserSession us) {
+		System.out.println("Resending to:" + us.username);
+		for (int i = 0; i < nPlayers; i++) {
+			Player p = playerArray[i];
+			if (p.userSession == us) {
+				// found it!
+				ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.ADD_CARDS, p.subdeck);
+				// make sure the recipient is correct...
+				// here, or a global problem? XXX
+				pm.setSender(i);	// pid should work, too...
+				p.sendToClient(pm);
+				// also send current trick and whether your turn
+				return;
+			}
+		}
+
+		System.out.println("Canot find player in game to resend to:" + us.username);
 	}
 
 	void gameErrorLog(String sError) {

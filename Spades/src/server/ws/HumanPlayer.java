@@ -11,7 +11,7 @@ public class HumanPlayer extends Player implements PlayerInterface {
 
 	GameInterface cardgame=null;	// serverside callbacks into the cardgame; these are actually the same for Human and RobotPlayer;
 	// NIOClientSession nioNetworkAccessMethods;
-	UserSession userSession=null;
+	//UserSession userSession=null;
 	
 	@Override
 	public void setCardgame(GameInterface gameInterfaceCallbacks) 
@@ -67,6 +67,8 @@ public class HumanPlayer extends Player implements PlayerInterface {
 	@Override
 	public void sendToClient(ProtocolMessage pm) {
 		// TODO Auto-generated method stub
+		// XXX pm.setpid pid;
+		//pm.setSender(pid);
 		System.out.println("SendToClient...");
 		String sProtocolMessage = pm.encode();
 		System.out.println("<" + sProtocolMessage + ">");
