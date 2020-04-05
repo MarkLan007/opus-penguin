@@ -25,12 +25,12 @@ import server.ws.UserJCLCommand.JCLType;
  * server under the subdirectory that is the name of the project.
  * todo: Can this be changed in an xml file somewhere?
  */ 
-@ServerEndpoint("/websocketendpoint")
+//@ServerEndpoint("/gameserver")
+@ServerEndpoint("/server/ws")
 public class WsServer {
 	
-	public class CardGame {
-
-	}
+	//public class CardGame { }
+	
 	@OnOpen
 	public void onOpen(Session sess){
 		sess.setMaxIdleTimeout(1000000);

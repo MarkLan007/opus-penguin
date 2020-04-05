@@ -30,6 +30,9 @@ public class Player /*implements PlayerInterface */{
 	protected CardGame cardGame=null;
 	Boolean bIsMyMove = false;
 	public Subdeck subdeck=new Subdeck();	/* this is the server's copy of the cards */
+	void reset() {
+		subdeck = new Subdeck();
+	}
 	String playerName="";
 	int score=0;
 	protected int pid; 	// Player-id for protocol messages

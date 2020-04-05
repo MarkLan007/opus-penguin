@@ -1219,7 +1219,6 @@ function turnover1cardOld() {
 	currentSeatToPlay = (currentSeatToPlay + 1) % nTableSize;
 }
 
-const sServiceName = "Spades";
 var webSocket = null;
 
 var debugXStatus=false;
@@ -1413,7 +1412,8 @@ function selectButtonPress(event) {
 function wsOpen(message){
 	// echoText.value += "Connected ... \n";
 	setReconnectDisabled(true);
-	xstatusUpdate("Connected...");
+	// xxx don't write this here... write it when the write succeeds maybe?
+	//xstatusUpdate("Connected...");
 }
 function wsCloseConnection(){
 	webSocket.close();
@@ -1588,19 +1588,61 @@ function setReconnectDisabled(bDisabled) {
 function wsClose(message){
 	// echoText.value += "Disconnect ... \n";
 	setReconnectDisabled(false);
-	xstatusUpdate("Disconnected..."); 
+	xstatusUpdate("Disconnected w/msg:" + message); 
 }
 
 // obsolete: wserror -- superceded by xstatusUpdate
-function wserror(message){
+function wsError(message){
 	echoText.value += "Error ... \n";
 }
 
+function whereami() {
+	//var s=document.getElementById("scriptdiv").outerHTML;
+	var s=location.hostname;
+	console.log("url:" + s);
+	return s;
+}
+
+// drop :8080
+var sWS="ws://";
+var sService = "ws://172.98.72.44:8080/";
+var sServiceName = "Spades/";
+//var sEndPoint="gameserver";
+var sEndPoint="server/ws";
+
+var bHack=false;
+var sName="";
+function hackWSString(service) {
+	bHack=true;
+	appendTextToTextArea("Was:" + sServiceName + sEndPoint + ". Setting service to:" + service);
+	sServiceName = service;
+	sEndPoint = "";
+}
+
+function showHack() {
+	echoText.value = "using:" + sName + "...\n" + echoText.value;
+	console.log("using:" + sName + "...");	
+}
+
+function unHack() {
+	bHack = false;
+}
+
+//var sService = "ws://127.0.0.1:8080/"
 function openWebSocket() {
-	webSocket = new WebSocket("ws://localhost:8080/" +
+	var host = whereami();
+	if (bHack)
+		host="172.98.72.44";
+	sName = sWS + host + ":8080/" + sServiceName + sEndPoint;
+	//var sName = sService + sServiceName + "/websocketendpoint";
+	console.log("opening:" + sName + "...");
+	//appendTextToTextArea("connecting to " + sName + "...");
+	echoText.value = "connecting to " + sName + "..." + echoText.value;
+	/*webSocket = new WebSocket("ws://localhost.net:8080/" +
 				sServiceName +
-				"/websocketendpoint");
-	// todo: something about an error...
+				"/websocketendpoint"); */
+	webSocket = new WebSocket(sName);
+
 	var message = document.getElementById("message");
 	webSocket.onopen = function(message){ wsOpen(message);};
 	webSocket.onmessage = function(message){ wsGetMessage(message);};
@@ -1615,22 +1657,30 @@ function sleep(ms) {
 
 // returns true on successful write; false on error
 function serverWrite(msg){
-	if (webSocket == null) {
+	if (webSocket == null || webSocket.readyState > 1) {
 		openWebSocket();
-		sleep(10);
 	}
-	if (webSocket.readystate == 0) {
-		console.log("Still connecting. Try again in a second.");
+	// wait (but not too long) while connecting...
+	for (var i=0; i<10; i++) {
+		if (webSocket.readyState == 0 ||
+				webSocket.readyState == undefined)
+			sleep(50);
+		else 
+			break;
+	}
+	if (webSocket.readyState == 0 || webSocket.readyState == undefined) {
+		console.log("Connecting successfully... Netwok slow; Try to write again in a second.");
+		xstatusUpdate("Connecting successfully... Netwok slow; Try to write again in a second.")
 		return false;
 	}
 	else if (webSocket.readyState == 1) {	// Ready. Connection established
 		webSocket.send(msg);
 		return true;
 	} else if (webSocket.readyState == 2 || webSocket.readyState == 3) {
-		xstatusUpdate("Connection to server has been closed. Plese Reconnect.")
+		xstatusUpdate("Connection to server has been closed. Please Reconnect.")
 		return false;
 	} else {
-		console.log("Unknown status(" + webSocket.readystate + ") unable to write:" + msg);
+		console.log("Unknown status(" + webSocket.readyState + ") unable to write:" + msg);
 		xstatusUpdate("unable to write:{"+msg+"} Network temporarily unavailable. Please try again.")
 		return false;
 	}
@@ -1713,6 +1763,15 @@ function processLocalCommand(line) {
 	} else if (line.includes("status=")) {
 		// from the 2nd char after the = to the end
 		gamestatusUpdate(line.slice(8)); 
+	} else if (line.includes("showhack")) {
+		showHack();
+	} else if (line.includes("unhack")) {
+		unHack();
+	} else if (line.includes("hack=")) {
+		// from the 2nd char after the = to the end
+		var param=line.slice(6);
+		hackWSString(param); 
+		xstatusUpdate("string="+param);
 	} else if (line.includes("clear")) {
 		clearCardTable(false)
 		fadeOutTrick(currentScene);

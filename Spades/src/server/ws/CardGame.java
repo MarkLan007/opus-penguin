@@ -100,7 +100,12 @@ public class CardGame implements GameInterface {
 		for (i = 0; i < nPlayers; i++)
 			if (playerArray[i] == null) {
 				playerArray[i] = new RobotPlayer(i, this);
+			} else {
+				// player/robot player already exists, but since this is a 
+				// reset/new game clear out existing hand
+				playerArray[i].reset();
 			}
+		
 	}
 
 	/*
@@ -459,6 +464,7 @@ public class CardGame implements GameInterface {
 				// Game is over; total score and reset
 				totalScores();
 				nCurrentTurn = -1;
+				reset(true);	// shuffle this time...
 				return;
 				}
 			/*
