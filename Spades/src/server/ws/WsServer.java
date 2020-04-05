@@ -26,6 +26,7 @@ import server.ws.UserJCLCommand.JCLType;
  * todo: Can this be changed in an xml file somewhere?
  */ 
 //@ServerEndpoint("/gameserver")
+// convert to this url
 @ServerEndpoint("/server/ws")
 public class WsServer {
 	
