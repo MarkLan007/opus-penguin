@@ -1608,6 +1608,7 @@ var sWS="ws://";
 var sService = "ws://172.98.72.44:8080/";
 var sServiceName = "Spades/";
 //var sEndPoint="gameserver";
+var sUserName="mll"
 var sEndPoint="server/ws";
 
 var bHack=false;
@@ -1629,12 +1630,16 @@ function unHack() {
 	bHack = false;
 }
 
+function setName(s) {
+	sUserName = s;
+}
+
 //var sService = "ws://127.0.0.1:8080/"
 function openWebSocket() {
 	var host = whereami();
 	if (bHack)
 		host="172.98.72.44";
-	sName = sWS + host + ":8080/" + sServiceName + sEndPoint;
+	sName = sWS + host + ":8080/" + sServiceName + sEndPoint + "/" + sUserName;
 	//var sName = sService + sServiceName + "/websocketendpoint";
 	console.log("opening:" + sName + "...");
 	//appendTextToTextArea("connecting to " + sName + "...");
@@ -1773,6 +1778,11 @@ function processLocalCommand(line) {
 		var param=line.slice(6);
 		hackWSString(param); 
 		xstatusUpdate("string="+param);
+	} else if (line.includes("setname=")) {
+		// from the 2nd char after the = to the end
+		var param=line.slice(9);
+		setName(param); 
+		xstatusUpdate("username="+param);
 	} else if (line.includes("clear")) {
 		clearCardTable(false)
 		fadeOutTrick(currentScene);

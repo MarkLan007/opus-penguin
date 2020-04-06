@@ -27,7 +27,7 @@ import server.ws.UserJCLCommand.JCLType;
  */ 
 //@ServerEndpoint("/gameserver")
 // convert to this url
-@ServerEndpoint("/server/ws")
+@ServerEndpoint("/server/ws/{client}")
 public class WsServer {
 	
 	//public class CardGame { }
@@ -35,8 +35,25 @@ public class WsServer {
 	@OnOpen
 	public void onOpen(Session sess){
 		sess.setMaxIdleTimeout(1000000);
+		//RemoteBasicEndpoint rbe = sess.getBasicRemote();
+		//sess.getBasicRemote().getClass().getAnnotations().getClass().getCanonicalName();
+		String sClientName = "default";
+		String sFriendlyName = "default";
+		String sReallyFriendlyName =
+				sess.getPathParameters().get("client");
+		if (sess.getRequestParameterMap().containsKey("client")) {
+			//sClientName = sess.p
+			sClientName = sess.getRequestParameterMap().toString();
+			sFriendlyName = sess.getRequestParameterMap().get("client").get(0);
+			/* sClientName =
+			  sess.getRequestParameterMap().getOrDefault("client"); */
+			// sClientName = sess.getPathParameters().get("client").			
+			System.out.println("Yea! retrieved client name is" + sClientName);
+			System.out.println("Yea! retrieved client name is" + sFriendlyName);
+			System.out.println("Yea! retrieved really friendly client name is" + sReallyFriendlyName);
+		}
 		System.out.println("Open Connection ...");
-		SessionManager.manageSession(sess);
+		SessionManager.manageSession(sess, sFriendlyName);
 		// Catch up...
 		retrievePreviousConversation(sess);
 	}

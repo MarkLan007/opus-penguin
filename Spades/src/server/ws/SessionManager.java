@@ -24,9 +24,10 @@ public class SessionManager {
 	 * Upgrade to using Vector, which is thread safe.
 	 */
 	//static ArrayList<Session> sessionList=new ArrayList();
-	static void manageSession(Session sess) {
+	static void manageSession(Session sess, String susername) {
 		int vc=sessionList.size();
 		UserSession userSession=new UserSession(sess, vc);
+		userSession.setName(susername);
 		//userSession.setvc(sessionList.size());
 			sessionList.add(userSession);
 		}
