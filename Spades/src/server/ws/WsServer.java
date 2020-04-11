@@ -27,13 +27,17 @@ import server.ws.UserJCLCommand.JCLType;
  */ 
 //@ServerEndpoint("/gameserver")
 // convert to this url
-@ServerEndpoint("/server/ws/{client}")
+//@ServerEndpoint("/server/ws/{client}")
+//@ServerEndpoint("/websocket/{client}")
+//@ServerEndpoint("/server/ws/{client}")
+//@ServerEndpoint("/server/ws/websocket/{client}")
+@ServerEndpoint("/server/ws")
 public class WsServer {
 	
 	//public class CardGame { }
 	
 	@OnOpen
-	public void onOpen(Session sess){
+	public void onOpen(Session sess, EndpointConfig endpointConfig){
 		sess.setMaxIdleTimeout(1000000);
 		//RemoteBasicEndpoint rbe = sess.getBasicRemote();
 		//sess.getBasicRemote().getClass().getAnnotations().getClass().getCanonicalName();
@@ -41,6 +45,9 @@ public class WsServer {
 		String sFriendlyName = "default";
 		String sReallyFriendlyName =
 				sess.getPathParameters().get("client");
+		String sPathParams = sess.getPathParameters().toString();
+		System.out.println("onOpen... Opening at:" + sPathParams);
+		//sPathParams = sess.
 		if (sess.getRequestParameterMap().containsKey("client")) {
 			//sClientName = sess.p
 			sClientName = sess.getRequestParameterMap().toString();

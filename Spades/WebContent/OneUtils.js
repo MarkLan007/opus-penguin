@@ -1599,55 +1599,91 @@ function wsError(message){
 function whereami() {
 	//var s=document.getElementById("scriptdiv").outerHTML;
 	var s=location.hostname;
+	s = window.location.host;
 	console.log("url:" + s);
 	return s;
 }
 
-// drop :8080
+// Construct sConnectionString as:
+//	sWS + sHost + sPort + sRoot + sEndPoint
+//so ws:// dragonreef.net :8080 /Spades/ + websocket/ + user
+// by convention each component (except host) that needs a leading / adds it7
+//(nothing starts with a / except sRoot)
+// also: sHost and sPort have no slashes
+// the port is tacked on my window.host
 var sWS="ws://";
-var sService = "ws://172.98.72.44:8080/";
-var sServiceName = "Spades/";
+var sHost="172.98.72.44:8080";	// determined at runtime or set by user with .server=
+//var sPort=":8080";			// can't be set by user, yet
+var sRoot = "/Spades";	// was sServiceName
+var sEndPoint="/server/ws";
+var sUser="";
+var sConnectionString="";	// constructed by formatConnectionString
+
+/*
+ * formatConnectionString - build the connection string from componenets:
+ * called to make use componenets that were changed interactively
+ */
+var bDetermineHostDynamically=true;
+function formatConnectionString() {
+	/*
+	 * if user has set host explicitly, don't set the host
+	 */
+	if (bDetermineHostDynamically)
+		sHost = whereami();
+	sConnectionString = sWS + sHost // + sPort 
+			+ sRoot + sEndPoint + sUser;
+}
+
+// Todo: Review: obsolete?
+// only used by Hack* functions
+// kill sService and sServiceName
+// var sService = "ws://172.98.72.44:8080/";
 //var sEndPoint="gameserver";
-var sUserName="mll"
-var sEndPoint="server/ws";
+//var sEndPoint="server/ws";
+// Try making the directory structure congruent
+// to where the endpoint is to be deployed
 
-var bHack=false;
-var sName="";
-function hackWSString(service) {
-	bHack=true;
-	appendTextToTextArea("Was:" + sServiceName + sEndPoint + ". Setting service to:" + service);
-	sServiceName = service;
-	sEndPoint = "";
-}
 
-// added showhack
+//added showhack
+// TODO: review:
+// showhack should survive the purge of obsolete functions...
+// should be showConnectionString or just show??? 
+// Not sure of name yet.
 function showHack() {
-	echoText.value = "using:" + sName + "...\n" + echoText.value;
-	console.log("using:" + sName + "...");	
+	formatConnectionString();
+	echoText.value = "using:" + sConnectionString + "...\n" + echoText.value;
+	console.log("using:" + sConnectionString);	
 }
 
-function unHack() {
-	bHack = false;
+function setHost(host) {
+	// Since user has explicitly set the host, don't override it
+	// when you construct the string
+	bDetermineHostDynamically = false;
+	sHost = host;
 }
 
-function setName(s) {
-	sUserName = s;
+function setRoot(root) {
+	sRoot = root;
+}
+
+function setEndpoint(endpoint) {
+	sEndPoint = endpoint;
+}
+
+function setUser(s) {
+	sUser = s;
 }
 
 //var sService = "ws://127.0.0.1:8080/"
 function openWebSocket() {
-	var host = whereami();
-	if (bHack)
-		host="172.98.72.44";
-	sName = sWS + host + ":8080/" + sServiceName + sEndPoint + "/" + sUserName;
-	//var sName = sService + sServiceName + "/websocketendpoint";
-	console.log("opening:" + sName + "...");
-	//appendTextToTextArea("connecting to " + sName + "...");
-	echoText.value = "connecting to " + sName + "..." + echoText.value;
+	formatConnectionString();
+	console.log("opening:" + sConnectionString + "...");
+	//appendTextToTextArea("connecting to " + sConnectionString + "...");
+	echoText.value = "connecting to " + sConnectionString + "..." + echoText.value;
 	/*webSocket = new WebSocket("ws://localhost.net:8080/" +
 				sServiceName +
 				"/websocketendpoint"); */
-	webSocket = new WebSocket(sName);
+	webSocket = new WebSocket(sConnectionString);
 
 	var message = document.getElementById("message");
 	webSocket.onopen = function(message){ wsOpen(message);};
@@ -1767,22 +1803,62 @@ function processLocalCommand(line) {
         	}
         }
 	} else if (line.includes("status=")) {
+		// Todo: Review: Not sure this is useful anymore...
 		// from the 2nd char after the = to the end
 		gamestatusUpdate(line.slice(8)); 
-	} else if (line.includes("showhack")) {
-		showHack();
 	} else if (line.includes("unhack")) {
 		unHack();
 	} else if (line.includes("hack=")) {
+		// sets the endpoint componenet of the connect string
+		// from the 2nd char after the = to the end
+		var param=line.slice(6);	// length + .
+		//hackWSString(param); 
+		sstatusUpdate("Obolete: must set individual components: .host= .port= .root= .endpoint= .user= ")
+		//xstatusUpdate("string="+param);
+	} else if (line.includes("whereami")) {
+		// sets the endpoint componenet of the connect string
+		// from the 2nd char after the = to the end
+		xstatusUpdate("host:"+whereami()+ " aka " + window.location.host);
+	} else if (line.includes("host=")) {
+		// sets the server component
+		// from the 2nd char after the = to the end
+		var param=line.slice(6);	// length + .
+		setHost(param); 
+		//xstatusUpdate("string="+param);
+		xstatusUpdate("host="+param + " connect=" + sConnectionString);
+	} else if (line.includes("root=")) {
 		// from the 2nd char after the = to the end
 		var param=line.slice(6);
-		hackWSString(param); 
-		xstatusUpdate("string="+param);
-	} else if (line.includes("setname=")) {
+		setRoot(param); 
+		formatConnectionString();
+		xstatusUpdate("root="+param + " connect=" + sConnectionString);
+	} else if (line.includes("endpoint=")) {
+		// sets the endpoint componenet of the connect string
 		// from the 2nd char after the = to the end
-		var param=line.slice(9);
-		setName(param); 
-		xstatusUpdate("username="+param);
+		var param=line.slice(10);	// length + .
+		//hackWSString(param); 
+		//xstatusUpdate("string="+param );
+		setEndpoint(param);
+		xstatusUpdate("endpoint="+param + " connect=" + sConnectionString);
+	} else if (line.includes("user=")) {
+		// from the 2nd char after the = to the end
+		var param=line.slice(6);
+		setUser(param); 
+		//xstatusUpdate("user="+param);
+		xstatusUpdate("user="+param + " connect=" + sConnectionString);
+	} else if (line.includes("showhack") ||
+			line.includes("show")) {
+		showHack();
+		xstatusUpdate("host=" + sHost + 
+				" root=" + sRoot +
+				" endpoint=" + sEndPoint +
+				" user=" + sUser);
+		xstatusUpdate("connect=" + sConnectionString);
+	} else if (line.includes("parse")) {
+		xstatusUpdate("host=" + sHost + 
+				" root=" + sRoot +
+				" endpoint=" + sEndPoint +
+				" user=" + sUser);
 	} else if (line.includes("clear")) {
 		clearCardTable(false)
 		fadeOutTrick(currentScene);
@@ -1799,7 +1875,7 @@ function processLocalCommand(line) {
     	repaint(saveScene);
     	xstatusUpdate("Last trick...");
     } else {
-		xstatusUpdate("Unrecognized command. ignored");   	
+		xstatusUpdate("*** Unrecognized command. ignored ***");   	
 	} 
 	
 	return true;	// if I've made it this far, it's at least .something
