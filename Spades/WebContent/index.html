@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <!-- touch here to cause rebuild v2b xyzzy abc
+	*** Here is a change
 	*** identical to cgt.html ***
  * Use OneUtils.js for all utilities. 
  * Couldn't make modules with import/export work.
@@ -181,7 +182,7 @@ body {
 		<input title="Game will connect to server when you submit a command.." 
 			onclick="wsSendMessage1();" value="Submit" type="button">
 		<br/>
-		<input onclick="wsFeltInit();" value="ShowFelt" type="button" >
+		<input onclick='wsPassDialog(3, "Pass 3 Cards");' value="Pass Dialog" type="button" >
 		<input onclick="wsHandInit();" value="ShowHand" type="button">
 		<input onclick="turnover1card();" value="Show 1 Card" type="button">
 		<input onclick="wsCloseConnection();" value="Disconnect" type="button" disabled>

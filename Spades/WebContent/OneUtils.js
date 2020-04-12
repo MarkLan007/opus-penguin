@@ -209,7 +209,13 @@ function cardSelected(event) {
 	// alert("Whoa Nellie! in called with" + t.id + special);
 	var digitString=buttonName.replace(/\D/g,"");
 	var cardIndex = parseInt(digitString);
-	playCardFromButtonPress(cardIndex);
+	//
+	// if the pass dialog is up, pass it. 
+	// otherwise play it
+	if (bPassingCardsInProgress)
+		addCardToPassDialog(cardIndex);
+	else
+		playCardFromButtonPress(cardIndex);
 }
 
 function cardSelected2(event) {
@@ -492,6 +498,7 @@ function wsFeltInit() {
 		/* }; */
 	
 }
+
 
 function wsShowFelt() {
 	feltWindow=open("FeltCanvas.html", "example", "width=600,height=800");
@@ -1568,6 +1575,147 @@ function processCardString(cardString) {
 			break;
 	}
 	
+}
+
+/*
+ * wsPassDialog - bring up the pass card dialog
+ */
+var bPassingCardsInProgress=false;
+var passCards=[null,null,null];
+var iCurrentFreeCardinPass=0;
+var iPassSize=3;
+
+var passWindow=null;
+var passDiv=null;
+var bPassDialogInit=false;
+function wsInitPassDialog(n, sMsg) {
+	//alert("Real dialog goes here...");
+	//
+	// divert the cards selected to the dialog
+	bPassingCardsInProgress = true;
+	// create with visibility=hidden
+	var w=window.open("PassCards.html", 
+					"Pass Cards",
+					"width=400,height=300,status=yes,resizeable=yes"
+			);
+    passWindow = w;
+    bPassDialogInit = true;
+}
+
+function wsPassDialog(n, sMsg) {
+	if (!bPassDialogInit)
+		wsInitPassDialog(n, sMsg);
+    var passBtn;
+    var w=passWindow;
+    //passBtn = w.document.getElementById("passCardsButton");
+    //passBtn.addEventListener("click", passCardsFromButtonPress);
+	passWindow.visibility = "visible";
+}
+
+/*
+ * createNewButton - create button to be placed in passed card dialog
+ */
+function createNewPassCardButton(cardindex) {
+	var cardBtn;
+	cardBtn = document.createElement("Button");
+    //cardBtn.setAttribute("id", "CardButton" + i);
+    cardBtn.setAttribute("id", "CardIndex" + cardindex);
+    cardBtn.setAttribute("type","button");
+    cardBtn.setAttribute("value","Search");
+    cardBtn.innerText = ""; //card.friendlyName;
+    // unneeded:
+    //cardBtn.setAttribute("name","label" + i);
+    
+    // failed tries...
+    // cardBtn.setAttribute("data-arg1", "foobar");
+    // cardBtn.setAttribute("textContent", "AceClubs");
+
+    cardBtn.style.height = "0";
+    cardBtn.style.width = "0";
+    cardBtn.style.visibility = "hidden";
+    /*
+	 * Bug: For no apparent reason adding the event listeners with setAttribute
+	 * doesn't work. I have no idea why. But addEventListener does work.
+	 */
+    cardBtn.addEventListener("click", passCardSelected);
+    cardBtn.addEventListener("dblclick", passCardSelected);
+    //unneeded
+    //cardBtn.setAttribute("data-arg1", "User-Button"+ i);
+    // Add to the div
+    passWindow.document.getElementById("passDiv").appendChild(cardBtn);
+    return cardBtn;
+}
+
+function passCardSelected(event) {
+	// return the card to the hand, delete from the dialog
+	// actually just make it not visible.
+	//
+	// clear out the passDiv so the next time it comes up
+	// there are no cards in it.
+	console.log("passCard:Click Seen in dialog. Return card...");	
+}
+
+function passCardsFromButtonPress(event) {
+	// xxx in progress
+	// first, stop diverting selected cards
+	bPassingCardsInProgress = false;
+	console.log("passCardtoServer:Click Seen in dialog. Sending...");	
+
+	//alert("Yea! but still need to implement actual pass");
+
+	// pull the cards from the list, construct message
+	var cardnames=""
+	for (var i=0; i<passCards.length; i++) {
+		var btn=passCards[i];
+		/* 
+		 * sad but true
+		 * Determine what card to pass
+		 * from the name of the button...
+		 * Is there a better way to store (hide)
+		 * a value in a button?
+		 */
+		var buttonName = btn.name;
+		var shortname=buttonName;
+		cardnames += shortname;
+	}
+	// and send to the server
+	var msg = "" + "~" + seatId + cardnames;
+	serverWrite(msg);
+
+	// hide/dismiss the dialog
+	// reset index to passCards
+	iCurrentFreeCardinPass=0;
+	passWindow.visibility = "hidden";
+	xstatusUpdate("Passing:" + msg);
+}
+
+function addCardToPassDialog(cardindex) {
+	var card = theDeck[cardindex];
+	// xxx get card from index...
+	var i = iCurrentFreeCardinPass;
+	if (i >= iPassSize) {
+		// Ooh. Bad User. 
+		// trying to select more cards to pass than is legal
+		alert("Warning: Can only pass " + iPassSize + " cards.");
+	} 
+	if (passCards[iCurrentFreeCardinPass] == null) {
+		passCards[iCurrentFreeCardinPass] = createNewPassCardButton(cardindex);
+	}
+	var cardBtn = passCards[i];
+	cardBtn.innerText = card.friendlyName;
+	cardBtn.name = card.shortName;
+	cardBtn.style.visibility = "visible";
+	cardBtn.style.height = "75px";
+	cardBtn.style.width = "54px";
+	
+	iCurrentFreeCardinPass++;
+	// iPassSize cards? enable the send button		
+	if (i >= iPassSize - 1) {
+		var passBtn;
+		passWindow.document.getElementById("passCardsButton").disabled = false;
+	    passBtn = passWindow.document.getElementById("passCardsButton");
+	    passBtn.addEventListener("click", passCardsFromButtonPress);
+	}
 }
 
 /*

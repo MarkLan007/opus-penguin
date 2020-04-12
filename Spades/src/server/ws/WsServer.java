@@ -152,7 +152,10 @@ public class WsServer {
 			break;
 		case JCLSetname:
 			String sName;
-			sName = jcl.getValue(1);
+			if (jcl.argc() > 1)
+				sName = jcl.getValue(1);
+			else
+				sName = "Ghost-in-Machine";
 			us.setName(sName);
 			break;
 		case JCLSuperUser:
@@ -169,9 +172,23 @@ public class WsServer {
 			// create a game if one does not exist, and insert this session into it
 			// xxx
 			System.out.println("User:" + us.username + "Joining...");
-
-			if (!us.join()) {
+			boolean byGod=false;
+			String sname="";
+			String sparam="";
+			if (jcl.argc() > 1) {	// argc is always at least 1
+				sname=jcl.getName(1);
+				sparam=jcl.getValue(1);
+				}
+			if (!us.join() && (sparam.contains("bygod") ||
+					(sname.contains("bygod")))) {
+				broadcast("Game reset by divine providence. Mortals will need to rejoin.");
+				System.out.println("Game reset by divine providence. Mortals will need to rejoin.");
+				byGod = true;
+				us.joinBygod();
+			}
+			else if (!us.join()) {
 				System.out.println("New User cannot join.");
+				write(us, "New User cannot join. Game full.");
 				// Uh oh...
 				// xxx
 			}

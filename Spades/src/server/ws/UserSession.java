@@ -60,6 +60,17 @@ public class UserSession {	// wrapper for data to keep with Session
 	 */
 	static CardGame theGame=null;
 	static CardGameKernel thecgk=null;
+	/*
+	 * Join the game, bygod, crashing it and resetting if necessary
+	 */
+	public boolean joinBygod() {
+		theGame = null;
+		thecgk = null;
+		join();
+		System.out.println("Apocalyptic reset complete...");
+		return true;
+	}
+	
 	public boolean join() {
 		boolean bNewGame=false;
 		if (theGame == null) {

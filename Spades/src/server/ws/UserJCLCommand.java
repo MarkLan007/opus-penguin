@@ -37,14 +37,34 @@ public class UserJCLCommand {
 		public String getValue() { return value;}
 	}
 
+	/*
+	 * Note that arguments are actually zero based as an array
+	 *  but user expects argv convention that argv[0] is command name
+	 */
 	String getName(int index) {
-		return argv.get(index).name;
+		if (index == 0) {
+			return this.type.name();
+		}
+		int i=index - 1;
+		if (i >= argv.size())	// Uh-oh
+			return "param out of bounds";
+		return argv.get(i).name;
 	}
 	String getValue(int index) {
-		return argv.get(index).value;
+		if (index == 0) {
+			return this.type.name();
+		}
+		int i=index - 1;
+		if (i >= argv.size())	// Uh-oh
+			return "param out of bounds";
+		return argv.get(i).value;
 	}
+	/*
+	 * argc() - wierd, huh? argc is a function. Oh well.
+	 *  let him who is without sin cast the first stone
+	 */
 	public int argc() {
-		return argv.size();
+		return argv.size() + 1;
 	}
 	
 	// Vector params[]=new Vector
@@ -174,6 +194,8 @@ public class UserJCLCommand {
 					continue; // the command itself
 				case 1:
 					sName = identifier.group();
+					NameValuePair p1 = new NameValuePair("keyword", sName);
+					argv.add(p1);
 					break;
 				}
 			}
