@@ -1,0 +1,29 @@
+<!DOCTYPE html> 
+<html>
+	<head>
+		<title>Pass Cards</title>
+		<!-- TODO: Define the canvas style here -->
+		<style type="text/css">
+			#canvas1 {
+			border: dotted 3 px #c0c0c0;
+			background-color: lightblue
+			}
+		</style>
+		<link rel="stylesheet" href="../style.css" />
+	</head>
+	<body>
+		<div id="passDiv">
+			<p id="passMsg">Pass [n] cards prior to play.</p>
+			<!-- TODO: canvas goes here -->
+			<canvas id="passCanvas" style="background-color:powderblue;" >
+				Your browser sucks and does not support canvas.
+			</canvas>		
+			<!-- should load images: xxx style="display:none;"  -->
+		</div>
+		<input id="passCardsButton" onclick="passCardsToServer();" value="Pass Cards" type="button" disabled >
+		<!-- 
+		<button id="passCardsButton" disabled onclick="passCardsToServer();"> Pass Cards </button>
+		<input onclick="wsFeltInit();" value="ShowFelt" type="button" >
+		-->
+	</body>
+</html>
