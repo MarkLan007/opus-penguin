@@ -340,7 +340,8 @@ public class CardGame implements GameInterface {
 			/*
 			 * check if player has any cards left to play; if not return... ?
 			 */
-			// This sends to client; fine; pause before processing any response when stepping
+			// This sends to client; fine; 
+			//  pause before processing any response when stepping
 			/*
 			 * This message should included the cards already played in the trick..
 			 * xxx
@@ -364,6 +365,20 @@ public class CardGame implements GameInterface {
 		//}
 		if (nCurrentTurn == -1)
 			gameErrorLog("Game over.");
+	}
+	
+	/*
+	 * initiatePass -- set up exchnage mail boxes, 
+	 * 	set routing, and send the pass cards request
+	 * xxx new untested code
+	 */
+	void initiatePass(MailBoxExchange.PassType pt) {
+		if (pt == MailBoxExchange.PassType.PassHold)
+			return;
+		// number of players, number of cards to pass for error checking
+		MailBoxExchange mbx=new MailBoxExchange(nPlayers, 3);
+		// Now send the pass messages, telling the user what
+		// the pass type is
 	}
 	
 	void broadcastUpdate(ProtocolMessage pmsg) {
@@ -718,6 +733,14 @@ public class CardGame implements GameInterface {
 			}
 		}
 		/*
+		 * Initiate a pass message to players ~
+		 * Retrieve results
+		 * Then start the game
+		 *  idea... Passing: waiting for... to everyone
+		 *  then start...
+		 *  This is the first really asynch thing to be done...
+		 */
+		/*
 		 * create the first trick and initialize for gameplay
 		 */
 		nTrickId = 0;
@@ -740,9 +763,24 @@ public class CardGame implements GameInterface {
 			gameErrorLog("Housekeeping: subdeck size(" + sd.size() + "){" + sd.encode() + "}");
 			}
 
+		// So do the pass, if a pass hand.
+		//  when the pass is complete it will call send next move
+		// otherwise sendnextmove
 		//
 		// Send the message to the first player to start...
-		sendNextMove();
+		//
+		// Todo: This is pretty big
+		// Make what is now reset() manage what
+		// type of hand this is...
+		// And to do that... 
+		// Todo:
+		// Need to play consecutive hands
+		// as part of a game
+		boolean holdHand = true;
+		if (!holdHand)	// This is just to compile; not implemented fully yet
+			initiatePass(MailBoxExchange.PassType.PassHold);
+		else
+			sendNextMove();
 	}
 
 	/*
