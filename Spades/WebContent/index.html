@@ -15,232 +15,250 @@
 <!-- 
 <meta name="viewport" content="width=device-width, initial-scale=1">
  -->
- 
+
 <style>
 body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
+	margin: 0;
+	font-family: Arial, Helvetica, sans-serif;
 }
 
 .topnav {
-  overflow: hidden;
-  background-color: #333;
+	overflow: hidden;
+	background-color: #333;
 }
 
 .topnav a {
-  float: left;
-  color: #f2f2f2;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
-  font-size: 17px;
+	float: left;
+	color: #f2f2f2;
+	text-align: center;
+	padding: 14px 16px;
+	text-decoration: none;
+	font-size: 17px;
 }
 
 .topnav a:hover {
-  background-color: #ddd;
-  color: black;
+	background-color: #ddd;
+	color: black;
 }
 
 .topnav a.active {
-  background-color: #4CAF50;
-  color: white;
+	background-color: #4CAF50;
+	color: white;
 }
 </style>
-<style>
-* {
-  box-sizing: border-box;
-	}
-
-.column1 {
-  	float: left;
-  	width: 75%;
-  	padding: 5px;
-  	padding-left: 5px;
-  	height: 500px;
-	}
-
-.column2 {
-	float:right;
-	width:25%;
-	padding: 5px;
-	height: 500px;	
-	}
-
-/* Clearfix (clear floats) */
-.row:after {
-  content: "";
-  clear: both;
-  display: table;
-  padding-left:5px;
-}
-</style>
-
 <style>
 .dropbtn {
-  background-color: #3498DB;
-  color: white;
-  padding: 16px;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
+	background-color: #3498DB;
+	color: white;
+	padding: 16px;
+	font-size: 16px;
+	border: none;
+	cursor: pointer;
 }
 
 .dropbtn:hover, .dropbtn:focus {
-  background-color: #2980B9;
+	background-color: #2980B9;
 }
 
 .dropdown {
-  position: relative;
-  display: inline-block;
+	position: relative;
+	display: inline-block;
 }
 
 .dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #f1f1f1;
-  min-width: 160px;
-  overflow: auto;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
+	display: none;
+	position: absolute;
+	background-color: #f1f1f1;
+	min-width: 160px;
+	overflow: auto;
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+	z-index: 1;
 }
 
 .dropdown-content a {
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
+	color: black;
+	padding: 12px 16px;
+	text-decoration: none;
+	display: block;
 }
 
-.dropdown a:hover {background-color: #ddd;}
-.show {display: block;}
+.dropdown a:hover {
+	background-color: #ddd;
+}
 
+.show {
+	display: block;
+}
 </style>
-</head> 
+<style>
+.column1 {
+	width: 55%;
+	float: left;
+}
+
+/*
+ * column2 is a container of rows
+ *  must think about column2 and buttonGrid very differently
+ * close but not quite...
+	display:	flex;
+	flex-direction:	row;
+	flex-wrap:	wrap;
+	justify-content:	start;
+ */
+.column2 {
+	display:grid;
+	gap: 0 0;
+ 	grid-template-rows: repeat(15, 80px [col-start]);
+	/*
+	 * the column aspect; i.e. relationship with rest of page
+	 *  i.e. cf with column1
+	 */
+	width: 45%;
+	float: right;
+}
+
+/*
+ * buttonGrid is a container for a row of buttons
+ */
+ .buttonGrid {
+ 	display:grid;
+ 	gap: 0 0;
+ 	grid-template-columns: repeat(21, 20px [col-start]);
+ 	}
+ /* using flex didn't do what I wanted
+.buttonGrid {
+	display: flex;
+	flex-direction:	row;
+	flex-wrap: wrap;
+	justify-content: start;
+	align-items: baseline;
+}
+*/
+
+/* Clearfix (clear floats) */
+.row:after {
+	content: "";
+	clear: both;
+	display: table;
+	padding-left: 5px;
+}
+</style>
+
+</head>
 <body>
+	<div class="topnav">
+		<a class="active" href="#home" onclick="menuDropDown();">Home</a> <a
+			href="#view">View</a> <a href="#settings">Settings</a> <a
+			href="#about">About</a>
+	</div>
 
-
-<div class="topnav">
-  <a class="active" href="#home" onclick="menuDropDown();">Home</a>
-  <a href="#view">View</a>
-  <a href="#settings">Settings</a>
-  <a href="#about">About</a>
-</div> 
-
-<!-- 
+	<!-- 
   <button onclick="dropDown()" class="item1-menu"></button>
     <button onclick="menuDropDown()" class="tmpbutton">Foobar</button>
   
    -->
-<div class="MenubarItem1Dropdown"> 
-  <div id="item1-menu" class="dropdown-content" onclick="menuDropDown()" onmouseleave="mouseExitDropDownMenu(this)">
-    <a href="#home">File Open</a>
-    <a href="#about">Save</a>
-    <a href="#contact">Exit</a>
-    </div>
-  </div>
-  <!-- Add styles above, and div below... -->
+	<div class="MenubarItem1Dropdown">
+		<div id="item1-menu" class="dropdown-content" onclick="menuDropDown()"
+			onmouseleave="mouseExitDropDownMenu(this)">
+			<a href="#home">File Open</a> <a href="#about">Save</a> <a
+				href="#contact">Exit</a>
+		</div>
+	</div>
+	<!-- Add styles above, and div below... -->
 
-<div class="row">
-  <div class="column1" id="TextScrollDiv" >
-  
-  <!-- 
-	<p> Canvas with game goes here... </p> <br>
-	 -->
-			<canvas id="Canvas1" >
+	<div class="row"></div>
+	<div class="column1" id="TextScrollDiv">
+		<canvas id="Canvas1" width=550>
 				Your browser sucks and does not support canvas.
-			</canvas>		
-			<!-- should load images: xxx style="display:none;"  
-			delay logCardImage() call to make sure script loaded...
-			Let him who is without sin cast the first stone...
-			was:
-			            onload="logCardImage();">
-			-->
-   	  <img id="ClubsImage" src="Clubs.jpg"  style="display:none;"
-   	  		onload="setTimeout(function(){logCardImage();}, 300);">
-      <img id="DiamondsImage" src="Diamonds.jpg"  style="display:none;"
-   	  		onload="setTimeout(function(){logCardImage();}, 300);"> 
-      <img id="HeartsImage" src="Hearts.jpg"  style="display:none;"
-   	  		onload="setTimeout(function(){logCardImage();}, 300);"> 
-      <img id="SpadesImage" src="Spades.jpg"  style="display:none;"
-   	  		onload="setTimeout(function(){logCardImage();}, 300);"> 
-	 
-  </div>
-  <div class="column2" id="CardsInHandDiv">
-	<p id="gamestatusArea"> cards as buttons go here. </p>
-	<p id="trickArea"> Previous Trick. </p> <br>
-  </div>
-</div>
-<br>
+			</canvas>
+		<!--  card images here	-->
+		<img id="ClubsImage" src="Clubs.jpg" style="display: none;"
+			onload="setTimeout(function(){logCardImage();}, 300);"> <img
+			id="DiamondsImage" src="Diamonds.jpg" style="display: none;"
+			onload="setTimeout(function(){logCardImage();}, 300);"> <img
+			id="HeartsImage" src="Hearts.jpg" style="display: none;"
+			onload="setTimeout(function(){logCardImage();}, 300);"> <img
+			id="SpadesImage" src="Spades.jpg" style="display: none;"
+			onload="setTimeout(function(){logCardImage();}, 300);">
+	</div>
 
-<div class="row">
-
-<var> Table Talk>> </var>
-
-	 <!-- bug: I have no idea why adding autofocus doesn't seem to work here -->
-		<input id="msgText" type="text" 
-			 onkeydown="keyFilter(event)">
-		<input title="Game will connect to server when you submit a command.." 
-			onclick="wsSendMessage1();" value="Submit" type="button">
-		<br/>
-		<input onclick='wsPassDialog(3, "Pass 3 Cards");' value="Pass Dialog" type="button" >
-		<input onclick="wsHandInit();" value="ShowHand" type="button">
-		<input onclick="turnover1card();" value="Show 1 Card" type="button">
-		<input onclick="wsCloseConnection();" value="Disconnect" type="button" disabled>
-		<input onclick="wsReconnect();" id="reconnectButton"
-			value="Reconnect" type="button" disabled>
+	<div class="column2"
+		style="height: 500px; background-color: powderblue;">
+		<div class="buttonGrid" id="CardsInHandDiv"></div>
+		<div class="buttonGrid" id="ClubsInHandDiv"></div>
+		<div class="buttonGrid" id="DiamondsInHandDiv"></div>
+		<div class="buttonGrid" id="SpadesInHandDiv"></div>
+		<div class="buttonGrid" id="HeartsInHandDiv"></div>
+	</div>
 	<br>
-	<!-- Move text area up (delete this...) 
+
+	<div class="column1">
+		<var> Table Talk>> </var>
+
+		<!-- bug: I have no idea why adding autofocus doesn't seem to work here -->
+		<input id="msgText" type="text" onkeydown="keyFilter(event)">
+		<input title="Game will connect to server when you submit a command.."
+			onclick="wsSendMessage1();" value="Submit" type="button"> <br />
+		<input onclick='wsPassDialog(3, "Pass 3 Cards");' value="Pass Dialog"
+			type="button"> <input onclick="wsHandInit();"
+			value="ShowHand" type="button"> <input
+			onclick="turnover1card();" value="Show 1 Card" type="button">
+		<input onclick="wsCloseConnection();" value="Disconnect" type="button"
+			disabled> <input onclick="wsReconnect();"
+			id="reconnectButton" value="Reconnect" type="button" disabled>
+		<br>
+		<!-- Move text area up (delete this...) 
 	<textarea id="echoText" rows="15" cols="60" readonly></textarea>
 	-->
-<br/>
-<var>status...</var>  <div id="statusArea">  Loading...  </div>
-<br/>
-</div>
+		<br />
+		<var>status...</var>
+		<div id="statusArea">Loading...</div>
+		<br />
+	</div>
 	<textarea id="echoText" rows="15" cols="40" readonly></textarea>
 
-<script id="scriptdiv" type="text/javascript" src="OneUtils.js">
-	// Key Point: Would prefer to use module and import/export (like this)
-	// But modules dont' actually work as of Chrome 79..
-	//	<script "module" src="SocketUtils.js">
-	'use strict'; 
-	/* x
-	 * I have no idea why these logging functinos don't produce visible output...
-	*/
-	console.log("Now in GameConsole.html back from loading OneUtils.js...");
-	alert("logging load...");
-	/*console.log(versionString1);
-	const consoleVersion="v0.01a";
-	console.log(versionString2);
-	console.log(versionString1 + consoleVersion + versionString2);
-	*/
-	// Dropdown Menu stuff
+	<script id="scriptdiv" type="text/javascript" src="OneUtils.js">
+		// Key Point: Would prefer to use module and import/export (like this)
+		// But modules dont' actually work as of Chrome 79..
+		//	<script "module" src="SocketUtils.js">
+		'use strict';
+		/* x
+		 * I have no idea why these logging functinos don't produce visible output...
+		 */
+		console.log("Now in GameConsole.html back from loading OneUtils.js...");
+		alert("logging load...");
+		/*console.log(versionString1);
+		const consoleVersion="v0.01a";
+		console.log(versionString2);
+		console.log(versionString1 + consoleVersion + versionString2);
+		 */
+		// Dropdown Menu stuff
+		// Close the dropdown if the user clicks outside of it
+		window.onclick = function(event) {
+			console.log("onclick...");
 
-	// Close the dropdown if the user clicks outside of it
-	window.onclick = function(event) {
-		console.log("onclick...");
-
-		if (!event.target.matches('.dropbtn')) {
-			console.log("Trying to close after select...")
-			var dropdowns = document.getElementsByClassName("dropdown-content");
-			var i;
-			for (i = 0; i < dropdowns.length; i++) {
-				var openDropdown = dropdowns[i];
-				if (openDropdown.classList.contains('show')) {
-					openDropdown.classList.remove('show');
+			if (!event.target.matches('.dropbtn')) {
+				console.log("Trying to close after select...")
+				var dropdowns = document
+						.getElementsByClassName("dropdown-content");
+				var i;
+				for (i = 0; i < dropdowns.length; i++) {
+					var openDropdown = dropdowns[i];
+					if (openDropdown.classList.contains('show')) {
+						openDropdown.classList.remove('show');
+					}
 				}
 			}
 		}
-	}
-	
-	openWebSocket();
-	document.addEventListener('keydown', keyFilter, true);
-	document.getElementById('testButton').addEventListener('click',
-			selectButtonPress);
 
-	//wsHandInit();
+		openWebSocket();
+		document.addEventListener('keydown', keyFilter, true);
+		document.getElementById('testButton').addEventListener('click',
+				selectButtonPress);
 
-</script> 
-<script type="text/javascript">
+		//wsHandInit();
+	</script>
+	<script type="text/javascript">
 		//<script type="module" >
 		/*
 		 * ok, so why does this make a difference?
@@ -248,10 +266,8 @@ body {
 		 * whereas using it above does not. Why?
 		 */
 		wsHandInit();
-		wsFeltInit();	// auto-init felt canvas
-</script>
-
- 
+		wsFeltInit(); // auto-init felt canvas
+	</script>
 
 </body>
 </html>

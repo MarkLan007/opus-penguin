@@ -9,17 +9,16 @@
 			background-color: lightblue
 			}
 		</style>
+		<!-- 
 		<link rel="stylesheet" href="../style.css" />
+		 -->
 	</head>
 	<body>
-		<div id="passDiv">
-			<p id="passMsg">Pass [n] cards prior to play.</p>
-			<!-- TODO: canvas goes here -->
-			<canvas id="passCanvas" style="background-color:powderblue;" >
-				Your browser sucks and does not support canvas.
-			</canvas>		
-			<!-- should load images: xxx style="display:none;"  -->
+		<p id="passMsg" style="text-align:center" >Pass [n] cards prior to play.</p>
+		<div id="passDiv" style="align-items:center;width:400px;height:200px;background-color:powderblue;">
+			<!-- TODO: canvas goes here, to display cards as images -->
 		</div>
+		<br>
 		<input id="passCardsButton" onclick="passCardsToServer();" value="Pass Cards" type="button" disabled >
 		<!-- 
 		<button id="passCardsButton" disabled onclick="passCardsToServer();"> Pass Cards </button>

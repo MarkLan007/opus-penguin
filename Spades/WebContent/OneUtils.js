@@ -261,6 +261,7 @@ function wsHandInit() {
 	       cardBtn.setAttribute("id", "CardButton" + i);
 	       cardBtn.setAttribute("type","button");
 	       cardBtn.setAttribute("value","Search");
+	       // +++ experiment +++ should be friendlyName
 	       cardBtn.innerText = card.friendlyName;
 	       cardBtn.setAttribute("name","label" + i);
 	       // failed tries...
@@ -270,6 +271,10 @@ function wsHandInit() {
 	       cardBtn.style.height = "0";
 	       cardBtn.style.width = "0";
 	       cardBtn.style.visibility = "hidden";
+	       //
+	       // Button alignment in the hand?
+	       cardBtn.style.alignItems="left";
+
 	       /*
 			 * Bug: For no apparent reason adding the event listeners with
 			 * setAttribute doesn't work. I have no idea why. But
@@ -282,7 +287,28 @@ function wsHandInit() {
 	       // cardBtn.style.marginTop = "20px";
 	       
 	       // Add the button to the div holding cards
-	       controlDiv.appendChild(cardBtn);
+	       // see below:
+	       //controlDiv.appendChild(cardBtn);
+		}
+		/*
+		 * Place cards in suit-related div
+		 */
+		controlDiv=document.getElementById("ClubsInHandDiv");
+		for (i=0; i<52; i++) {
+			card = theDeck[i];
+			cardBtn = card.handButton;
+			switch (i) {
+			case 13:
+				controlDiv=document.getElementById("DiamondsInHandDiv");
+				break;
+			case 26:
+				controlDiv=document.getElementById("SpadesInHandDiv");
+				break;
+			case 39:
+				controlDiv=document.getElementById("HeartsInHandDiv");
+				break;
+			}
+			controlDiv.appendChild(cardBtn);			
 		}
 	
 }
@@ -1578,9 +1604,16 @@ function processCardString(cardString) {
 }
 
 /*
- * wsPassDialog - bring up the pass card dialog
+ * Passing cards.
+ *  if we are passing cards, selected cards from hand
+ *  are diverted.
  */
 var bPassingCardsInProgress=false;
+/*
+ * PassCards are actually buttons, from which we
+ *  scrape the names off of to pass on.
+ *  Not ideal, obviously.
+ */
 var passCards=[null,null,null];
 var iCurrentFreeCardinPass=0;
 var iPassSize=3;
@@ -1596,17 +1629,25 @@ function wsInitPassDialog(n, sMsg) {
 	// create with visibility=hidden
 	var w=window.open("PassCards.html", 
 					"Pass Cards",
-					"width=400,height=300,status=yes,resizeable=yes"
+					"width=600,height=400,status=yes,resizeable=yes"
 			);
     passWindow = w;
     bPassDialogInit = true;
 }
 
+/*
+ * wsPassDialog - bring up the pass card dialog
+ */
 function wsPassDialog(n, sMsg) {
+	// somehow closing it destroys the window;
+	// for now, create it every time...
+	bPassDialogInit = false; 
 	if (!bPassDialogInit)
 		wsInitPassDialog(n, sMsg);
     var passBtn;
     var w=passWindow;
+    // This doesn't work when we do this here.
+    // Why? Don't know. Blame javascript.
     //passBtn = w.document.getElementById("passCardsButton");
     //passBtn.addEventListener("click", passCardsFromButtonPress);
 	passWindow.visibility = "visible";
@@ -1632,6 +1673,11 @@ function createNewPassCardButton(cardindex) {
 
     cardBtn.style.height = "0";
     cardBtn.style.width = "0";
+    cardBtn.style.alignItems="center";
+    cardBtn.style.marginLeft="auto";
+    cardBtn.style.marginRight="auto";
+    // Monkeyed with style to get the display of card/buttons ok in this dialog
+    //style="display:flex;padding:10px;margin-right:auto;margin-left:auto;align-items:center;
     cardBtn.style.visibility = "hidden";
     /*
 	 * Bug: For no apparent reason adding the event listeners with setAttribute
@@ -1703,6 +1749,7 @@ function addCardToPassDialog(cardindex) {
 	}
 	var cardBtn = passCards[i];
 	cardBtn.innerText = card.friendlyName;
+//	cardBtn.innerText = card.shortName;
 	cardBtn.name = card.shortName;
 	cardBtn.style.visibility = "visible";
 	cardBtn.style.height = "75px";
