@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<!-- touch here to cause rebuild v2b xyzzy abc
+<!-- touch here to cause rebuild v2b xyzzy 
 	*** Here is a change
 	*** identical to cgt.html ***
  * Use OneUtils.js for all utilities. 
@@ -88,13 +88,19 @@ body {
 
 .show {
 	display: block;
-}
+	}
 </style>
 <style>
+.alignRight {
+	float:none;
+	text-align:right;
+	margin-right:10px;
+	}
+	
 .column1 {
 	width: 55%;
 	float: left;
-}
+	}
 
 /*
  * column2 is a container of rows
@@ -182,8 +188,8 @@ body {
 			onload="setTimeout(function(){logCardImage();}, 300);">
 	</div>
 
-	<p id="gamestatusArea"> cards as buttons go here. </p>
-	<p id="trickArea"> Previous Trick. </p>
+	<p id="gamestatusArea" class="alignRight"> Cards as buttons go here. </p>
+	<p id="trickArea" class="alignRight"> Previous Trick. </p>
 
 	<div class="column2"
 		style="height: 416px; background-color: powderblue;">

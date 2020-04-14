@@ -1610,7 +1610,7 @@ function processCardString(cardString) {
  */
 var bPassingCardsInProgress=false;
 /*
- * PassCards are actually buttons, from which we
+ * PassCards are implemented as buttons, from which we
  *  scrape the names off of to pass on.
  *  Not ideal, obviously.
  */
@@ -1622,14 +1622,12 @@ var passWindow=null;
 var passDiv=null;
 var bPassDialogInit=false;
 function wsInitPassDialog(n, sMsg) {
-	//alert("Real dialog goes here...");
-	//
-	// divert the cards selected to the dialog
+	// divert selected cards to the dialog
 	bPassingCardsInProgress = true;
-	// create with visibility=hidden
+	iCurrentFreeCardinPass=0;
 	var w=window.open("PassCards.html", 
 					"Pass Cards",
-					"width=600,height=400,status=yes,resizeable=yes"
+					"width=410,height=325,status=no,toolbars=no,resizeable=yes,location=no"
 			);
     passWindow = w;
     bPassDialogInit = true;
@@ -1644,13 +1642,11 @@ function wsPassDialog(n, sMsg) {
 	bPassDialogInit = false; 
 	if (!bPassDialogInit)
 		wsInitPassDialog(n, sMsg);
-    var passBtn;
-    var w=passWindow;
     // This doesn't work when we do this here.
     // Why? Don't know. Blame javascript.
     //passBtn = w.document.getElementById("passCardsButton");
     //passBtn.addEventListener("click", passCardsFromButtonPress);
-	passWindow.visibility = "visible";
+	//passWindow.visibility = "visible";
 }
 
 /*
@@ -1698,7 +1694,7 @@ function passCardSelected(event) {
 	//
 	// clear out the passDiv so the next time it comes up
 	// there are no cards in it.
-	console.log("passCard:Click Seen in dialog. Return card...");	
+	console.log("passCard:Click Seen in dialog. Return card...");
 }
 
 function passCardsFromButtonPress(event) {
@@ -1731,22 +1727,33 @@ function passCardsFromButtonPress(event) {
 	// hide/dismiss the dialog
 	// reset index to passCards
 	iCurrentFreeCardinPass=0;
-	passWindow.visibility = "hidden";
+	//
+	// this doesn't work for windows...
+	// passWindow.visibility = "hidden";
+	// just close it and create a new one...
+	passWindow.close();
 	xstatusUpdate("Passing:" + msg);
 }
 
+/*
+ * Todo:
+ * Note that clicking on the card in the dialog to return it is not
+ * actually implemented
+ */
 function addCardToPassDialog(cardindex) {
 	var card = theDeck[cardindex];
 	// xxx get card from index...
 	var i = iCurrentFreeCardinPass;
+	// push cardPassWindow to top
+	passWindow.focus();
 	if (i >= iPassSize) {
 		// Ooh. Bad User. 
 		// trying to select more cards to pass than is legal
-		alert("Warning: Can only pass " + iPassSize + " cards.");
+		//alert("Warning: Can only pass " + iPassSize + " cards. i=" + i);
+		alert("Click on card to return it to hand. Can only pass " + iPassSize + " cards. i=" + i);
+		return;
 	} 
-	if (passCards[iCurrentFreeCardinPass] == null) {
-		passCards[iCurrentFreeCardinPass] = createNewPassCardButton(cardindex);
-	}
+	passCards[i] = createNewPassCardButton(cardindex);
 	var cardBtn = passCards[i];
 	cardBtn.innerText = card.friendlyName;
 //	cardBtn.innerText = card.shortName;
