@@ -227,11 +227,6 @@ function cardSelected2(event) {
 }
 
 /*
- * Array code... Temporary. If it works, fold into creating theDeck
- * 
- */
-
-/*
  * wsHandInit - (was wsShowHand) initialize hand details including creating
  * buttons for each card to be added to a hand
  */
@@ -261,7 +256,6 @@ function wsHandInit() {
 	       cardBtn.setAttribute("id", "CardButton" + i);
 	       cardBtn.setAttribute("type","button");
 	       cardBtn.setAttribute("value","Search");
-	       // +++ experiment +++ should be friendlyName
 	       /*
 	        * aaa images: don't set innerText
 	        */
@@ -278,19 +272,16 @@ function wsHandInit() {
 	       // Button alignment in the hand?
 	       /*
 	        * images on buttons
-	        * xxx yyy
 	        */
 	       cardBtn.style.alignItems="left";
 	       /*
 	        * construct name from shortname + _thumb.png
 	        */
-//	       var fname = '"lib/' + card.shortName + '_thumb.png"';
 	       var fname = '"thumblib/' + card.shortName + '_thumb.png"';
-//	       fname = '"buttonfacetest.png"';
+	       //  fname = '"buttonfacetest.png"';
 
 	       cardBtn.style.backgroundImage = 'url(' + fname + ')';
 	       cardBtn.style.backgroundRepeat = "no-repeat";
-
 	       /*
 			 * Bug: For no apparent reason adding the event listeners with
 			 * setAttribute doesn't work. I have no idea why. But
@@ -328,106 +319,11 @@ function wsHandInit() {
 		}
 	
 }
-/*
- * Old code... when show hand brought up its own window
- */
-function wsShowHand2() {
-	var i=0;
-	handWindow=document.window;
-	handWindow=open("HandCanvas.html", "example", "alwaysRaised=on,width=500,height=400");
-	handWindow.document.title="Player's Hand";
-	
-	// handWindow.focus();
-	// alert(handWindow.location.href);
-	handWindow.onload = 
-		function() { 
-		/*
-		 * let html='<dev style="font-size:30px">Welcome!</div>';
-		 * handWindow.document.body.insertAdjacentHTML('afterbegin', html);
-		 */
-	       // Create the search button
-		// var controlDiv=handWindow.document.getElementById("CardsInHandDiv");
-		// now in main window...
-		// var controlDiv=document.getElementById("CardsInHandDiv");
-		var cardBtn;
-		initializeTheDeck(); // if not done already
-		for (i=0; i<maxCardsInHand; i++) {
-			// only way to do cardBtn = new Button();
-			cardBtn = handWindow.document.createElement("Button");
-			if (cardBtn == null) {
-				alert("ButtonCreate failed on attempt=" + i);
-				console.log("ButtonCreate failed on attempt=" + i);
-			}
-			// buttonList.push(cardBtn);
-			/*
-			 * foreach card in the deck place a handButton to make visible later
-			 */
-		    // theDeck[i].handButton = cardBtn;
-		    var card = theDeck[i];
-		    card.handButton = cardBtn;
-
-	       // Set the attributes on the button
-	       cardBtn.setAttribute("id", "CardButton" + i);
-	       cardBtn.setAttribute("type","button");
-	       cardBtn.setAttribute("value","Search");
-	       /*
-	        * aaa images: don't set innerText
-	        */
-//	       cardBtn.innerText = "A1"; // for now
-//	       cardBtn.innerText = card.friendlyName;
-	       cardBtn.setAttribute("name","label" + i);
-	       // failed tries...
-	       // cardBtn.setAttribute("data-arg1", "foobar");
-	       // cardBtn.setAttribute("textContent", "AceClubs");
-
-	       cardBtn.style.height = "0";
-	       cardBtn.style.width = "0";
-	       cardBtn.style.visibility = "hidden";
-	       /*
-	        * set cardimage to thumbnail
-	        * (in progress xxx yyy)
-	        * uh... This whole block doesn't actually get called...
-	        * Todo: Review and delete
-	        */
-	       /*
-	        * construct name from shortname + _thumb.png
-	        */
-//	       var fname = '"lib/' + card.shortName + '_thumb.png"';
-	       var fname = '"thumblib/' + card.shortName + '_thumb.png"';
-	       //fname = '"buttonfacetest.png"';
-	       cardBtn.style.backgroundImage = 'url(' + fname + ')';
-	       cardBtn.style.backgroundRepeat = "no-repeat";	       
-	       //cardBtn.style.backgroundImage = 'url("buttonfacetest.png")';
-	       
-	       /*
-			 * Bug: For no apparent reason adding the event listeners with
-			 * setAttribute doesn't work. I have no idea why. But
-			 * addEventListener does work.
-			 */
-	       cardBtn.addEventListener("click", cardSelected);
-	       cardBtn.addEventListener("dblclick", cardSelected2);
-	       cardBtn.setAttribute("data-arg1", "User-Button"+ i);
-	       // cardBtn.style.marginLeft = "20px";
-	       // cardBtn.style.marginTop = "20px";
-	       
-	       // Add the button to the div holding cards
-	       controlDiv.appendChild(cardBtn);
-		}
-		/*
-		 * stop doing this now that grab works... for (i=10; i<maxCardsInHand;
-		 * i++) { //cardBtn = handWindow.document.getElementById("CardButton" +
-		 * i); cardBtn = buttonList[i]; cardBtn.style.visibility = "visible"; }
-		 */
-		}; // lambda function
-	
-}
 
 /*
  * make card (by cardindex) visible in hand
  */
 function addCardToHand(cardindex) {
-	// var cardBtn = buttonList[cardindex];
-	// cardBtn.style.visibility = "visible";
 	var card=theDeck[cardindex];
 	if (card == null) {
 		console.log("Error: Somehow can't find cardindex=" + cradindex);
@@ -443,12 +339,11 @@ function addCardToHand(cardindex) {
 	return true;
 	// card.cardBtn.style.visibility = "visible";
 }
+
 /*
  * deleteCardFromHand - just set to to be not visible
  */
 function deleteCardFromHand(cardindex) {
-	// var cardBtn = buttonList[cardindex];
-	// cardBtn.style.visibility = "visible";
 	var card=theDeck[cardindex];
 	if (card == null) {
 		console.log("Error: Somehow can't find cardindex=" + cradindex);
@@ -513,10 +408,10 @@ function wsFeltInit() {
 
 				var cardWidth=200, cardHeight=500;
 				/*
-				for (let i=0; i<52; i++) {
-					feltContext.fillRect(i*cardWidth,0,cardWidth,cardHeight);
-					feltContext.strokeRect(i*cardWidth,0,cardWidth, cardHeight);						
-				} */
+				 * for (let i=0; i<52; i++) {
+				 * feltContext.fillRect(i*cardWidth,0,cardWidth,cardHeight);
+				 * feltContext.strokeRect(i*cardWidth,0,cardWidth, cardHeight); }
+				 */
 				// Cardwidth=200 cardheight=500
 
 				// Now get the card images loaded on the html page...
@@ -1696,21 +1591,13 @@ function wsPassDialog(n, sMsg) {
 function createNewPassCardButton(cardindex) {
 	var cardBtn;
 	cardBtn = document.createElement("Button");
-    //cardBtn.setAttribute("id", "CardButton" + i);
     cardBtn.setAttribute("id", "CardIndex" + cardindex);
     cardBtn.setAttribute("type","button");
     cardBtn.setAttribute("value","Search");
     /*
      * aaa images: don't set innerText
      */
-//    cardBtn.innerText = ""; //card.friendlyName;
-    // unneeded:
     //cardBtn.setAttribute("name","label" + i);
-    
-    // failed tries...
-    // cardBtn.setAttribute("data-arg1", "foobar");
-    // cardBtn.setAttribute("textContent", "AceClubs");
-
     cardBtn.style.height = "0";
     cardBtn.style.width = "0";
     cardBtn.style.alignItems="center";
@@ -1721,18 +1608,11 @@ function createNewPassCardButton(cardindex) {
     cardBtn.style.visibility = "hidden";
     /*
      * set background image
-     * xxx yyy
      */
-    
-//    cardBtn.style.backgroundImage = 'url("buttonfacetest.png")';
-//  var fname = '"lib/' + card.shortName + '_thumb.png"';
     var card = theDeck[cardindex];
     var fname = '"thumblib/' + card.shortName + '_thumb.png"';
-//    fname = '"buttonfacetest.png"';
-
+    //    fname = '"buttonfacetest.png"';
     cardBtn.style.backgroundImage = 'url(' + fname + ')';
-
-    //cardBtn.style.backgroundImage = document.getElementById("buttonfaceimage");
     cardBtn.style.backgroundRepeat = "no-repeat";
     	/*
 	 * Bug: For no apparent reason adding the event listeners with setAttribute
@@ -1740,9 +1620,6 @@ function createNewPassCardButton(cardindex) {
 	 */
     cardBtn.addEventListener("click", passCardSelected);
     cardBtn.addEventListener("dblclick", passCardSelected);
-    //unneeded
-    //cardBtn.setAttribute("data-arg1", "User-Button"+ i);
-    // Add to the div
     passWindow.document.getElementById("passDiv").appendChild(cardBtn);
     return cardBtn;
 }
