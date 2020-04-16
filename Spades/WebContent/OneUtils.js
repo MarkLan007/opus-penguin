@@ -273,7 +273,13 @@ function wsHandInit() {
 	       cardBtn.style.visibility = "hidden";
 	       //
 	       // Button alignment in the hand?
+	       /*
+	        * images on buttons
+	        * xxx yyy
+	        */
 	       cardBtn.style.alignItems="left";
+	       cardBtn.style.backgroundImage = 'url("buttonfacetest.png")';
+	       cardBtn.style.backgroundRepeat = "no-repeat";
 
 	       /*
 			 * Bug: For no apparent reason adding the event listeners with
@@ -365,6 +371,15 @@ function wsShowHand2() {
 	       cardBtn.style.width = "0";
 	       cardBtn.style.visibility = "hidden";
 	       /*
+	        * set cardimage to thumbnail
+	        * (in progress xxx yyy)
+	        * uh... This whole block doesn't actually get called...
+	        * Todo: Review and delete
+	        */
+	       cardBtn.style.backgroundImage = 'url("buttonfacetest.png")';
+	       cardBtn.style.backgroundRepeat = "no-repeat";
+	       
+	       /*
 			 * Bug: For no apparent reason adding the event listeners with
 			 * setAttribute doesn't work. I have no idea why. But
 			 * addEventListener does work.
@@ -441,10 +456,16 @@ var feltContext=null;
 
 //
 // constants pertaining to the particular .jpg files loaded
+/* Was:
 const cardwidth=180;		// shared constants...
 const cardheight=250;
 const xmarginwidth=23;
 const ymarginwidth=16;
+*/
+const cardwidth=180.4;	// (180) 1pixel fix 4-16-20	
+const cardheight=250.3;	// (250)
+const xmarginwidth=22.75;	// (23)
+const ymarginwidth=16.5;	// (16) 1pixel fix 4-16-20
 
 /*
  * wsInitFelt - initialize the canvas in the game window
@@ -1676,6 +1697,13 @@ function createNewPassCardButton(cardindex) {
     //style="display:flex;padding:10px;margin-right:auto;margin-left:auto;align-items:center;
     cardBtn.style.visibility = "hidden";
     /*
+     * set background image
+     * xxx yyy
+     */
+    cardBtn.style.backgroundImage = 'url("buttonfacetest.png")';
+    //cardBtn.style.backgroundImage = document.getElementById("buttonfaceimage");
+    cardBtn.style.backgroundRepeat = "no-repeat";
+    	/*
 	 * Bug: For no apparent reason adding the event listeners with setAttribute
 	 * doesn't work. I have no idea why. But addEventListener does work.
 	 */
@@ -1757,6 +1785,18 @@ function addCardToPassDialog(cardindex) {
 	var cardBtn = passCards[i];
 	cardBtn.innerText = card.friendlyName;
 //	cardBtn.innerText = card.shortName;
+	/*
+	 * Experiment with adding an image...
+	 * ++
+	 */
+	// spadesCardImages
+	console.log("Get ready...");
+	cardBtn.style.imagefile = spadesCardImages;
+	cardBtn.style.backgroundImage = spadesCardImages;
+	cardBtn.style.backgroundImage = "http://localhost:8080/Spades/Spades.jpg";
+	/*
+	 * --
+	 */
 	cardBtn.name = card.shortName;
 	cardBtn.style.visibility = "visible";
 	cardBtn.style.height = "75px";
