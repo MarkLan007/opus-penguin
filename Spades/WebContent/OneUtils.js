@@ -262,7 +262,10 @@ function wsHandInit() {
 	       cardBtn.setAttribute("type","button");
 	       cardBtn.setAttribute("value","Search");
 	       // +++ experiment +++ should be friendlyName
-	       cardBtn.innerText = card.friendlyName;
+	       /*
+	        * aaa images: don't set innerText
+	        */
+	       //cardBtn.innerText = card.friendlyName;
 	       cardBtn.setAttribute("name","label" + i);
 	       // failed tries...
 	       // cardBtn.setAttribute("data-arg1", "foobar");
@@ -278,7 +281,14 @@ function wsHandInit() {
 	        * xxx yyy
 	        */
 	       cardBtn.style.alignItems="left";
-	       cardBtn.style.backgroundImage = 'url("buttonfacetest.png")';
+	       /*
+	        * construct name from shortname + _thumb.png
+	        */
+//	       var fname = '"lib/' + card.shortName + '_thumb.png"';
+	       var fname = '"thumblib/' + card.shortName + '_thumb.png"';
+//	       fname = '"buttonfacetest.png"';
+
+	       cardBtn.style.backgroundImage = 'url(' + fname + ')';
 	       cardBtn.style.backgroundRepeat = "no-repeat";
 
 	       /*
@@ -360,8 +370,11 @@ function wsShowHand2() {
 	       cardBtn.setAttribute("id", "CardButton" + i);
 	       cardBtn.setAttribute("type","button");
 	       cardBtn.setAttribute("value","Search");
-	       cardBtn.innerText = "A1"; // for now
-	       cardBtn.innerText = card.friendlyName;
+	       /*
+	        * aaa images: don't set innerText
+	        */
+//	       cardBtn.innerText = "A1"; // for now
+//	       cardBtn.innerText = card.friendlyName;
 	       cardBtn.setAttribute("name","label" + i);
 	       // failed tries...
 	       // cardBtn.setAttribute("data-arg1", "foobar");
@@ -376,8 +389,15 @@ function wsShowHand2() {
 	        * uh... This whole block doesn't actually get called...
 	        * Todo: Review and delete
 	        */
-	       cardBtn.style.backgroundImage = 'url("buttonfacetest.png")';
-	       cardBtn.style.backgroundRepeat = "no-repeat";
+	       /*
+	        * construct name from shortname + _thumb.png
+	        */
+//	       var fname = '"lib/' + card.shortName + '_thumb.png"';
+	       var fname = '"thumblib/' + card.shortName + '_thumb.png"';
+	       //fname = '"buttonfacetest.png"';
+	       cardBtn.style.backgroundImage = 'url(' + fname + ')';
+	       cardBtn.style.backgroundRepeat = "no-repeat";	       
+	       //cardBtn.style.backgroundImage = 'url("buttonfacetest.png")';
 	       
 	       /*
 			 * Bug: For no apparent reason adding the event listeners with
@@ -1680,7 +1700,10 @@ function createNewPassCardButton(cardindex) {
     cardBtn.setAttribute("id", "CardIndex" + cardindex);
     cardBtn.setAttribute("type","button");
     cardBtn.setAttribute("value","Search");
-    cardBtn.innerText = ""; //card.friendlyName;
+    /*
+     * aaa images: don't set innerText
+     */
+//    cardBtn.innerText = ""; //card.friendlyName;
     // unneeded:
     //cardBtn.setAttribute("name","label" + i);
     
@@ -1700,7 +1723,15 @@ function createNewPassCardButton(cardindex) {
      * set background image
      * xxx yyy
      */
-    cardBtn.style.backgroundImage = 'url("buttonfacetest.png")';
+    
+//    cardBtn.style.backgroundImage = 'url("buttonfacetest.png")';
+//  var fname = '"lib/' + card.shortName + '_thumb.png"';
+    var card = theDeck[cardindex];
+    var fname = '"thumblib/' + card.shortName + '_thumb.png"';
+//    fname = '"buttonfacetest.png"';
+
+    cardBtn.style.backgroundImage = 'url(' + fname + ')';
+
     //cardBtn.style.backgroundImage = document.getElementById("buttonfaceimage");
     cardBtn.style.backgroundRepeat = "no-repeat";
     	/*
@@ -1783,7 +1814,10 @@ function addCardToPassDialog(cardindex) {
 	} 
 	passCards[i] = createNewPassCardButton(cardindex);
 	var cardBtn = passCards[i];
-	cardBtn.innerText = card.friendlyName;
+    /*
+     * aaa images: don't set innerText
+     */
+//	cardBtn.innerText = card.friendlyName;
 //	cardBtn.innerText = card.shortName;
 	/*
 	 * Experiment with adding an image...
