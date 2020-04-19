@@ -680,12 +680,19 @@ function showClear() {
 	// clear the table
 	// extract the winning card, and enqueue it
 	// then place the card back on top of it
-	var c=new SpecialEffect();
-	qEnqueue(c);
+	var se=new SpecialEffect();
+	se.setType(SpecialEffectType.CLEAR);
+
+	qEnqueue(se);
 	if (currentTrick) {
 		var w=currentTrick.winningCard();
 		qEnqueue(new CardAnimation(w));
 	}
+	/*
+	 * to creat a cardback card, turnover1c4(null,position)
+	*/
+	var winner=currentTrick.getWinner();
+	turnover1card4(null, winner);
 	if (!qEmpty())
 		animator();
 }
@@ -839,7 +846,7 @@ function turnover1card4(card, position) { // New rotation
 	var firstx = 0;
 	var firsty = 0;
 	var imagefile = null;
-	if (card == null) {	// i.e. display a card back
+	if (card == null) {	// (cardback) i.e. display a card back
 		firstx = cardXoffset(14);
 		firsty = cardYoffset(14);
 		imagefile = suitcardImages;
@@ -1262,8 +1269,8 @@ class TrickAnimation extends AnimationScene {
 		this.opacity = 1.0;
 		//
 		this.list = new Array();
-		this.leader = -1;
-		this.winner = -1;
+		this.leader = 0;	// should always be a valid seat
+		this.winner = 0;
 		this.bIsClosed = false;
 	}
 	size() {
@@ -1317,10 +1324,15 @@ class TrickAnimation extends AnimationScene {
 			card = this.list[index];
 		return card;
 	}
+	getWinner() {
+		return this.winner;
+	}
+	getLeader() {
+		return this.leader;
+	}
 }
 
 const SpecialEffectType = { UNIMPLEMENTED:-1, CLEAR:5, };
-
 class SpecialEffect extends AnimationScene {
 	constructor() {
 		super();
@@ -1436,6 +1448,20 @@ function clearTrick(sMsg) {
 			currentTrick.close(leader, winner);
 			qEnqueue(currentTrick);
 			previousTrick = currentTrick;
+			var se=new SpecialEffect();
+			se.setType(SpecialEffectType.CLEAR);
+			qEnqueue(se);
+			if (currentTrick) {
+				var w=currentTrick.winningCard();
+				qEnqueue(new CardAnimation(w));
+			}
+			/*
+			 * to creat a cardback card, turnover1c4(null,position)
+			*/
+			//var winner=currentTrick.getWinner();
+			turnover1card4(null, winner);
+			if (!qEmpty())
+				animator();
 			break;
 		case 6:
 			break;
@@ -1599,6 +1625,7 @@ function processCardString(cardString) {
 		case '?':
 			// tell user: your move
 			cUser = cardString.charAt(1);
+			animator();
 			gamestatusUpdate("Your move! seat<" + cUser + ">");
 			break;
 		case '&':	// 
