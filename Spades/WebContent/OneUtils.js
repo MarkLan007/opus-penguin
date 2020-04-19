@@ -1319,7 +1319,7 @@ class TrickAnimation extends AnimationScene {
 	winningCard() {
 		var index=0, card=null;
 		if (this.isClosed())
-			index = winner;
+			index = this.winner;
 		if (index >= 0 && index < this.size())
 			card = this.list[index];
 		return card;
@@ -1649,7 +1649,7 @@ function processCardString(cardString) {
 
 			break;
 		case '!':
-			alert("Clear trick... pausing");
+			//alert("Clear trick... pausing");
 			// line.slice(8)
 			clearTrick(cardString);
 			// clearCardTable(true);
