@@ -61,7 +61,7 @@ public class RobotPlayer extends Player implements PlayerInterface {
 	RobotPlayer(int pid, GameInterface gameInterfaceCallbacks) {
 		//super();
 		setAsynch(false); // { Because I am a robot, I can be called synchronously }
-
+		isRobotPlayer = true;
 		hand = new Subdeck();
 		robotBrain = new RobotBrain();
 		robotBrain.setPID(pid);

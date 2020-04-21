@@ -19,7 +19,7 @@ public class Player /*implements PlayerInterface */{
 	 *  but the internal robots are not isAsynch.
 	 */
 	private boolean isAsynch=false;
-	private boolean isRobotPlayer=true;
+	protected boolean isRobotPlayer=true;
 	UserSession userSession=null;
 
 	void setAsynch(boolean b) { isAsynch = b; }

@@ -848,12 +848,14 @@ public class CardGame implements GameInterface {
 	 */
 	@Override
 	public void disconnect(int pid) {
-		RobotPlayer robot = new RobotPlayer(pid, this);
 		/*
-		 * TODO: Should transfer the cards that are in the hand; and 
-		 * if it is his turn (as it probably is, since everyone responds quickly...)
-		 * then pass a YOUR_TURN message.
+		 * create new robot player, copy the human player's state and send message
+		 * on to the new addition...
 		 */
+		RobotPlayer robot = new RobotPlayer(pid, this);
+		Player p = playerArray[pid];
+		System.out.println("Disconnect: Seat(" + pid + ")" + p.getName());
+		copyPlayer(p, robot);
 		playerArray[pid] = robot;
 		if (nCurrentTurn == pid) {
 			ProtocolMessage pm=new ProtocolMessage(ProtocolMessageTypes.YOUR_TURN);
@@ -861,7 +863,5 @@ public class CardGame implements GameInterface {
 			}
 		}
 			
-		
-
 }
 

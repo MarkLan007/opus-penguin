@@ -73,7 +73,14 @@ public class HumanPlayer extends Player implements PlayerInterface {
 		String sProtocolMessage = pm.encode();
 		System.out.println("<" + sProtocolMessage + ">");
 		//nioNetworkAccessMethods.write(sProtocolMessage);
-		WsServer.send(userSession, sProtocolMessage);
+		if (!userSession.session.isOpen()) {
+			// uh oh.
+			// session has been closed
+			// replace with robot player in game..
+			userSession.game.disconnect(userSession.pid); 
+		} else {
+			WsServer.send(userSession, sProtocolMessage);
+			}
 	}
 
 	@Override

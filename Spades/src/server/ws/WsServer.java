@@ -256,7 +256,10 @@ public class WsServer {
 				System.out.println("Game reset by divine providence. Mortals will need to rejoin.");
 				byGod = true;
 				g.reset();
-				g.join(us, us.sessionId + "/God");
+				if (g.join(us, us.sessionId + "/God"))
+					write(us, "%msg%ByGod join successfull");
+				else
+					write(us, "%msg%Divine intervention failed. Still can't join.");
 				System.out.println("Apocalyptic reset complete...");
 				//us.joinBygod();
 			}

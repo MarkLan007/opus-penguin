@@ -752,7 +752,7 @@ function drawFadeInImage(ctx,
  * animationGestault
  */
 function resolveWithClear() {
-	clearCardTable(false); // xxx
+	clearCardTable(false); 
 }
 var fIncrement = .01;
 function fadeOutTrick(gestault) {
@@ -1219,7 +1219,7 @@ class AnimationScene {	// baseclass
 	}
 	// draw one frame, one time
 	// increment opacity
-	// purely abstract class; expects to be overrriden in subclass
+	// purely abstract class; expects to be overiden in subclass
 	init() {
 		
 	}
@@ -1284,7 +1284,7 @@ class TrickAnimation extends AnimationScene {
 		var i;
 		// need to clear since writing over the
 		// prevous trick fainter doesn't really work
-		// xxx aaa
+		// aaa
 		for (i=0; i<this.list.length; i++) {
 			var pc=this.list[i];
 			pc.paint(this.opacity);
@@ -1514,7 +1514,7 @@ function selectButtonPress(event) {
 function wsOpen(message) {
 	// echoText.value += "Connected ... \n";
 	setReconnectDisabled(true);
-	// xxx don't write this here... write it when the write succeeds maybe?
+	// don't write this here... write it when the write succeeds maybe?
 	// xstatusUpdate("Connected...");
 }
 function wsCloseConnection() {
@@ -1614,6 +1614,8 @@ function processCardString(cardString) {
 			if (!bDelete && bNoWelcome) {
 				// when you are dealt cards set the seat value for future
 				// messages
+				// only set them if you HAVEN'T seen a welcome msg
+				//  which is the most trustrworthy way to set it
 				setSeatId(parseInt(cardString.charAt(1)));
 			}
 			for (i = 2; i < cardString.length; i += 2) {
@@ -2043,6 +2045,90 @@ function processSubmitAndClearMsgText() {
 	document.getElementById("msgText").focus();
 }
 
+function getDescendantElements(parent) {
+	return [].slice.call(parent.getElementsByTagName('*'));
+}
+function rankOrdinal(c) {
+	if (parseInt(c))
+		return c;
+	switch (c) {
+	case 'T':
+	case 't':
+		return 10;
+	case 'j':
+	case 'J':
+		return 11;
+	case 'q':
+	case 'Q':
+		return 12;
+	case 'k':
+	case 'K':
+		return 13;
+	case 'a':
+	case 'A':
+		return 14;
+	default:
+		return 0;
+	}
+	return 0;
+}
+/*
+ * true if c1 >= c2
+ */
+function higherCard(c1CardButton, c2CardButton) {
+	var cardIndex1 = c1CardButton.name.match(/\d+/);
+	var cardIndex2 = c2CardButton.name.match(/\d+/);
+	var card1 = theDeck[cardIndex1];
+	var card2 = theDeck[cardIndex2];
+	var c1 = rankOrdinal(card1.shortName[0]);
+	var c2 = rankOrdinal(card2.shortName[0]);
+	return c1 >= c2;
+}
+function sortByCardOrder(a) {
+	for (var i=0; i<a.length; i++) {
+		// highest card is in a[i]
+		for (var j=i+1; j<a.length; j++)
+			if (higherCard(a[j], a[i])) {
+				// swap
+				var t=a[i];				
+				a[i] = a[j];
+				a[j] = t;
+			}
+	}
+	return a;
+}
+
+function reorgButtonsInDiv(sdiv) {
+	var buttonList=null; //= new Array();
+	// start with "ClubsInHandDiv"
+	var div=document.getElementById(sdiv);
+	buttonList = getDescendantElements(div);
+	buttonList = sortByCardOrder(buttonList);
+	// remove the items add them back to the div
+	var i;
+	for (i=0; i<buttonList.length; i++)
+		div.removeChild(buttonList[i]);
+	for (i=0; i<buttonList.length; i++) {
+		// should only append if it's visible... i.e. actually in the hand...
+		var b=buttonList[i];
+		if (buttonList[i].style.visibility === "hidden")
+			;
+		else
+			div.appendChild(buttonList[i]);
+	}
+}
+
+var cardDivs=[
+	"ClubsInHandDiv",
+	"DiamondsInHandDiv",
+	"SpadesInHandDiv",
+	"HeartsInHandDiv",
+];
+function reorgButtons() {
+	for (var i=0; i<cardDivs.length; i++)
+		reorgButtonsInDiv(cardDivs[i])
+}
+
 /*
  * processLocalCommand - process a typed-in line locally
  */
@@ -2144,6 +2230,15 @@ function processLocalCommand(line) {
 		fadeOutTrick(currentGestault);
 		// clearCardTable(true);
 		xstatusUpdate("Table Cleared and Reset.");
+	} else if (line.includes("reorg")) {
+		//Array of div names
+		// foreach div name
+		// get buttons
+		// place into a temp array in reverse card-sorted order
+		// add back into div
+		// rrr
+		reorgButtons();
+		xstatusUpdate("reorg of button divs complete.");
 	} else if (line.includes("repaint")) {
 		clearCardTable(false);
 		if (previousTrick != null) {
