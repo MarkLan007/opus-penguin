@@ -21,6 +21,9 @@ public class UserJCLCommand {
 		JCLJoin, // Join, Rejoin games
 		JCLRejoin, JCLSuperUser, // SuperUser
 		JCLResend, JCLReset,
+		JCLNewdeal, JCLMisdeal,
+		JCLShuffle,
+		JCLStatus,
 		JCLPoke, JCLResume, 	// poke or resume the server
 		JCLWhoAmI,
 	}
@@ -107,6 +110,10 @@ public class UserJCLCommand {
 	String jclSuperUser = "su";
 	String jclResend = "resend";
 	String jclReset = "reset";
+	String jclMisdeal = "misdeal";	//synonyms...
+	String jclNewdeal = "newdeal";
+	String jclStatus = "status";
+	String jclShuffle = "shuffle";
 	
 	String jclIdentifierPattern = "[a-zA-Z0-9]+";
 	Pattern jclRegex = Pattern.compile(jclPattern);
@@ -119,6 +126,10 @@ public class UserJCLCommand {
 	Pattern jclPokeRegex = Pattern.compile(jclPoke);
 	Pattern jclResendRegex = Pattern.compile(jclResend);
 	Pattern jclResetRegex = Pattern.compile(jclReset);
+	Pattern jclMisdealRegex = Pattern.compile(jclMisdeal);
+	Pattern jclNewdealRegex = Pattern.compile(jclNewdeal);
+	Pattern jclStatusRegex = Pattern.compile(jclStatus);
+	Pattern jclShuffleRegex = Pattern.compile(jclShuffle);
 	
 	Pattern jclIdentierRegex = Pattern.compile(jclIdentifierPattern);
 
@@ -182,7 +193,7 @@ public class UserJCLCommand {
 			}
 			return; // "//+Rejoin game(" + sName + ")";
 		} // ... if
-			// scan for Join
+		// scan for Join
 		m = jclJoinRegex.matcher(commandString);
 		if (m.find()) { // i.e. look for 'setname' then an identifier
 			type = JCLType.JCLJoin;
@@ -201,6 +212,96 @@ public class UserJCLCommand {
 			}
 			return; // "//+Join game(" + sName + ")";
 		}
+		// scan for Newdeal
+		m = jclNewdealRegex.matcher(commandString);
+		if (m.find()) { // i.e. look for 'setname' then an identifier
+			type = JCLType.JCLNewdeal;
+			/*
+			 * param is left, right, across, hold
+			 */
+			String sName = "hold"; // default name string
+			Matcher identifier = jclIdentierRegex.matcher(commandString);
+			for (int i = 0; identifier.find(); i++) {
+				switch (i) {
+				case 0:
+					continue; // the command itself
+				case 1:
+					sName = identifier.group();
+					NameValuePair p1 = new NameValuePair("pass", sName);
+					argv.add(p1);
+					break;
+				}
+			}
+			return; // "//+Join game(" + sName + ")";
+		}
+		// scan for Misdeal
+		m = jclMisdealRegex.matcher(commandString);
+		if (m.find()) { // i.e. look for 'setname' then an identifier
+			type = JCLType.JCLNewdeal;
+			/*
+			 * param is left, right, across, hold
+			 */
+			String sName = "hold"; // default name string
+			Matcher identifier = jclIdentierRegex.matcher(commandString);
+			for (int i = 0; identifier.find(); i++) {
+				switch (i) {
+				case 0:
+					continue; // the command itself
+				case 1:
+					sName = identifier.group();
+					NameValuePair p1 = new NameValuePair("pass", sName);
+					argv.add(p1);
+					break;
+				}
+			}
+			return; // "//+Join game(" + sName + ")";
+		}
+		// scan for Shuffle
+		m = jclShuffleRegex.matcher(commandString);
+		if (m.find()) { // i.e. look for 'setname' then an identifier
+			type = JCLType.JCLShuffle;
+			/*
+			 * param is left, right, across, hold
+			 */
+			String sOnOff = "no"; // default name string
+			Matcher identifier = jclIdentierRegex.matcher(commandString);
+			for (int i = 0; identifier.find(); i++) {
+				switch (i) {
+				case 0:
+					continue; // the command itself
+				case 1:
+					sOnOff = identifier.group();
+					NameValuePair p1 = new NameValuePair("enabled", sOnOff);
+					argv.add(p1);
+					break;
+				}
+			}
+			return; // "//+Join game(" + sName + ")";
+		}
+		// scan for status
+		m = jclStatusRegex.matcher(commandString);
+		if (m.find()) { // i.e. look for 'setname' then an identifier
+			type = JCLType.JCLStatus;
+			/*
+			 * status options a future possibility
+			 *  status game, status network, etc.
+			 */
+			String sName = "hold"; // default name string
+			Matcher identifier = jclIdentierRegex.matcher(commandString);
+			for (int i = 0; identifier.find(); i++) {
+				switch (i) {
+				case 0:
+					continue; // the command itself
+				case 1:
+					sName = identifier.group();
+					NameValuePair p1 = new NameValuePair("item", sName);
+					argv.add(p1);
+					break;
+				}
+			}
+			return; // "//+Join game(" + sName + ")";
+		}
+
 		m = jclResendRegex.matcher(commandString);
 		if (m.find()) { // i.e. look for 'setname' then an identifier
 			type = JCLType.JCLResend;

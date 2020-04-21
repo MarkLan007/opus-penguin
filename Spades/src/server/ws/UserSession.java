@@ -16,6 +16,8 @@ public class UserSession {	// wrapper for data to keep with Session
 	CardGame game=null;		// placeholder for a pointer to a game;
 	CardGameKernel cgk=null;	// kernel queue
 	String username="";
+
+	public String sessionId="";
 	
 	public UserSession(Session sess) {
 		session = sess;
@@ -63,6 +65,11 @@ public class UserSession {	// wrapper for data to keep with Session
 	/*
 	 * Join the game, bygod, crashing it and resetting if necessary
 	 */
+	/*
+	 * can no longer join at userSession level.
+	 * -- must access game directly
+	 * -- it's much cleaner with this code dead.
+	 * 
 	public boolean joinBygod() {
 		theGame = null;
 		thecgk = null;
@@ -101,7 +108,7 @@ public class UserSession {	// wrapper for data to keep with Session
 			game.resend(this);
 		return true;
 	}
-	
+	*/
 	public void resume() {
 		// check if idle?
 		cgk.resume();

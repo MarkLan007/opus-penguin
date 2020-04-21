@@ -2,7 +2,7 @@ package server.ws;
 
 //package cardGame;
 
-//=~S+-?&!B$%
+//=~S+-?&!B$%>
 
 public enum ProtocolMessageTypes {
 	//
@@ -21,6 +21,7 @@ public enum ProtocolMessageTypes {
 	BROKEN_SUIT, // B hearts/spades are broken
 	PLAYER_SCORES, // $ Player-score, Player-score...
 	PLAYER_ERROR, // %Text {Please play 2c, Follow Suit, Hearts/Spades not broken, not-your-turn, don't-have-that-card, user-error}
+	PLAYER_WELCOME,
 	}
 /* Eleven Messages at the moment */
 

@@ -1,10 +1,8 @@
 package server.ws;
 
-//Not any more...
+//Not used any more since server.ws integration
 //package cardGame;
-
-import java.nio.channels.SocketChannel;
-
+//import java.nio.channels.SocketChannel;
 //import java.util.LinkedList;
 
 public class CardGame implements GameInterface {
@@ -18,8 +16,10 @@ public class CardGame implements GameInterface {
 
 	/*
 	 * TODO: global game shouldn't be managed this way; 
-	 * This is sad, of course; but there is only one game for now, and it is created in ttyhandler.
-	 * Let him who is without sin cast the first stone. (Hey, I'll fix it soon.)
+	 * This is sad, of course; but there is only one game for now, 
+	 *  and it is created in ttyhandler or WsServer
+	 * Let him who is without sin cast the first stone. 
+	 *  (Hey, I'll fix it soon...)
 	 */
 	static public CardGame theGame=null;
 	
@@ -74,6 +74,9 @@ public class CardGame implements GameInterface {
 	*/	
 
 	Boolean bShuffle = false;
+	void setShuffle(boolean bs) {
+		bShuffle = bs;
+	}
 	Player[] playerArray = new Player[nPlayers];
 	// Subdeck[] playerCards = new Subdeck[nPlayers]; // Key point: the game's
 	// official copy of what's in the hand NOT part of player...
@@ -103,9 +106,13 @@ public class CardGame implements GameInterface {
 			} else {
 				// player/robot player already exists, but since this is a 
 				// reset/new game clear out existing hand
+				// xxx
+				Player p=playerArray[i];
+				System.out.println("Reset: Seat(" + i + ")" + p.getName() 
+					+ p.getPID() + 
+					"(robot?" + p.isRobot() + ')');
 				playerArray[i].reset();
-			}
-		
+			}		
 	}
 
 	/*
@@ -135,35 +142,39 @@ public class CardGame implements GameInterface {
 
 	/*
 	 * Player p joins the game.
-	 * TODO: (join functions are for remote human players when I implement them)
-	 * TODO: Fix join. join is completely bogus now... 
 	 *  so... if playertype is robot player, then replace with human player...
-	 *  TODO: this should synchonize so that robot player isn't moving or something
+	 *   -> See join(us,name)
+	 *   Note: robot players never join; they are added by populatePlayers
 	 */
+	/* This is obsolete and now wrong... 
 	boolean join(Player p) {
 		int i;
-		// Obsolete... This should not get called, right?
+		// Obsolete... always called
 		// xxx
-		System.out.println("Obsolete function called:" + "join");
+		//System.out.println("Obsolete function called:" + "join");
 		for (i = 0; i < nPlayers; i++) {
 			if (playerArray[i] == null) {
-				playerArray[i] = p;
-				p.setPID(i);
+//				playerArray[i] = p;
+//				p.setPID(i);
 				return true;
 			}
 			//
 			// kick out first robot player I find and replace, taking the subdeck, and move
 			Player cp = playerArray[i];
 			if (cp.isRobot()) {
-				p.subdeck = cp.subdeck;
-				p.score = cp.score;
-				p.setPID(cp.pid);
+				// escort player from game
+				// todo: robot should send departing words...
+				copyPlayer(cp,p);
+//				p.subdeck = cp.subdeck;
+//				p.score = cp.score;
+//				p.setPID(cp.pid);
 				playerArray[i] = p;
 				return true;
 			}
 		}
 		return false;
 	}
+	*/
 
 	/*
 	 * TODO: allow ability to add multiple humans
@@ -203,10 +214,15 @@ public class CardGame implements GameInterface {
 		}
 		*/
 
-	boolean join(String s) {
+	/*
+	 * join(s) -- where s is "sessionid/friendlyName"
+	 */
+/*	boolean join(String s) {
 		Player p = new Player(s);
+		// doesn't check to see if already in the game...
 		return join(p);
 	}
+	*/
 
 	void copyPlayer(Player from, Player to) {
 		to.pid = from.pid;
@@ -214,18 +230,30 @@ public class CardGame implements GameInterface {
 		to.subdeck = from.subdeck;
 		to.score = from.score;
 	}
-	
-	boolean join(UserSession us) {
+
+	/*
+	 * user session version obsolete with sessions managed
+	 *  (unfortunately, not yet... Should be true someday..)
+	 * at higher level by WsServer
+	 *  -- this version used any time human player joins -- 
+	 */
+	boolean join(UserSession us, String sessionName) {
 		HumanPlayer hp=new HumanPlayer(us);
+		hp.setName(sessionName);
 		// todo: multiple human players...
 		// find a robot player to displace
 		// xxx
+		// write something:
+		System.out.println("Obsolete join called..");
 		int i;
 		for (i=0; i<nPlayers; i++) {
 			Player p = playerArray[i];
 			// take over the robot players seat
 			// set the pid, and take the cards, and turn
 			if (p.isRobot()) {
+				// escort player from game
+				// todo: robot should send departing words...
+
 				copyPlayer(p,hp);
 				playerArray[i] = hp;
 				us.setpid(i);
@@ -236,6 +264,7 @@ public class CardGame implements GameInterface {
 		return false;
 		//console.log("Cannot add player...")
 	}
+	
 	/*
 	 * TODO: actually use getPlayer instead of pulling things out of PlayerArray
 	 */
@@ -243,11 +272,6 @@ public class CardGame implements GameInterface {
 		if (index >= 0 && index < nPlayers)
 			return playerArray[index];
 		return null;
-	}
-
-	void reset(Boolean shuffle) {
-		bShuffle = shuffle;
-		reset();
 	}
 
 	/*
@@ -479,6 +503,7 @@ public class CardGame implements GameInterface {
 				// Game is over; total score and reset
 				totalScores();
 				nCurrentTurn = -1;
+				// should just reset hand...
 				reset(true);	// shuffle this time...
 				return;
 				}
@@ -690,7 +715,28 @@ public class CardGame implements GameInterface {
 		}
 	}
 
-	void reset() {
+	/*
+	 * two versions of reset - 
+	 * reset - game reset initial or after catastrophic reset
+	 *  regenerate players 
+	 *  reset score
+	 *   -- and initiatePlay
+	 */
+	public void reset() {
+		populatePlayers();
+		//resetPassOrder();
+		handReset();
+		initiatePlay();
+	}
+	void reset(Boolean shuffle) {
+		bShuffle = shuffle;
+		reset();
+	}
+
+	/*
+	 * handReset - shuffle and deal
+	 */
+	public void handReset() {
 		//
 		// TODO: Make sure there are nPlayers and add robots if there aren't
 		//
@@ -698,7 +744,8 @@ public class CardGame implements GameInterface {
 		/*
 		 * seat the human players at the table, and add robots to fill in the game
 		 */
-		populatePlayers();
+		// No. players already populated
+		//populatePlayers();
 		
 		//
 		// Create a new pack of cards and shuffle them
@@ -732,6 +779,9 @@ public class CardGame implements GameInterface {
 				playerArray[i].subdeck.add(c);
 			}
 		}
+	}
+	void initiatePlay() {
+	
 		/*
 		 * Initiate a pass message to players ~
 		 * Retrieve results
@@ -748,7 +798,17 @@ public class CardGame implements GameInterface {
 		t.leader = nCurrentTurn;
 		trickArray[nTrickId] = t;
 		currentTrick = t;
+		int i;
+		Player p;
 
+		//
+		// send (individual) welcome message
+		for (i = 0; i < nPlayers; i++) {
+			p = playerArray[i];
+			ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PLAYER_WELCOME, p.getName());
+			p.sendToClient(pm);
+		}
+		
 		//
 		// Now send the protocol message to add them to the players hand
 		for (i = 0; i < nPlayers; i++) {

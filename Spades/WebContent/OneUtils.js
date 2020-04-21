@@ -1564,6 +1564,7 @@ var protocolMessageTypes = {
 	'B': true,	// Broken suit
 	'$': true,	// player scores
 	'%': true,	// player error
+	'>': true,	// player welcome
 };
 
 /*
@@ -1593,6 +1594,7 @@ function sendCardFromButtonPress(cardindex) {
 /*
  * processCardString -- process a card protocol message from server
  */
+var bNoWelcome=true;
 function processCardString(cardString) {
 	var card = null;
 	var bDelete = false;
@@ -1600,11 +1602,16 @@ function processCardString(cardString) {
 	var i = 0;
 	var c0 = cardString.charAt(0);
 	switch (c0) {
+		case '>':
+			setSeatId(parseInt(cardString.charAt(1)));
+			bNoWelcome=false;
+			console.log("Welcome:" + cardString);
+			break;
 		case '-':
 			bDelete = true;
 		case '+':
 			// char 1 is the user id.
-			if (!bDelete) {
+			if (!bDelete && bNoWelcome) {
 				// when you are dealt cards set the seat value for future
 				// messages
 				setSeatId(parseInt(cardString.charAt(1)));

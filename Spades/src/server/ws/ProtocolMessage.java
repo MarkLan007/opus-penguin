@@ -105,7 +105,8 @@ public class ProtocolMessage {
 		}
 	
 	//static final String sComChars="=~QS+-?&B$%";
-	static final String sComChars="=~QS+-?&!B$%";
+	static final String sComChars="=~QS+-?&!B$%>";
+	static boolean bServer=true;
 	static boolean isProtocolMessage(String sMsg) {
 		int i;
 		//
@@ -116,6 +117,12 @@ public class ProtocolMessage {
 		int len=sComChars.length();
 		char cCom=sMsg.charAt(0);
 		for (i=0; i<len; i++) {
+			/*
+			 * client-origin protocol messages never
+			 * begin with a letter
+			 */
+			if (bServer && Character.isLetter(cCom))
+				return false;
 			if (sComChars.charAt(i) == cCom) {
 				return true;
 				}

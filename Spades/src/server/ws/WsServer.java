@@ -60,7 +60,12 @@ public class WsServer {
 			System.out.println("Yea! retrieved really friendly client name is" + sReallyFriendlyName);
 		}
 		System.out.println("Open Connection ...");
-		SessionManager.manageSession(sess, sFriendlyName);
+		String gensym=newSessionIdentifier();
+		SessionManager.manageSession(sess, sFriendlyName, gensym);
+		// call gensym to create a name
+		// and set the session name to that.
+		//  SessionManager.setSessionIdentifier(sess, gensym);
+		
 		// Catch up...
 		retrievePreviousConversation(sess);
 	}
@@ -103,9 +108,49 @@ public class WsServer {
 	boolean remoteDebug=true;
 	boolean bBypassKernel=true;	// by pass kernel synchronization; invoke g.process direction
 
+	// rudimentary game-session manager
+	// ++
+	/*
+	 * No-ops for now
+	 */
+	String getSessionInfo(String msg) {
+		return "";
+	}
+	/*
+	 * Session info is leading: # SxxGxxPx#
+	 */
+	String stripSessionInfo(String msg) {
+		return msg;
+	}
+	static CardGame[] cardGames = new CardGame[4];
+	// total stub routines...
+	CardGame lookupGameFromSession(String sessionString) {
+		if (sessionString.isEmpty())
+			return cardGames[0];
+		return cardGames[0];
+	}
+	CardGame getDefaultGame() {
+		if (cardGames[0] == null) {
+			System.out.println("Generating new (default) game...");
+			cardGames[0] = new CardGame();
+			// cardGames[0].reset();	// but don't initiate play
+			}
+		return cardGames[0];		
+	}
+	int globalSessionId = 0;
+	/*
+	 * newSessionIdentifier - gensym
+	 */
+	String newSessionIdentifier() {
+		return "#S" + globalSessionId++ + "gXpX#";
+	}
+	// --
+	
 	@OnMessage
 	public void onMessage(String message, boolean last, Session sess) {
 
+		CardGame g=null;
+		
 		System.out.println("Message from the client: " + message);
 		if (message.startsWith("$")) {
 			processSUCommand(sess, message);
@@ -118,8 +163,11 @@ public class WsServer {
 		case JCLNotJCL:
 			// Non-jcl, non SU command
 			// if (is protocol... enqueue to cgk for play...
+			String sRemoteSession = getSessionInfo(message);
 			if (ProtocolMessage.isProtocolMessage(message)) {
-				ProtocolMessage pm = new ProtocolMessage(message);
+				String msg=stripSessionInfo(message);
+				ProtocolMessage pm = new ProtocolMessage(msg);
+				g=lookupGameFromSession(sRemoteSession);
 				// tell the client what protocol message parsed as:
 				if (remoteDebug)
 					write(us, "saw:" + pm.type + "sender:" + pm.sender + "{" + pm.usertext + "}");
@@ -128,13 +176,20 @@ public class WsServer {
 					// temporary hack...
 					// xxx yyy
 					CardGameKernel.msleep(10);
-					us.game.process(pm);
+					g.process(pm);
+					// was...
+					//us.game.process(pm);
 					break;
 				}
+				/*
+				 * cgk is completely disabled because
+				 *  messages coming into onMessage are serialized
+				 *
 				us.cgk.enqueue(pm);
 				// now tell the kernel to resume if it is idle...
 				if (us.cgk.isIdle())
 					us.cgk.resume();
+				*/
 				break;
 			}
 			// otherwise chatstring message
@@ -162,16 +217,17 @@ public class WsServer {
 			us.setSuperUser(true);
 			break;
 		case JCLWhoAmI:
+			
 			String s = "name=" + us.getName();
 			if (us.superuser())
 				s = s + "+";
-			write(us, s);
+			write(us, us.sessionId + us.username);
 			break;
 		case JCLJoin:
 			// here is the confluence of the http server and the gameserver
 			// create a game if one does not exist, and insert this session into it
 			// xxx
-			System.out.println("User:" + us.username + "Joining...");
+			System.out.println("User: '" + us.username + "' Joining...");
 			boolean byGod=false;
 			String sname="";
 			String sparam="";
@@ -179,6 +235,38 @@ public class WsServer {
 				sname=jcl.getName(1);
 				sparam=jcl.getValue(1);
 				}
+			// this is just for now...
+			// should join the game requested
+			// not the default one that was born into
+			g=lookupGameFromSession(sparam);
+			if (g == null)
+				g = getDefaultGame();
+			us.game = g;
+			String pname=us.getName();
+			boolean bJoinStatus = g.join(us, us.sessionId + "/" + pname);
+			if (bJoinStatus) {
+				// joined ok...
+				//
+				write(us, "Successfully joined game as " + pname + "...");
+				write(us, "send reset to initiate play.");
+			}
+			else if (!bJoinStatus  && (sparam.contains("bygod") ||
+					(sname.contains("bygod")))) {
+				broadcast("Game reset by divine providence. Mortals will need to rejoin.");
+				System.out.println("Game reset by divine providence. Mortals will need to rejoin.");
+				byGod = true;
+				g.reset();
+				g.join(us, us.sessionId + "/God");
+				System.out.println("Apocalyptic reset complete...");
+				//us.joinBygod();
+			}
+			else {
+				System.out.println("New User cannot join.");
+				write(us, "New User cannot join. Game full.");
+				// Uh oh...
+				// xxx
+			}
+			/*
 			if (!us.join() && (sparam.contains("bygod") ||
 					(sname.contains("bygod")))) {
 				broadcast("Game reset by divine providence. Mortals will need to rejoin.");
@@ -192,17 +280,74 @@ public class WsServer {
 				// Uh oh...
 				// xxx
 			}
+			*/
+			break;
+		case JCLRejoin:
+			sparam="";
+			if (jcl.argc() > 1) {	// argc is always at least 1
+				sname=jcl.getName(1);
+				sparam=jcl.getValue(1);
+				}
+			write(us, "Rejoin("+sparam+") by session not yet implemented.");
+			// lookup usersession by session id
+			// and take it over
+			// request a resend on the joiners behalf
+			// i.e. send a welcome message
+			// 
+			// can also (implement) capture a seat here...
 			break;
 		case JCLReset:
+			/*
+			 * Lookup game by session and reset...
+			 */
+			if (us.game != null)
+				g = us.game;
+			else
+				g = getDefaultGame();
+			write(us, "Game reset ordered.");
 			System.out.println("Reset game ordered...");
+			g.reset();
+			/*
 			if (us.game == null) {
 				System.out.println("No game to reset.");
 				break;
 			}
 			us.game.reset();
+			*/
 			break;
 		case JCLResend:
+			// not to be confused with not-yet-implemented
+			// ... JCLRefresh which sends the whole context
 			us.game.resend(us);
+			break;
+		case JCLStatus:
+			write(us, "" + jcl.type + "(" + "): under construction");
+			break;
+		case JCLMisdeal:
+		case JCLNewdeal:
+			String sPasstype="";
+			if (jcl.argc() > 1)
+				sPasstype = jcl.getValue(1);
+			else
+				sPasstype = "hold";
+			write(us, "" + jcl.type + "(" + sPasstype + "): under construction");
+			break;
+		case JCLShuffle:
+			String sOnOff="";
+			boolean bShuffle=false;
+			if (jcl.argc() > 1)
+				sOnOff = jcl.getValue(1);
+			else
+				sOnOff = "no";
+			write(us, "" + jcl.type + "(" + sOnOff + "): under construction");
+			if (sOnOff.equalsIgnoreCase("yes") ||
+					sOnOff.equalsIgnoreCase("true"))
+				bShuffle = true;
+			// set for game
+			if (us.game == null)
+				write(us, "No game yet to set shuffle;");
+			else
+				us.game.setShuffle(bShuffle);
 			break;
 		case JCLError: // JCL command but malformed
 		case JCLCommandNotRecognized: // Command is not recognized

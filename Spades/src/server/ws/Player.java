@@ -32,9 +32,11 @@ public class Player /*implements PlayerInterface */{
 	public Subdeck subdeck=new Subdeck();	/* this is the server's copy of the cards */
 	void reset() {
 		subdeck = new Subdeck();
+		bIsMyMove = false;
 	}
 	String playerName="";
 	int score=0;
+	// pid, critically, corresponds to table-seat
 	protected int pid; 	// Player-id for protocol messages
 	/*
 	 * NIOClientSession is private to make sure that it is only called through HumanPlayer
