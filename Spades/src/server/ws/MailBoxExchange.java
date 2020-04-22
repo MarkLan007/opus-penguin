@@ -4,6 +4,22 @@ public class MailBoxExchange {
 	public enum PassType {
 		PassHold, PassLeft, PassRight, PassAcross;
 	}
+	static PassType[] pts = PassType.values();
+	static public PassType getNextPass(PassType e)
+	{
+	  int index = e.ordinal();
+	  int next = (index + 1) % pts.length;
+	  return pts[next];
+	}
+	static public PassType getPrevPass(PassType e)
+	{
+	  int index = e.ordinal();
+	  if (index == 0)
+		  index = pts.length;
+	  return pts[--index];
+	}
+	//
+	
 	public class MailBox {
 		int from, to;	// to is redundant; stored by place
 		int messagesize=0;
@@ -21,7 +37,7 @@ public class MailBoxExchange {
 	 * MailBoxExchange - create an exchange with nplayers mailboxes
 	 *  msize is for error checking the size of the subeck at runtime
 	 */
-	MailBoxExchange(int nplayers, int msize) {
+	MailBoxExchange(PassType pt, int nplayers, int msize) {
 		exchangeSize = nplayers;
 		exchange = new MailBox[nplayers];
 		int i;
@@ -29,7 +45,9 @@ public class MailBoxExchange {
 			exchange[i] = new MailBox();
 			exchange[i].to = i;
 		}
+		setRouting(pt);
 	}
+	
 	void setRouting(PassType passType) {
 		int i;
 		MailBox mb;
@@ -82,3 +100,39 @@ public class MailBoxExchange {
 		return exchange[to].contents;
 	}
 }
+
+
+/* Slight Improvement to the cars example:
+ * Sometimes you need the enums outside of the class
+ * for example, as parameters. So How about this:
+ * 
+ * 1. Better if it's a class variable: 
+ * i.e. static 
+ * Then you can call it from outside the class like this 
+ * 	Cars.nextCar(e);
+ * 2. And also you don't have to create the array and 
+ * initialize it with every call
+ * 3. One line shorter...
+*/
+/*
+static Cars[] cars = Cars.values();
+static public Cars getNextCar(Cars e)
+{
+  int index = e.ordinal();
+  int next = (index + 1) % cars.length;
+  return cars[next];
+}
+*/
+/*
+ * And don't forget about prev
+ * Here's a snappy version
+ */
+/*
+static public PassType getPrevCar(PassType e)
+{
+  int index = e.ordinal();
+  if (index == 0)
+	  index = cars.length;
+  return cars[--index];
+}
+*/

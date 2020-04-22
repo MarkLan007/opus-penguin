@@ -13,7 +13,9 @@ public class CardGame implements GameInterface {
 	Trick currentTrick;
 	int nTrickId = 0;
 	boolean bDebugCardCf=true;
-
+	boolean bGameAborted=false;
+	boolean bGameOver=false;
+	
 	/*
 	 * TODO: global game shouldn't be managed this way; 
 	 * This is sad, of course; but there is only one game for now, 
@@ -93,6 +95,8 @@ public class CardGame implements GameInterface {
 		// gameName = "Hearts";
 		
 		populatePlayers();
+		// xxx reset as part of creation?
+		reset();
 	}
 
 	private void populatePlayers() {
@@ -232,10 +236,9 @@ public class CardGame implements GameInterface {
 	}
 
 	/*
-	 * user session version obsolete with sessions managed
-	 *  (unfortunately, not yet... Should be true someday..)
-	 * at higher level by WsServer
-	 *  -- this version used any time human player joins -- 
+	 * passed user session (for communications wiring) and internal session name 
+	 * called by WsServer
+	 *  -- called any time human player joins -- 
 	 */
 	boolean join(UserSession us, String sessionName) {
 		HumanPlayer hp=new HumanPlayer(us);
@@ -253,7 +256,7 @@ public class CardGame implements GameInterface {
 			if (p.isRobot()) {
 				// escort player from game
 				// todo: robot should send departing words...
-
+				// i.e. call player.disconnet() for robots?
 				copyPlayer(p,hp);
 				playerArray[i] = hp;
 				us.setpid(i);
@@ -356,37 +359,47 @@ public class CardGame implements GameInterface {
 	 * It should send it once, and the response will come back either from human player or robot player thereby moving 
 	 * the game along...
 	 */
+	void sendFirstMove() {
+		/*
+		 * figure out who has the two
+		 * set 'your move' for that player
+		 * call send next move
+		 */
+	}
+	
 	void sendNextMove() {
 
-		//while (nCurrentTurn != -1) {
-			ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.YOUR_TURN);
-			Player p = playerArray[nCurrentTurn];
-			/*
-			 * check if player has any cards left to play; if not return... ?
-			 */
-			// This sends to client; fine; 
-			//  pause before processing any response when stepping
-			/*
-			 * This message should included the cards already played in the trick..
-			 * xxx
-			 * ,,, No it shouldn't. But it should send a %msg text attachment
-			 *  if first move, ?0%msg: lead the 2c
-			 *  if leading, ?0%msg: your lead
-			 *  else ?0%msg: your turn
-			 */
-			String msg;
-			if (nCurrentTurn == -1
-					&& (currentTrick == null || 
-							currentTrick.subdeck.size() == 0))
-				msg = "%Play the 2 of clubs";
-			else if (currentTrick == null || 
-					currentTrick.subdeck.size() == 0) // i.e. your leading, and not first trick
-				msg = "%Your lead.";
-			else
-				msg = "%Your turn.";
-			pm.setUsertext(msg);
-			p.sendToClient(pm);
-		//}
+		// while (nCurrentTurn != -1) {
+		if (nCurrentTurn == -1) {
+			// really just the hand is over, not the game...
+			// TODO:
+			// so should rotate the pass order pt=nextPassType();
+			// shuffle and deal
+			gameOver();
+			return;
+		}
+		ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.YOUR_TURN);
+		Player p = playerArray[nCurrentTurn];
+		/*
+		 * check if player has any cards left to play; if not return... ?
+		 */
+		// This sends to client; fine;
+		// pause before processing any response when stepping
+		/*
+		 * This message should included the cards already played in the trick.. xxx ,,,
+		 * No it shouldn't. But it should send a %msg text attachment if first move,
+		 * ?0%msg: lead the 2c if leading, ?0%msg: your lead else ?0%msg: your turn
+		 */
+		String msg;
+		if (nCurrentTurn == -1 && (currentTrick == null || currentTrick.subdeck.size() == 0))
+			msg = "%Play the 2 of clubs";
+		else if (currentTrick == null || currentTrick.subdeck.size() == 0) // i.e. your leading, and not first trick
+			msg = "%Your lead.";
+		else
+			msg = "%Your turn.";
+		pm.setUsertext(msg);
+		p.sendToClient(pm);
+		// }
 		if (nCurrentTurn == -1)
 			gameErrorLog("Game over.");
 	}
@@ -394,17 +407,31 @@ public class CardGame implements GameInterface {
 	/*
 	 * initiatePass -- set up exchnage mail boxes, 
 	 * 	set routing, and send the pass cards request
-	 * xxx new untested code
+	 * 
+	 * At end of hand, set currentPassType to the next passtype
 	 */
 	void initiatePass(MailBoxExchange.PassType pt) {
 		if (pt == MailBoxExchange.PassType.PassHold)
 			return;
 		// number of players, number of cards to pass for error checking
-		MailBoxExchange mbx=new MailBoxExchange(nPlayers, 3);
+		MailBoxExchange mbx=new MailBoxExchange(pt, nPlayers, 3);
 		// Now send the pass messages, telling the user what
 		// the pass type is
 	}
-	
+
+	MailBoxExchange.PassType currentPassType=MailBoxExchange.PassType.PassHold;
+	void initiatePass() {
+		MailBoxExchange.PassType pass;
+		
+		pass=MailBoxExchange.PassType.PassHold;
+		if (pass == MailBoxExchange.PassType.PassHold)
+			return;
+		// number of players, number of cards to pass for error checking
+		MailBoxExchange mbx=new MailBoxExchange(currentPassType, nPlayers, 3);
+		// Now send the pass messages, telling the user what
+		// the pass type is
+	}
+
 	void broadcastUpdate(ProtocolMessage pmsg) {
 		int i, j;
 		j = nCurrentTurn; 
@@ -504,7 +531,8 @@ public class CardGame implements GameInterface {
 				totalScores();
 				nCurrentTurn = -1;
 				// should just reset hand...
-				reset(true);	// shuffle this time...
+				// Don't be too quick to reset
+				// reset(true);	// shuffle this time...
 				return;
 				}
 			/*
@@ -719,98 +747,173 @@ public class CardGame implements GameInterface {
 	 * two versions of reset - 
 	 * reset - game reset initial or after catastrophic reset
 	 *  regenerate players 
-	 *  reset score
+	 *  reset score, and pass order
 	 *   -- and initiatePlay
 	 */
 	public void reset() {
-		populatePlayers();
+		bGameAborted=false;
+		bGameOver=false;
+		nCurrentTurn=-1;
+		
+		//populatePlayers();
 		//resetPassOrder();
 		handReset();
-		initiatePlay();
+	}
+	
+	public boolean isAborted() {
+		return bGameAborted;
+	}
+	void gameOver() {
+		bGameOver = true;
+	}
+	void abort() {
+		bGameAborted = true;
 	}
 	void reset(Boolean shuffle) {
 		bShuffle = shuffle;
 		reset();
 	}
-
+	public void start() {
+		initiatePlay();		
+	}
 	/*
-	 * handReset - shuffle and deal
+	 * setFirstMove - set the player who leads, and set up trick
 	 */
-	public void handReset() {
-		//
-		// TODO: Make sure there are nPlayers and add robots if there aren't
-		//
-
-		/*
-		 * seat the human players at the table, and add robots to fill in the game
-		 */
-		// No. players already populated
-		//populatePlayers();
-		
-		//
-		// Create a new pack of cards and shuffle them
-		//
-		Subdeck pack = new Subdeck(52);
-		/*
-		 * shuffle
-		 */
-		if (bShuffle)
-			pack.shuffle();
-		//
-		// deal official copy of cards
-		//
+	public void setFirstMove() {
 		int i;
 		Player p;
-		for (i = 0; pack.size() > 0; i++) {
-			i = i % nPlayers;
-			Card c = pack.pullTopCard();
-			/*
-			 * if there aren't a full complement of players cards get thrown away for now...
-			 * should throw an exception and a hissy fit.
-			 */
-			if (playerArray[i] != null) {
-				if (c.equals(Rank.DEUCE, Suit.CLUBS))
-					updateTurn(i);	//	nCurrentTurn = i;
-				if (playerArray[i].subdeck == null)
-					gameErrorLog("can't happen:null subdeck.");
-				//gameErrorLog("adding:<" + c.encode() + "> to" + playerArray[i].subdeck.encode());
-				//
-				// TODO: call ssAddCard
-				playerArray[i].subdeck.add(c);
-			}
+		Subdeck sd;
+		Card theTwo=new Card(Rank.DEUCE, Suit.CLUBS);
+		
+		// go through players list
+		// find who has the two of clubs.
+		for (i=0; i<nPlayers; i++) {
+			p = playerArray[i];
+			sd = p.subdeck;
+			if (sd.find(theTwo)) 
+				nCurrentTurn = i;
 		}
-	}
-	void initiatePlay() {
-	
+		if (nCurrentTurn == -1) {
+			// Uh oh. Can't happen. Nobody had the two of clubs...
+			System.out.println("Catastrophic error: No one has the two...");
+			// TODO:
+			// broadcast error... For this?
+			abort();
+		}
+
 		/*
-		 * Initiate a pass message to players ~
-		 * Retrieve results
-		 * Then start the game
-		 *  idea... Passing: waiting for... to everyone
-		 *  then start...
-		 *  This is the first really asynch thing to be done...
-		 */
-		/*
-		 * create the first trick and initialize for gameplay
+		 * set up the first trick now that we know who leads
 		 */
 		nTrickId = 0;
 		Trick t = new Trick(nTrickId);
 		t.leader = nCurrentTurn;
 		trickArray[nTrickId] = t;
 		currentTrick = t;
+	}
+	
+	/*
+	 * handReset - shuffle and deal
+	 */
+	public void handReset() {
+		/*
+		 * Knock out cards from client
+		 * and reset robot players
+		 */
+		deal();
+	}
+
+	/*
+	 * create a pack of cards and deal them
+	 */
+	void deal() {
+		/* Can't know the leader yet...
+		 * move to initiate play
+		nTrickId = 0;
+		Trick t = new Trick(nTrickId);
+		t.leader = nCurrentTurn;
+		trickArray[nTrickId] = t;
+		currentTrick = t;
+		*/
 		int i;
 		Player p;
 
 		//
+		// Create a new pack of cards and shuffle them
+		//
+		Subdeck pack = new Subdeck(52);
+		if (bShuffle)
+			pack.shuffle();
+		//
+		// deal official copy of cards
+		//
+		/* 
+		 * no need to set current turn here
+		 * the two might get passed to someone else
+		 */
+		for (i = 0; pack.size() > 0; i++) {
+			i = i % nPlayers;
+			Card c = pack.pullTopCard();
+			/*
+			 * if there aren't a full complement of players cards get thrown away for now...
+			 * should abort and throw an exception and a hissy fit.
+			 */
+			if (playerArray[i] != null) {
+				/* updateTurn done after pass...
+				if (c.equals(Rank.DEUCE, Suit.CLUBS))
+					updateTurn(i);	//	nCurrentTurn = i;
+					*/
+				if (playerArray[i].subdeck == null)
+					gameErrorLog("can't happen:null subdeck.");
+				//
+				// TODO: call ssAddCard
+				// is ssAddCard still a thing?
+				playerArray[i].subdeck.add(c);
+			}
+		}
+
+	}
+	/*
+	 * send welcome message holding session information
+	 * to get back into the game. Then..
+	 * 
+	 * 1. Initiate a pass message to players ~
+	 *   when pass is complete, game will start
+	 * 2. otherwise find the two commence play
+	 *   
+	 * Retrieve results
+	 * Then start the game
+	 *  idea... Passing: waiting for... to everyone
+	 *  then start...
+	 *  This is the first really asynch thing to be done...
+	 */
+	void initiatePlay() {
+		/*
+		 * Can't setup trick yet, till after the (maybe) pass
+		 *
+		nTrickId = 0;
+		Trick t = new Trick(nTrickId);
+		t.leader = nCurrentTurn;
+		trickArray[nTrickId] = t;
+		currentTrick = t;
+		*/
+		int i;
+		Player p;
+		/*
+		 * create the first trick and initialize for gameplay
+		 */
+
+		//
 		// send (individual) welcome message
+		// shouldn't join do this?
 		for (i = 0; i < nPlayers; i++) {
 			p = playerArray[i];
 			ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PLAYER_WELCOME, p.getName());
 			p.sendToClient(pm);
 		}
-		
+				
+		// lookup pass type for this hand...
 		//
-		// Now send the protocol message to add them to the players hand
+		// Now send the protocol message to add cards to the players hand
 		for (i = 0; i < nPlayers; i++) {
 			p = playerArray[i];
 			ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.ADD_CARDS, p.subdeck);
@@ -825,6 +928,7 @@ public class CardGame implements GameInterface {
 
 		// So do the pass, if a pass hand.
 		//  when the pass is complete it will call send next move
+		
 		// otherwise sendnextmove
 		//
 		// Send the message to the first player to start...
@@ -839,12 +943,15 @@ public class CardGame implements GameInterface {
 		boolean holdHand = true;
 		if (!holdHand)	// This is just to compile; not implemented fully yet
 			initiatePass(MailBoxExchange.PassType.PassHold);
-		else
+		else {
+			setFirstMove();
 			sendNextMove();
+			}
 	}
 
 	/*
 	 * disconnect -- delete human player entry that this was attached to, and add robot player
+	 *  -- called when communications terminate to keep the game going --
 	 */
 	@Override
 	public void disconnect(int pid) {
@@ -864,4 +971,3 @@ public class CardGame implements GameInterface {
 		}
 			
 }
-

@@ -150,7 +150,9 @@ public class WsServer {
 	public void onMessage(String message, boolean last, Session sess) {
 
 		CardGame g=null;
-		
+		String sname="";
+		String sparam="";
+
 		System.out.println("Message from the client: " + message);
 		if (message.startsWith("$")) {
 			processSUCommand(sess, message);
@@ -168,6 +170,8 @@ public class WsServer {
 				String msg=stripSessionInfo(message);
 				ProtocolMessage pm = new ProtocolMessage(msg);
 				g=lookupGameFromSession(sRemoteSession);
+				if (g == null)
+					g = getDefaultGame();
 				// tell the client what protocol message parsed as:
 				if (remoteDebug)
 					write(us, "saw:" + pm.type + "sender:" + pm.sender + "{" + pm.usertext + "}");
@@ -223,21 +227,36 @@ public class WsServer {
 				s = s + "+";
 			write(us, us.sessionId + us.username);
 			break;
+		case JCLStart:
+			sname="";
+			sparam="";
+			if (jcl.argc() > 1) {	// argc is always at least 1
+				sname=jcl.getName(1);
+				sparam=jcl.getValue(1);
+				}
+			/*
+			 * sparam is in reality ignored for now
+			 */
+			g=lookupGameFromSession(sparam);
+			if (g == null)
+				g = getDefaultGame();
+			g.start();
+			break;
 		case JCLJoin:
 			// here is the confluence of the http server and the gameserver
 			// create a game if one does not exist, and insert this session into it
 			// xxx
 			System.out.println("User: '" + us.username + "' Joining...");
 			boolean byGod=false;
-			String sname="";
-			String sparam="";
+			sname="";
+			sparam="";
 			if (jcl.argc() > 1) {	// argc is always at least 1
 				sname=jcl.getName(1);
 				sparam=jcl.getValue(1);
 				}
-			// this is just for now...
-			// should join the game requested
-			// not the default one that was born into
+			/*
+			 * sparam needs to be managed more intensely
+			 */
 			g=lookupGameFromSession(sparam);
 			if (g == null)
 				g = getDefaultGame();
@@ -248,7 +267,7 @@ public class WsServer {
 				// joined ok...
 				//
 				write(us, "Successfully joined game as " + pname + "...");
-				write(us, "send reset to initiate play.");
+				write(us, "issue start command to initiate play.");
 			}
 			else if (!bJoinStatus  && (sparam.contains("bygod") ||
 					(sname.contains("bygod")))) {

@@ -19,6 +19,7 @@ public class UserJCLCommand {
 		JCLCommandNotImplemented, // Command is not implemented
 		JCLSetname, // set the name attached to user
 		JCLJoin, // Join, Rejoin games
+		JCLStart,
 		JCLRejoin, JCLSuperUser, // SuperUser
 		JCLResend, JCLReset,
 		JCLNewdeal, JCLMisdeal,
@@ -114,7 +115,8 @@ public class UserJCLCommand {
 	String jclNewdeal = "newdeal";
 	String jclStatus = "status";
 	String jclShuffle = "shuffle";
-	
+	String jclStart = "start";
+
 	String jclIdentifierPattern = "[a-zA-Z0-9]+";
 	Pattern jclRegex = Pattern.compile(jclPattern);
 	Pattern jclSetnameRegex = Pattern.compile(jclSetnamePattern);
@@ -130,6 +132,7 @@ public class UserJCLCommand {
 	Pattern jclNewdealRegex = Pattern.compile(jclNewdeal);
 	Pattern jclStatusRegex = Pattern.compile(jclStatus);
 	Pattern jclShuffleRegex = Pattern.compile(jclShuffle);
+	Pattern jclStartRegex = Pattern.compile(jclStart);
 	
 	Pattern jclIdentierRegex = Pattern.compile(jclIdentifierPattern);
 
@@ -277,6 +280,28 @@ public class UserJCLCommand {
 				}
 			}
 			return; // "//+Join game(" + sName + ")";
+		}
+		// scan for Start
+		m = jclStartRegex.matcher(commandString);
+		if (m.find()) { // i.e. look for 'start' then an identifier
+			type = JCLType.JCLStart;
+			/*
+			 * param is ignored for start
+			 */
+			String sSession = "no"; // default name string
+			Matcher identifier = jclIdentierRegex.matcher(commandString);
+			for (int i = 0; identifier.find(); i++) {
+				switch (i) {
+				case 0:
+					continue; // the command itself
+				case 1:
+					sSession = identifier.group();
+					NameValuePair p1 = new NameValuePair("session", sSession);
+					argv.add(p1);
+					break;
+				}
+			}
+			return; // "//+start sSession
 		}
 		// scan for status
 		m = jclStatusRegex.matcher(commandString);
