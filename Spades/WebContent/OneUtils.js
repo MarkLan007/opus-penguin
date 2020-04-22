@@ -201,7 +201,7 @@ function cardSelected2(event) {
 function wsHandInit() {
 	var i = 0;
 	// alert(handWindow.location.href);
-	var controlDiv = document.getElementById("CardsInHandDiv");
+	// var controlDiv = document.getElementById("CardsInHandDiv");
 	// now in main window...
 	// var controlDiv=document.getElementById("CardsInHandDiv");
 	var cardBtn;
@@ -266,7 +266,7 @@ function wsHandInit() {
 	/*
 	 * Place cards in suit-related div
 	 */
-	controlDiv = document.getElementById("ClubsInHandDiv");
+	var controlDiv = document.getElementById("ClubsInHandDiv");
 	for (i = 0; i < 52; i++) {
 		card = theDeck[i];
 		cardBtn = card.handButton;
@@ -300,8 +300,8 @@ function addCardToHand(cardindex) {
 		return false;
 	}
 	card.handButton.style.visibility = "visible";
-	card.handButton.style.height = "75px";
-	card.handButton.style.width = "54px";
+	card.handButton.style.height = "150px";	// was 75px
+	card.handButton.style.width = "100px";	// was 54px xxx
 	return true;
 	// card.cardBtn.style.visibility = "visible";
 }
@@ -1699,7 +1699,8 @@ function wsInitPassDialog(n, sMsg) {
 	iCurrentFreeCardinPass = 0;
 	var w = window.open("PassCards.html",
 		"Pass Cards",
-		"width=410,height=325,status=no,toolbars=no,resizeable=yes,location=no"
+		"width=600,height=370,status=no,toolbars=no,resizeable=yes,location=no"
+		// was 410x325
 	);
 	passWindow = w;
 	bPassDialogInit = true;
@@ -1721,6 +1722,28 @@ function wsPassDialog(n, sMsg) {
 	// passWindow.visibility = "visible";
 }
 
+// get a button card that is the cardback
+// Note: ** untested ** probably doesn't work
+function getCardBackBtn() {
+	var cardBtn;
+	cardBtn = document.createElement("Button");
+	cardBtn.setAttribute("id", "CardIndex" + 15);
+	cardBtn.setAttribute("type", "button");
+	cardBtn.setAttribute("value", "Search");
+	var fname = '"thumblib/' + "bkD" + '_thumb.png"';
+	// fname = '"buttonfacetest.png"';
+	cardBtn.style.backgroundImage = 'url(' + fname + ')';
+	cardBtn.style.backgroundRepeat = "no-repeat";
+	/*
+	 * Bug: For no apparent reason adding the event listeners with setAttribute
+	 * doesn't work. I have no idea why. But addEventListener does work.
+	 */
+	cardBtn.addEventListener("click", passCardSelected);
+	cardBtn.addEventListener("dblclick", passCardSelected);
+	//passWindow.document.getElementById("passDiv").appendChild(cardBtn);
+	return cardBtn;
+	
+}
 /*
  * createNewButton - create button to be placed in passed card dialog
  */
@@ -1732,6 +1755,8 @@ function createNewPassCardButton(cardindex) {
 	cardBtn.setAttribute("value", "Search");
     // with images: don't set innerText
 	// cardBtn.setAttribute("name","label" + i);
+	//
+	// set width and height here??? xxx
 	cardBtn.style.height = "0";
 	cardBtn.style.width = "0";
 	cardBtn.style.alignItems = "center";
@@ -1837,8 +1862,8 @@ function addCardToPassDialog(cardindex) {
 	 */
 	cardBtn.name = card.shortName;
 	cardBtn.style.visibility = "visible";
-	cardBtn.style.height = "75px";
-	cardBtn.style.width = "54px";
+	cardBtn.style.height = "250px";	// was "75px" "250px" by "180px" works but is big..
+	cardBtn.style.width = "180px";	// was "54px"
 
 	iCurrentFreeCardinPass++;
 	// iPassSize cards? enable the send button
@@ -2097,25 +2122,87 @@ function sortByCardOrder(a) {
 	}
 	return a;
 }
-
+var rowMaxButtons = 8;	// max of 8 cards in a row...
+/*
+ * blankBtn padding doesn't work. It's bad. Kill it. Now.
+ */
+//var blankBtn=null;		// for padding...
 function reorgButtonsInDiv(sdiv) {
+//	blankBtn = getCardBackBtn();
 	var buttonList=null; //= new Array();
+	var cardBtn=null;
 	// start with "ClubsInHandDiv"
 	var div=document.getElementById(sdiv);
+	//div.style.alignItems = "left";	// Ok...
+
 	buttonList = getDescendantElements(div);
 	buttonList = sortByCardOrder(buttonList);
 	// remove the items add them back to the div
-	var i;
-	for (i=0; i<buttonList.length; i++)
-		div.removeChild(buttonList[i]);
+	var i, j, nSkipped=0;
+	// div.style.left = "50px";
+	for (i=0; i<buttonList.length; i++) {
+		cardBtn = buttonList[i];
+		div.removeChild(cardBtn);
+		/*
+		 * for now squirrel away a card that is not visible...
+		 */
+	}
+	var minmargin = 0;
+	/*
+	 * Ok, so count the blank buttons in the array and then
+	 * pad the buttonlist from the left
+	 * So that it right justifies.
+	 * Can't figure out any other way to do this...
+	 */
+	/*
+	for (i=0; i<buttonList.length; i++) {
+		cardBtn=buttonList[i];
+		// don't add in cards that should be hidden
+		if (cardBtn.style.visibility == "hidden") {
+			nSkipped++;
+			if (blankBtn == null)
+				blankBtn = cardBtn;
+		}
+	}
+	*/
+	var k=0;
+	/*
+	 * No don't. Really.
+	 *
+	// append nSkipped blanks to div
+	for (j=0; j<nSkipped; j++) {
+		if (blankBtn != null) {
+			div.appendChild(blankBtn);
+			k++;
+		}
+	}
+	*/
+	console.log("Prepending " + k + " blanks to " + sdiv)
+	// append (sorted, nonblank) cards to div
 	for (i=0; i<buttonList.length; i++) {
 		// should only append if it's visible... i.e. actually in the hand...
-		var b=buttonList[i];
-		if (buttonList[i].style.visibility === "hidden")
-			;
-		else
-			div.appendChild(buttonList[i]);
+		cardBtn=buttonList[i];
+		// don't add in cards that should be hidden
+		if (cardBtn.style.visibility == "hidden") {
+			nSkipped++;
+		} else {
+			/* the values I started with work better...
+			cardBtn.style.minWidth = 160;
+			cardBtn.style.minHeight = 200;
+			cardBtn.style.height = "200px";	// was 75px
+			cardBtn.style.width = "183px";	// was 54px xxx
+			*/
+			//cardBtn.style.left = "40px";
+			//cardBtn.style.alignItems = "left";	// Does nothing here...
+			div.appendChild(cardBtn);
+			minmargin += 140;
+			}
 	}
+	div.className = "buttonGrid";
+	// alignRight is another interesting option...
+	// need to make cards narrower, though.. perhaps float...
+	//div.className = "alignRight";
+	console.log("Reorg consolidated " + nSkipped + " cards.");
 }
 
 var cardDivs=[
@@ -2125,6 +2212,10 @@ var cardDivs=[
 	"HeartsInHandDiv",
 ];
 function reorgButtons() {
+	// put the hand-index over the top of the table-canvas
+	//.style.zIndex
+	var handDiv = document.getElementById("handArea");
+	handDiv.style.zIndex = 2;
 	for (var i=0; i<cardDivs.length; i++)
 		reorgButtonsInDiv(cardDivs[i])
 }

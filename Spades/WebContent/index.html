@@ -110,17 +110,20 @@ body {
 	flex-direction:	row;
 	flex-wrap:	wrap;
 	justify-content:	start;
+
+	float: right;
+
  */
 .column2 {
-	display:grid;
-	gap: 0 0;
- 	grid-template-rows: repeat(15, 80px [col-start]);
 	/*
 	 * the column aspect; i.e. relationship with rest of page
 	 *  i.e. cf with column1
 	 */
-	width: 45%;
-	float: right;
+	 z-index: 1;
+	 width: 45%;  
+	/* left: 550px; */
+	display: grid;
+	grid-template-rows: 80px 80px 80px auto;
 }
 
 /*
@@ -128,8 +131,9 @@ body {
  */
  .buttonGrid {
  	display:grid;
- 	gap: 0 0;
- 	grid-template-columns: repeat(21, 20px [col-start]);
+ 	grid-gap: 5px 20px;
+ 	grid-template-columns: repeat(21, 20px [col-end]);
+	align-items: end;
  	}
  /* using flex didn't do what I wanted
 .buttonGrid {
@@ -195,9 +199,11 @@ body {
 	<p id="gamestatusArea" class="alignRight"> Cards as buttons go here. </p>
 	<p id="trickArea" class="alignRight"> Previous Trick. </p>
 
-	<div class="column2"
-		style="height: 416px; background-color: powderblue;">
+	<div class="column2" id="handArea"
+		style="height: 415px; background-color: powderblue;">
+		<!--  
 		<div class="buttonGrid" id="CardsInHandDiv"></div>
+		-->
 		<div class="buttonGrid" id="ClubsInHandDiv"></div>
 		<div class="buttonGrid" id="DiamondsInHandDiv"></div>
 		<div class="buttonGrid" id="SpadesInHandDiv"></div>
