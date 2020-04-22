@@ -219,9 +219,11 @@ body {
 		<input title="Game will connect to server when you submit a command.."
 			onclick="wsSendMessage1();" value="Submit" type="button"> <br />
 		<input onclick='wsPassDialog(3, "Pass 3 Cards");' value="Pass Dialog"
-			type="button"> <input onclick="wsHandInit();"
-			value="ShowHand" type="button"> <input
-			onclick="turnover1card();" value="Show 1 Card" type="button">
+			type="button"> 
+		<input onclick='wsScoreDialog("$0<p1.0.0><p2.1.10><p3.13><p4.3.3>");' value="Score Dialog"
+			 type="button"> 
+		<input onclick="turnover1card();" value="Show 1 Card" 
+			type="button">
 		<input onclick="wsCloseConnection();" value="Disconnect" type="button"
 			disabled> <input onclick="wsReconnect();"
 			id="reconnectButton" value="Reconnect" type="button" disabled>

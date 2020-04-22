@@ -232,7 +232,8 @@ public class CardGame implements GameInterface {
 		to.pid = from.pid;
 		to.bIsMyMove = from.bIsMyMove;
 		to.subdeck = from.subdeck;
-		to.score = from.score;
+		to.handScore = from.handScore;
+		to.totalScore = from.totalScore;
 	}
 
 	/*
@@ -303,6 +304,10 @@ public class CardGame implements GameInterface {
 		MainServer.ttyLogString(sError);
 	}
 
+	/* TODO:
+	 * getGameStatus compare score totaling with
+	 *  other routine totalScores() and consolodate
+	 */
 	String getGameStatus() {
 		String sStatus = "";
 		//
@@ -311,7 +316,7 @@ public class CardGame implements GameInterface {
 			String sCurrent = "";
 			if (playerArray[i] != null) {
 				Player p = playerArray[i];
-				sCurrent = p.playerName + '.' + p.score;
+				sCurrent = p.playerName + '.' + p.handScore + "." + p.totalScore;
 				if (nCurrentTurn == i)
 					sCurrent = '#' + sCurrent;
 			}
@@ -444,10 +449,15 @@ public class CardGame implements GameInterface {
 		
 		}
 
+	/*
+	 * totalScores - total the scores for the hand checks for moonshooting and
+	 * game-end
+	 */
 	void totalScores() {
 		int i, iTrickTotal;
-		for (i=0; i<nTrickId; i++) {
-			Trick t=trickArray[i];
+		boolean gameEnds = false;
+		for (i = 0; i < nTrickId; i++) {
+			Trick t = trickArray[i];
 			// sum up the no of hearts in the trick, the QS and give to the winner
 			iTrickTotal = 0;
 			for (Card c : t.subdeck.subdeck) {
@@ -455,16 +465,47 @@ public class CardGame implements GameInterface {
 					iTrickTotal = iTrickTotal + 1;
 				else if (c.rank == Rank.QUEEN && c.suit == Suit.SPADES)
 					iTrickTotal = iTrickTotal + 13;
-				}
-			playerArray[t.winner].score = playerArray[t.winner].score + iTrickTotal; 
 			}
-		String sTemp="";
-		for (i=0; i<nPlayers; i++)
-			sTemp = sTemp + "<" + playerArray[i].pid + "." + playerArray[i].score + ">";
-		
-		ProtocolMessage pm=new ProtocolMessage(ProtocolMessageTypes.PLAYER_SCORES, sTemp);
-		broadcastUpdate(pm);		
+			playerArray[t.winner].handScore = playerArray[t.winner].handScore + iTrickTotal;
 		}
+		/*
+		 * Check to see if someone shot the moon! shot the moon if p[i] has pts && no
+		 * one else does so count the number of nonzero pts
+		 */
+		int playersWithPts = 0;
+		int moonShooter = -1;
+		for (i = 0; i < nPlayers; i++)
+			if (playerArray[i].handScore > 0) {
+				playersWithPts++;
+				moonShooter = i;
+			}
+		if (playersWithPts == 1) {
+			// then moonShooter is not -1 and shot the moon
+			for (i = 0; i < nPlayers; i++)
+				if (i == moonShooter)
+					playerArray[i].handScore = 0;
+				else
+					playerArray[i].handScore = 26;
+		}
+		// Total the score
+		for (i = 0; i < nPlayers; i++) {
+			playerArray[i].totalScore += playerArray[i].handScore;
+			if (playerArray[i].totalScore >= 100)
+				gameEnds = true;
+		}
+
+		String sTemp = "";
+		for (i = 0; i < nPlayers; i++)
+			sTemp = sTemp + "<" + playerArray[i].getName() + "." + playerArray[i].handScore + "."
+					+ playerArray[i].totalScore + ">";
+
+		if (gameEnds)
+			gameOver();
+		// ToDo:
+		// should sort by total score...
+		ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PLAYER_SCORES, sTemp);
+		broadcastUpdate(pm);
+	}
 	
 	/*
 	 * Update the trick with the (legally played) card, send updated trick to
@@ -956,8 +997,8 @@ public class CardGame implements GameInterface {
 	@Override
 	public void disconnect(int pid) {
 		/*
-		 * create new robot player, copy the human player's state and send message
-		 * on to the new addition...
+		 * create new robot player, copy the human player's state and send message on to
+		 * the new addition...
 		 */
 		RobotPlayer robot = new RobotPlayer(pid, this);
 		Player p = playerArray[pid];
@@ -965,9 +1006,9 @@ public class CardGame implements GameInterface {
 		copyPlayer(p, robot);
 		playerArray[pid] = robot;
 		if (nCurrentTurn == pid) {
-			ProtocolMessage pm=new ProtocolMessage(ProtocolMessageTypes.YOUR_TURN);
+			ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.YOUR_TURN);
 			robot.process(pm);
-			}
 		}
+	}
 			
 }

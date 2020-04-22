@@ -1706,6 +1706,36 @@ function wsInitPassDialog(n, sMsg) {
 	bPassDialogInit = true;
 }
 
+var scoreWindow;
+var bScoreDialogInit = false;
+
+function dismissScoreDialog(event) {
+	scoreWindow.close();
+}
+function wsInitScoreDialog(sMsg) {
+	// divert selected cards to the dialog
+	bPassingCardsInProgress = true;
+	iCurrentFreeCardinPass = 0;
+	var w = window.open("PlayerScores.html",
+		"Hand Results",
+		"width=600,height=370,status=no,toolbars=no,resizeable=yes,location=no"
+		// was 410x325
+	);
+	//cardBtn.addEventListener("click", dismissScoreDialog);
+	//cardBtn.addEventListener("dblclick", dismissScoreDialog);
+
+	scoreWindow = w;
+	bScoreDialogInit = true;
+}
+
+function wsScoreDialog(n, sMsg) {
+	// somehow closing it destroys the window;
+	// for now, create it every time...
+	bScoreDialogInit = false;
+	if (!bPassDialogInit)
+		wsInitScoreDialog(sMsg);
+}
+
 /*
  * wsPassDialog - bring up the pass card dialog
  */

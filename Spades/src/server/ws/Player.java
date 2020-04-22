@@ -35,7 +35,8 @@ public class Player /*implements PlayerInterface */{
 		bIsMyMove = false;
 	}
 	String playerName="";
-	int score=0;
+	int handScore=0;
+	int totalScore=0;
 	// pid, critically, corresponds to table-seat
 	protected int pid; 	// Player-id for protocol messages
 	/*
