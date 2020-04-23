@@ -1824,6 +1824,50 @@ function scoreHandlerInstall() {
 	closeBtn.addEventListener("click", dismissScoreDialog);
 }
 
+/*
+ * experimentalFunction
+ *  stub for experimenting with new elements invoked from index.html
+ */
+function showModal() {
+	var modal = document.getElementById("myExperimentalModal");
+	modal.style.display = "block";
+	}
+
+function initModal() {
+	var modalDiv = document.getElementById("myExperimentalModal");
+
+	// Get the button that opens the modalDiv
+	var btn = document.getElementById("myBtn");
+
+	// Get the <span> element that closes the modalDiv
+	var span = document.getElementsByClassName("close")[0];
+
+	// When the user clicks the button, open the modalDiv 
+	btn.onclick = function() {
+	  modalDiv.style.display = "block";
+	}
+
+	// When the user clicks on <span> (x), close the modalDiv
+	span.onclick = function() {
+	  modalDiv.style.display = "none";
+	}
+
+	// When the user clicks anywhere outside of the modalDiv, close it
+	window.onclick = function(event) {
+	  if (event.target == modalDiv) {
+	    modalDiv.style.display = "none";
+	  }
+	}
+
+}
+
+function experimentalFunction() {
+	console.log("You never know what you're going to get");
+	initModal();
+	//setNonModal();
+	showModal();
+}
+
 function wsScoreDialog(sMsg) {
 	// somehow closing it destroys the window;
 	// for now, create it every time...

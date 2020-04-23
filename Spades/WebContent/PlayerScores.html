@@ -50,10 +50,10 @@ tr:nth-child(even) {
  */
 function xyzzy() {
 	var b;
-	b = (document.readState === "complete");
-	/* alert("readystate?" + b + " should be true..."); */
-		document.getElementById("dismissScoresButton").disabled = false;
-		var closeBtn = document.getElementById("dismissScoresButton");
+	b = (window.document.readState === "complete");
+	alert("readystate?" + b + " should be true..."); 
+	window.document.getElementById("dismissScoresButton").disabled = false;
+		var closeBtn = window.document.getElementById("dismissScoresButton");
 		closeBtn.addEventListener("click", dismissScoreDialog);
 		"function _f() { } _f()"
 }
