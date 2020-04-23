@@ -261,6 +261,7 @@ public class CardGame implements GameInterface {
 				copyPlayer(p,hp);
 				playerArray[i] = hp;
 				us.setpid(i);
+				us.setgame(this);
 				return true;
 				}
 			
@@ -309,6 +310,8 @@ public class CardGame implements GameInterface {
 	 *  other routine totalScores() and consolodate
 	 */
 	String getGameStatus() {
+		return getFormatedGameScore();
+		/*
 		String sStatus = "";
 		//
 		// Format status string
@@ -324,6 +327,7 @@ public class CardGame implements GameInterface {
 		}
 		sStatus = sStatus + '$';
 		return sStatus;
+		*/
 	}
 
 	/*
@@ -449,6 +453,15 @@ public class CardGame implements GameInterface {
 		
 		}
 
+	String getFormatedGameScore() {
+		int i;
+		String sTemp = "";
+		for (i = 0; i < nPlayers; i++)
+			sTemp = sTemp + "<" + playerArray[i].getName() + "." + playerArray[i].handScore + "."
+					+ playerArray[i].totalScore + ">";
+		return sTemp;
+	}
+	
 	/*
 	 * totalScores - total the scores for the hand checks for moonshooting and
 	 * game-end
@@ -494,16 +507,15 @@ public class CardGame implements GameInterface {
 				gameEnds = true;
 		}
 
-		String sTemp = "";
-		for (i = 0; i < nPlayers; i++)
-			sTemp = sTemp + "<" + playerArray[i].getName() + "." + playerArray[i].handScore + "."
-					+ playerArray[i].totalScore + ">";
+		String sTemp=getFormatedGameScore();
 
 		if (gameEnds)
 			gameOver();
 		// ToDo:
 		// should sort by total score...
-		ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PLAYER_SCORES, sTemp);
+		ProtocolMessage pm = new ProtocolMessage(
+				ProtocolMessageTypes.PLAYER_SCORES, 
+				sTemp);
 		broadcastUpdate(pm);
 	}
 	
@@ -775,6 +787,13 @@ public class CardGame implements GameInterface {
 			// empty queue of passes if any built up
 			break;
 		case GAME_QUERY:
+			
+			System.out.println("New Query Code...");
+			returnMessage = new ProtocolMessage(ProtocolMessageTypes.GAME_QUERY,
+					getFormatedGameScore());
+			p.sendToClient(returnMessage);
+			break;
+			
 		case SUPER_USER:
 			String sStatus = getGameStatus();
 			break;
@@ -799,6 +818,15 @@ public class CardGame implements GameInterface {
 		//populatePlayers();
 		//resetPassOrder();
 		handReset();
+	}
+	void sendScore(int playerId) {
+		// xxx
+		Player p = playerArray[playerId];
+		String sTemp=getFormatedGameScore();
+		ProtocolMessage pm = new ProtocolMessage(
+				ProtocolMessageTypes.PLAYER_SCORES, 
+				sTemp);
+		p.sendToClient(pm);
 	}
 	
 	public boolean isAborted() {

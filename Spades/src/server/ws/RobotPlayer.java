@@ -57,6 +57,8 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		return pid;
 		}
 
+	static int iSym=0;
+	
 	RobotBrain robotBrain = null; // new RobotBrain();
 	RobotPlayer(int pid, GameInterface gameInterfaceCallbacks) {
 		//super();
@@ -67,6 +69,7 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		robotBrain.setPID(pid);
 		setPID(pid);
 		setCardgame(gameInterfaceCallbacks);
+		setName("robot" + iSym++);
 		}
 	
 	/*

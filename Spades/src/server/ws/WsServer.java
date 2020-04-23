@@ -146,6 +146,13 @@ public class WsServer {
 	}
 	// --
 	
+	/*
+	 * Main role of onMessage is to detect JCL commands and process them,
+	 * but it also wraps the protocol messages by calling join with 
+	 * the Session info necessary to write back to it.
+	 * Subsequently it keeps track of what game the session is associated with
+	 * so that it route messages to the right game. (held together in UserSession)
+	 */
 	@OnMessage
 	public void onMessage(String message, boolean last, Session sess) {
 
@@ -215,17 +222,20 @@ public class WsServer {
 				sName = jcl.getValue(1);
 			else
 				sName = "Ghost-in-Machine";
+			System.out.println("name="+sName);
 			us.setName(sName);
+			write(us, us.sessionId + us.getName());
+			System.out.println("name="+sName);
 			break;
 		case JCLSuperUser:
 			us.setSuperUser(true);
 			break;
-		case JCLWhoAmI:
-			
-			String s = "name=" + us.getName();
+		case JCLWhoAmI:			
+			String s = "";
 			if (us.superuser())
 				s = s + "+";
-			write(us, us.sessionId + us.username);
+			s += us.sessionId + us.getName();
+			write(us, s);
 			break;
 		case JCLStart:
 			sname="";
@@ -343,7 +353,13 @@ public class WsServer {
 			us.game.resend(us);
 			break;
 		case JCLStatus:
-			write(us, "" + jcl.type + "(" + "): under construction");
+			int playerId=us.getpid();
+			write(us, "" + jcl.type + "(" + playerId + "): under construction");
+			if (playerId == -1) {
+				write(us, "Not currently in a game; can't get status");
+				break;
+			}
+			us.game.sendScore(playerId);			
 			break;
 		case JCLMisdeal:
 		case JCLNewdeal:

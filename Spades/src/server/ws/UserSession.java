@@ -9,11 +9,18 @@ import javax.websocket.Session;
 
 public class UserSession {	// wrapper for data to keep with Session
 	int vc=0;			// vc - virtual channel
-	int pid=0;			// game assigned player id assigned by join for rejoini
+	int pid=-1;			// game assigned player id assigned by join for rejoini
 	Session session=null;
 	boolean bSuperUser=false;
 	// game variables
 	CardGame game=null;		// placeholder for a pointer to a game;
+	void setgame(CardGame g) {
+		game = g;
+	}
+	CardGame getGame() {
+		return game;
+	}
+	
 	CardGameKernel cgk=null;	// kernel queue
 	String username="";
 
@@ -34,8 +41,15 @@ public class UserSession {	// wrapper for data to keep with Session
 		bSuperUser = flag;
 	}
 
+	/*
+	 * used by CardGame.join to make sure that userSession 
+	 *  knows what the player id it...
+	 */
 	public void setpid(int n) {
 		pid = n;
+	}
+	public int getpid() {
+		return pid;
 	}
 	
 	/*

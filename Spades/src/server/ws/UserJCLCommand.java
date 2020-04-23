@@ -54,14 +54,18 @@ public class UserJCLCommand {
 			return "param out of bounds";
 		return argv.get(i).name;
 	}
+	/*
+	 * getValue - should return the arg at index, not monkeyed with
+	 * argv[0] is the command, and there is an entry at a[0] to reflect that
+	 */
 	String getValue(int index) {
-		if (index == 0) {
+/*		if (index == 0) {
 			return this.type.name();
 		}
-		int i=index - 1;
-		if (i >= argv.size())	// Uh-oh
+		int i=index - 1;*/
+		if (index >= argv.size())	// Uh-oh
 			return "param out of bounds";
-		return argv.get(i).value;
+		return argv.get(index).value;
 	}
 	/*
 	 * argc() - wierd, huh? argc is a function. Oh well.
@@ -148,6 +152,7 @@ public class UserJCLCommand {
 			return;
 		}
 		type = JCLType.JCLError;
+		
 		Matcher m = jclSetnameRegex.matcher(commandString);
 		if (m.find()) { // i.e. look for 'setname' then an identifier
 			type = JCLType.JCLSetname;
@@ -319,7 +324,7 @@ public class UserJCLCommand {
 					continue; // the command itself
 				case 1:
 					sName = identifier.group();
-					NameValuePair p1 = new NameValuePair("item", sName);
+					NameValuePair p1 = new NameValuePair("name", sName);
 					argv.add(p1);
 					break;
 				}

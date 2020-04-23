@@ -1668,6 +1668,11 @@ function processCardString(cardString) {
 			// report user error
 			gamestatusUpdate("error:" + cardString);
 			break;
+		case '$':
+			wsScoreDialog(cardString);
+			break;
+		case '~':
+			console.log("Pass message.. working on it...");
 		default:
 			console.log("unimplemented protocol msg:"
 				+ c0
@@ -1710,12 +1715,19 @@ var scoreWindow;
 var bScoreDialogInit = false;
 
 function dismissScoreDialog(event) {
+	console.log("Close-Button seen")
 	scoreWindow.close();
 }
+function enableScoreCloseButton() {
+
+	scoreWindow.document.getElementById("dismissScoresButton").disabled = false;
+	var closeBtn = scoreWindow.document.getElementById("dismissScoresButton");
+	closeBtn.addEventListener("click", dismissScoreDialog);
+	console.log("Clsoe button enabled...");
+	}
+
 function wsInitScoreDialog(sMsg) {
 	// divert selected cards to the dialog
-	bPassingCardsInProgress = true;
-	iCurrentFreeCardinPass = 0;
 	var w = window.open("PlayerScores.html",
 		"Hand Results",
 		"width=600,height=370,status=no,toolbars=no,resizeable=yes,location=no"
@@ -1723,16 +1735,41 @@ function wsInitScoreDialog(sMsg) {
 	);
 	//cardBtn.addEventListener("click", dismissScoreDialog);
 	//cardBtn.addEventListener("dblclick", dismissScoreDialog);
-
 	scoreWindow = w;
 	bScoreDialogInit = true;
+
+	window.addEventListener('load', (event) => {
+		  console.log('page is fully loaded');
+			scoreWindow.document.getElementById("dismissScoresButton").disabled = false;
+			closeBtn = scoreWindow.document.getElementById("dismissScoresButton");
+			closeBtn.addEventListener("click", dismissScoreDialog);
+		});
+
+	/*
+	 * theory: fails here because window not initialized enough..
+	 */
+	/*
+	scoreWindow.document.getElementById("dismissScoresButton").disabled = false;
+	var closeBtn;
+	closeBtn = scoreWindow.document.getElementById("dismissScoresButton");
+	closeBtn.addEventListener("click", dismissScoreDialog);
+	*/
+}
+
+function scoreHandlerInstall() {
+	console.log("Dialog init event...")
+	var closeBtn=null;
+	scoreWindow.document.getElementById("dismissScoresButton").disabled = false;
+	closeBtn = scoreWindow.document.getElementById("dismissScoresButton");
+	closeBtn.addEventListener("click", dismissScoreDialog);
 }
 
 function wsScoreDialog(n, sMsg) {
 	// somehow closing it destroys the window;
 	// for now, create it every time...
+	console.log("Parsing:" + sMSg);
 	bScoreDialogInit = false;
-	if (!bPassDialogInit)
+	if (!bScoreDialogInit)
 		wsInitScoreDialog(sMsg);
 }
 
@@ -2351,6 +2388,10 @@ function processLocalCommand(line) {
 		fadeOutTrick(currentGestault);
 		// clearCardTable(true);
 		xstatusUpdate("Table Cleared and Reset.");
+	} else if (line.includes("close")) {
+		//dismissScoreDialog(null);
+		enableScoreCloseButton();
+		xstatusUpdate("manually close score dialog window");
 	} else if (line.includes("reorg")) {
 		//Array of div names
 		// foreach div name
