@@ -1669,6 +1669,7 @@ function processCardString(cardString) {
 			gamestatusUpdate("error:" + cardString);
 			break;
 		case '$':
+			console.log("Starting scoredialog...");
 			wsScoreDialog(cardString);
 			break;
 		case '~':
@@ -1726,6 +1727,65 @@ function enableScoreCloseButton() {
 	console.log("Clsoe button enabled...");
 	}
 
+/*
+ * formatScore - parse formatted string and place fields in HTML table
+ */
+function formatScore(score) {
+	var w=scoreWindow;	
+	var name="",row=0;
+	var handscore="", gamescore="";
+	var c, prefix, elem;
+	var i,j;
+	// 
+	// looking at  {$name=x.y$}+
+	// scan upto $
+	for (i=1;i<score.length;i++)
+		if (score.charAt(i) == '$')
+			break;
+	// i points at $ (at top and bottom of loop; pre-increment)
+	for (row=0,i++; i<score.length; i++,row++){
+		// j points at first char after the $ (first char of name)
+		// scan past the name while accumulating it;
+		for (name="",j=i; j<score.length; j++) {
+			c = score.charAt(j);
+			// scan up to = for NAME saving chars
+			if (c == '=') 
+				break;
+			else
+				name += c;
+		}
+		// j points at '='
+		// scan past the first digit string
+		for (handscore="",j++; j<score.length; j++) {
+			c = score.charAt(j);
+			if (c == '.')
+				break;
+			else
+				handscore += c;
+		}
+		// j points at .
+		// scan past the second digit string
+		for (gamescore="",j++; j<score.length; j++) {
+			c = score.charAt(j);
+			if (c == '$')
+				break;
+			else
+				gamescore += c;
+		}
+		// j points at '$'
+		i = j;
+		//
+		// post up result in table
+		prefix = "p" + row;
+		elem = "player" + prefix;
+		w.document.getElementById(elem).innerText = name;
+		elem = prefix + "s0";
+		w.document.getElementById(elem).innerText = handscore;
+		elem = prefix + "s1";
+		w.document.getElementById(elem).innerText = gamescore;
+		}
+}
+
 function wsInitScoreDialog(sMsg) {
 	// divert selected cards to the dialog
 	var w = window.open("PlayerScores.html",
@@ -1746,7 +1806,7 @@ function wsInitScoreDialog(sMsg) {
 		});
 
 	/*
-	 * theory: fails here because window not initialized enough..
+	 * theory: fails here because window not fully initialized...
 	 */
 	/*
 	scoreWindow.document.getElementById("dismissScoresButton").disabled = false;
@@ -1764,13 +1824,14 @@ function scoreHandlerInstall() {
 	closeBtn.addEventListener("click", dismissScoreDialog);
 }
 
-function wsScoreDialog(n, sMsg) {
+function wsScoreDialog(sMsg) {
 	// somehow closing it destroys the window;
 	// for now, create it every time...
-	console.log("Parsing:" + sMSg);
-	bScoreDialogInit = false;
+	console.log("Parsing:" + sMsg);
+	//bScoreDialogInit = false;
 	if (!bScoreDialogInit)
 		wsInitScoreDialog(sMsg);
+	formatScore(sMsg);
 }
 
 /*
@@ -2392,6 +2453,11 @@ function processLocalCommand(line) {
 		//dismissScoreDialog(null);
 		enableScoreCloseButton();
 		xstatusUpdate("manually close score dialog window");
+	} else if (line.includes("score=")) {
+		var score = line.slice(6);
+		var s="fjkasd$buzz=0.0$joe=93.95$laura=3.3$anne=0.26$bob=0.26$patti=0.26$";
+		formatScore(s);
+		xstatusUpdate("score["+s+"]");
 	} else if (line.includes("reorg")) {
 		//Array of div names
 		// foreach div name

@@ -354,12 +354,12 @@ public class WsServer {
 			break;
 		case JCLStatus:
 			int playerId=us.getpid();
-			write(us, "" + jcl.type + "(" + playerId + "): under construction");
 			if (playerId == -1) {
 				write(us, "Not currently in a game; can't get status");
 				break;
 			}
 			us.game.sendScore(playerId);			
+			//write(us, "" + jcl.type + "(" + playerId + "): under construction");
 			break;
 		case JCLMisdeal:
 		case JCLNewdeal:

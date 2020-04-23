@@ -457,8 +457,9 @@ public class CardGame implements GameInterface {
 		int i;
 		String sTemp = "";
 		for (i = 0; i < nPlayers; i++)
-			sTemp = sTemp + "<" + playerArray[i].getName() + "." + playerArray[i].handScore + "."
-					+ playerArray[i].totalScore + ">";
+			sTemp = sTemp + "$" + playerArray[i].getName() + "=" 
+					+ playerArray[i].handScore + "."
+					+ playerArray[i].totalScore + "#";
 		return sTemp;
 	}
 	
@@ -826,6 +827,7 @@ public class CardGame implements GameInterface {
 		ProtocolMessage pm = new ProtocolMessage(
 				ProtocolMessageTypes.PLAYER_SCORES, 
 				sTemp);
+		pm.setSender(playerId);
 		p.sendToClient(pm);
 	}
 	
