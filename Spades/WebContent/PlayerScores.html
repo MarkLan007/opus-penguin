@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Hand Results</title>
+<style type="text/css">
+#canvas1 {
+	border: dotted 3 px #c0c0c0;
+	background-color: lightblue
+}
+</style>
+<style>
+/* 
+* scoreGrid is a container for a row of buttons 
+.scoreGrid {
+	display: grid;
+	gap: 0 0;
+	grid-template-columns: repeat(3, 20px [ col-start ]);
+	justify-items:center;
+}
+*/
+.scoreGrid {
+	display: flex;
+	justify-content:center;
+}
+</style>
+
+<style>
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+</style>
+
+<script>
+/*
+ * This seems to show a browser bug...
+ * can't seem to add an event listener until 'after' all the events
+ * should have been actived.
+ */
+function xyzzy() {
+	var b;
+	b = (document.readState === "complete");
+	alert("readystate?" + b + " should be true...");
+		document.getElementById("dismissScoresButton").disabled = false;
+		var closeBtn = document.getElementById("dismissScoresButton");
+		closeBtn.addEventListener("click", dismissScoreDialog);
+		"function _f() { } _f()"
+}
+</script>
+</head>
+<body onload='xyzzy()'>
+	<p id="passMsg" style="text-align: center">Player Scores</p>
+	<div class="scoreGrid" id="passDiv"
+		style="align-items: center; width: 590px; height: 270px; background-color: powderblue;">
+
+<table>
+  <tr>
+    <th>Player</th>
+    <th>Points</th>
+    <th>Total</th>
+  </tr>
+  <tr>
+    <td id="playerP0">Human Player 1</td>
+    <td>0</td>
+    <td>0</td>
+  </tr>
+  <tr>
+    <td id="playerP1">Robot Player 0</td>
+    <td>0</td>
+    <td>0</td>
+  </tr>
+  <tr>
+    <td id="playerP2">Robot Player 1</td>
+    <td>0</td>
+    <td>0</td>
+  </tr>
+  <tr>
+    <td id="playerP3">Robot Player 2</td>
+    <td>0</td>
+    <td>0</td>
+  </tr>
+  <tr>
+    <td id="playerP4">Robot Player 3</td>
+    <td>0</td>
+    <td>0</td>
+  </tr>
+  <tr>
+    <td id="playerP5">Robot Player 4</td>
+    <td>0</td>
+    <td>0</td>
+  </tr>
+</table>	
+		
+	</div>
+	<br>
+	<input id='dismissScoresButton' onclick='dismissScoreDialog();'
+		value='Ok..' type='button'>
+	<input id="blahButton" onclick="enableScoreCloseButton();"
+		value="Another button" type="button">
+		
+</body>
+	<script id="scriptdiv" type="text/javascript" src="OneUtils.js">
+	scoreHandlerInstall();
+	</script>
+
+</html>
