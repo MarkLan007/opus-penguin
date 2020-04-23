@@ -1779,11 +1779,11 @@ function formatScore(score) {
 		// post up result in table
 		prefix = "p" + row;
 		elem = "player" + prefix;
-		w.document.getElementById(elem).innerText = name;
+		document.getElementById(elem).innerText = name;
 		elem = prefix + "s0";
-		w.document.getElementById(elem).innerText = handscore;
+		document.getElementById(elem).innerText = handscore;
 		elem = prefix + "s1";
-		w.document.getElementById(elem).innerText = gamescore;
+		document.getElementById(elem).innerText = gamescore;
 		}
 }
 
@@ -1872,7 +1872,7 @@ function hidePassDiv() {
 	  modalDiv.style.display = "none";
 	}
 var defaultPassMsg="Pass 3 cards to the left/right/across";
-function initPassDiv() {
+function initPassDiv(nCards, sMsg) {
 	var modalDiv = document.getElementById("passMsgDiv");
 
 	// Get the button that opens the modalDiv
@@ -1883,7 +1883,10 @@ function initPassDiv() {
 	var span = document.getElementById("closePassDiv");
 
 	var msgDiv=document.getElementById("passMsgText");
-	msgDiv.innerText = defaultPassMsg;
+	if (sMsg == "")
+		msgDiv.innerText = defaultPassMsg;
+	else
+		msgDiv.innerText = sMsg;
 	
 	// When the user clicks the button, open the modalDiv 
 	btn.onclick = function() {
@@ -1912,18 +1915,30 @@ function initPassDiv() {
 	bPassDialogInit = true;
 }
 
-function experimentalFunction() {
+/*
+ *  passDiv - exercise the pass cards dialog done with a div
+ * cf: wsPassDialog -- the new window version
+ */
+function passDivBtnCall(nCards, sMsg) {
 	console.log("Modal div for passing cards");
-	initPassDiv();
-	//setNonModal();
+	initPassDiv(sMsg);
 	showPassDiv();
 }
 
-function experimentalFunction1() {
+function experimentalFunction() {
+	initFullModal();
+	
 	console.log("You never know what you're going to get");
-	initModal();
-	//setNonModal();
-	showModal();
+	var fullymodal = document.getElementById("myFullyModal");
+	// both block and inline-block seem to work
+	fullymodal.style.display = "inline-block";
+	var s="fjkasd$buzz=0.0$joe=93.95$laura=3.3$anne=0.26$bob=0.26$patti=0.26$";
+
+	formatScore(s);
+
+	//initModal();
+	//showModal();
+	
 }
 
 function wsScoreDialog(sMsg) {
@@ -1938,6 +1953,7 @@ function wsScoreDialog(sMsg) {
 
 /*
  * wsPassDialog - bring up the pass card dialog
+ * -- likely obsolete with routines doing dialog with divs --
  */
 function wsPassDialog(n, sMsg) {
 	// somehow closing it destroys the window;
@@ -2699,4 +2715,5 @@ function mouseExitMenu(event) {
 	dropDown();	// toggle show value...
 
 }
+
 console.log("OneUtils loaded [done].");

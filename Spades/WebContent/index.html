@@ -157,10 +157,11 @@ body {
 /* Styles for modal dialogs */
 
 /* The Modal (background) */
+/* The Modal (background) */
 .modal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
-  z-index: 2; /* Sit on top */
+  z-index: 1; /* Sit on top */
   padding-top: 100px; /* Location of the box */
   left: 0;
   top: 0;
@@ -169,6 +170,15 @@ body {
   overflow: auto; /* Enable scroll if needed */
   background-color: rgb(0,0,0); /* Fallback color */
   background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
 }
 
 /* The Semi-Modal (background)
@@ -191,15 +201,6 @@ body {
   overflow: auto; /* Enable scroll if needed */
   background-color: rgb(0,0,0); /* Fallback color */
   background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-}
-
-/* Modal Content */
-.modal-content {
-  background-color: #fefefe;
-  margin: auto;
-  padding: 0px;
-  border: 1px solid #888;
-  width: 100%
 }
 
 /* Modal Content */
@@ -226,7 +227,79 @@ body {
   cursor: pointer;
 }
 </style>
+<style>
+/* experiment with fully modal */
+body {font-family: Arial, Helvetica, sans-serif;}
+
+/* The FullyModal (background) */
+.fullymodal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* FullyModal Content */
+.fullymodal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+/* The fClose Button */
+.fclose {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.fclose:hover,
+.fclose:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+/* experimental fullyModal */
+</style>
+<style type="text/css">
+/* styles for the score table */
+#canvas1 {
+	border: dotted 3 px #c0c0c0;
+	background-color: lightblue
+}
+.scoreGrid {
+	display: flex;
+	justify-content:center;
+}
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+</style>
+
 </head>
+
 <body>
 	<div class="topnav">
 		<a class="active" href="#home" onclick="menuDropDown();">Home</a> <a
@@ -290,7 +363,7 @@ body {
 		<input id="msgText" type="text" onkeydown="keyFilter(event)">
 		<input title="Game will connect to server when you submit a command.."
 			onclick="wsSendMessage1();" value="Submit" type="button"> <br />
-		<input onclick='wsPassDialog(3, "Pass 3 Cards");' value="Pass Dialog"
+		<input onclick='passDivBtnCall(3, "Pass 3 Cards");' value="Pass Dialog"
 			type="button"> 
 		<input onclick='wsScoreDialog("fjkasd$Buzz=0.0$Joe=93.95$Laura=3.3Aanne=0.26$Bob=0.26$Patti=0.26$");' value="Score Dialog"
 			 type="button"> 
@@ -369,17 +442,18 @@ insert modal stuff here ->
 
 <!-- The Modal Dialogs here -->
 <div id="myExperimentalModal" class="Modal">
-
   <!-- Modal content -->
   <div class="modal-content">
     <span class="close">&times;</span>
     <p>Some text in the Modal..</p>
+            <p>Something's wrong. You shouldn't see this until you press the button...</p>
+    
   </div>
-
 </div>
 
-<div class="semiModal" id="passMsgDiv" 
-	>
+<!-- Generic Modal Here -->
+
+<div class="semiModal" id="passMsgDiv" >
 <div class="semi-modal-content" id="passMsgDiv1">
 	
     <span id="closePassDiv" class="close">&times;</span>
@@ -429,4 +503,101 @@ window.onclick = function(event) {
 </script>
 
 </body>
+<body>
+
+<h2>FullyModal Example</h2>
+
+<!-- Trigger/Open The FullyModal -->
+<button id="fmyBtn">Open FullyModal</button>
+
+<!-- The FullyModal -->
+<div id="myFullyModal" class="fullymodal">
+
+  <!-- FullyModal content -->
+  <div class="fullymodal-content">
+    <span class="fclose">&times;</span>
+    <!-- 
+    <p>Some text in the FullyModal..</p>
+     -->
+    	<p id="passMsg" style="text-align: center">Player Scores</p>
+	<div class="scoreGrid" id="passDiv"
+		style="align-items: center;  background-color: powderblue;">
+    
+<table>
+  <tr>
+    <th>Player</th>
+    <th>Points</th>
+    <th>Total</th>
+  </tr>
+  <tr>
+    <td id="playerp0">Human Player 1</td>
+    <td id="p0s0">0</td>
+    <td id="p0s1">0</td>
+  </tr>
+  <tr>
+    <td id="playerp1">Robot Player 0</td>
+    <td id="p1s0">0</td>
+    <td id="p1s1">0</td>
+  </tr>
+  <tr>
+    <td id="playerp2">Robot Player 1</td>
+    <td id="p2s0">0</td>
+    <td id="p2s1">0</td>
+  </tr>
+  <tr>
+    <td id="playerp3">Robot Player 2</td>
+    <td id="p3s0">0</td>
+    <td id="p3s1">0</td>
+  </tr>
+  <tr>
+    <td id="playerp4">Robot Player 3</td>
+    <td id="p4s0">0</td>
+    <td id="p4s1">0</td>
+  </tr>
+  <tr>
+    <td id="playerp5">Robot Player 4</td>
+    <td id="p5s0">0</td>
+    <td id="p5s1">0</td>
+  </tr>
+</table>	
+    
+  </div>
+
+</div>
+
+<script>
+
+	function initFullModal() {
+		// Get the fullymodal
+		var fullymodal = document.getElementById("myFullyModal");
+
+		// Get the button that opens the fullymodal
+		var btn = document.getElementById("fmyBtn");
+
+		// Get the <span> element that fcloses the fullymodal
+		var span = document.getElementsByClassName("fclose")[0];
+
+		// When the user clicks the button, open the fullymodal 
+		btn.onclick = function() {
+			fullymodal.style.display = "block";
+		}
+
+		// When the user clicks on <span> (x), close the fullymodal
+		span.onclick = function() {
+			fullymodal.style.display = "none";
+		}
+
+		// When the user clicks anywhere outside of the fullymodal, close it
+		window.onclick = function(event) {
+			if (event.target == fullymodal) {
+				fullymodal.style.display = "none";
+			}
+		}
+
+	}
+
+</script>
+
+</body>
+
 </html>
