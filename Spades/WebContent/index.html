@@ -160,7 +160,7 @@ body {
 .modal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
+  z-index: 2; /* Sit on top */
   padding-top: 100px; /* Location of the box */
   left: 0;
   top: 0;
@@ -178,14 +178,16 @@ body {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
   z-index: 2; /* Sit on top */
-  padding-top: 120px; /* Location of the box */
+  padding: 0px; /* 20px; Location of the box */
   left: 0;
   top: 0;
   /*
    * cover the play felt
    */
   width: 50%; /* partial width */
-  height: 40%; /* partial height */
+  height: 56%; /* partial height */
+  /* width: 590px; */
+  /* height: 270px; */
   overflow: auto; /* Enable scroll if needed */
   background-color: rgb(0,0,0); /* Fallback color */
   background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
@@ -195,19 +197,18 @@ body {
 .modal-content {
   background-color: #fefefe;
   margin: auto;
-  padding: 20px;
+  padding: 0px;
   border: 1px solid #888;
-  width: 80%;
+  width: 100%
 }
 
 /* Modal Content */
 .semi-modal-content {
   background-color: #fefefe;
   margin: auto;
-  padding: 10px;
+  padding: 0px;
   border: 1px solid #888;
-  width: 90%;
-  height: 80%;
+  /*width: 80%;*/
 }
 
 /* The Close Button */
@@ -366,16 +367,38 @@ insert modal stuff here ->
 <!-- Trigger/Open The Modal -->
 <button id="myBtn">Open Modal</button>
 
-<!-- The Modal -->
-<div id="myExperimentalModal" class="semiModal">
+<!-- The Modal Dialogs here -->
+<div id="myExperimentalModal" class="Modal">
 
   <!-- Modal content -->
-  <div class="semi-modal-content">
+  <div class="modal-content">
     <span class="close">&times;</span>
     <p>Some text in the Modal..</p>
   </div>
 
 </div>
+
+<div class="semiModal" id="passMsgDiv" 
+	>
+<div class="semi-modal-content" id="passMsgDiv1">
+	
+    <span id="closePassDiv" class="close">&times;</span>
+	<p id="passMsgText" style="text-align: center">Pass [n] cards prior to
+		play.</p>
+	<div class="buttonGrid" id="passDiv"
+			style="align-items: center; width: 400px; height: 275px; background-color: powderblue;">
+	
+	<!-- 
+		style="align-items: center; width: 100%; height: 100%; background-color: powderblue;">
+		 -->
+		 <!-- Monkeying with the fixed vs % h and w -->
+	</div>
+	<br>
+	<input id="passCardsButton" onclick="passCardsToServer();"
+		value="Pass Cards" type="button" disabled>
+</div>
+</div>
+
 
 <script>
 // Get the modal

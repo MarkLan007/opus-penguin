@@ -181,7 +181,8 @@ function cardSelected(event) {
 	// if the pass dialog is up, pass it.
 	// otherwise play it
 	if (bPassingCardsInProgress)
-		addCardToPassDialog(cardIndex);
+		//addCardToPassDialog(cardIndex);
+		addCardToPassDiv(cardIndex);
 	else
 		sendCardFromButtonPress(cardIndex);
 }
@@ -1861,7 +1862,64 @@ function initModal() {
 
 }
 
+function showPassDiv() {
+	var modal = document.getElementById("passMsgDiv");
+	modal.style.display = "block";
+	}
+
+function hidePassDiv() {
+	var modalDiv = document.getElementById("passMsgDiv");
+	  modalDiv.style.display = "none";
+	}
+var defaultPassMsg="Pass 3 cards to the left/right/across";
+function initPassDiv() {
+	var modalDiv = document.getElementById("passMsgDiv");
+
+	// Get the button that opens the modalDiv
+	var btn = document.getElementById("passCardsButton");
+
+	// Get the <span> element that closes the modalDiv
+	//var span = document.getElementsByClassName("closePassDiv")[0];
+	var span = document.getElementById("closePassDiv");
+
+	var msgDiv=document.getElementById("passMsgText");
+	msgDiv.innerText = defaultPassMsg;
+	
+	// When the user clicks the button, open the modalDiv 
+	btn.onclick = function() {
+	  modalDiv.style.display = "block";
+	}
+
+	// When the user clicks on <span> (x), close the modalDiv
+	span.onclick = hidePassDiv;
+
+	// When the user clicks anywhere outside of the modalDiv, close it
+	window.onclick = function(event) {
+	  if (event.target == modalDiv) {
+	    modalDiv.style.display = "none";
+	  }
+	}
+	bPassingCardsInProgress = true;
+	iCurrentFreeCardinPass = 0;
+	/*
+	var w = window.open("PassCards.html",
+		"Pass Cards",
+		"width=600,height=370,status=no,toolbars=no,resizeable=yes,location=no"
+		// was 410x325
+	);
+		passWindow = w;
+	 */
+	bPassDialogInit = true;
+}
+
 function experimentalFunction() {
+	console.log("Modal div for passing cards");
+	initPassDiv();
+	//setNonModal();
+	showPassDiv();
+}
+
+function experimentalFunction1() {
 	console.log("You never know what you're going to get");
 	initModal();
 	//setNonModal();
@@ -1951,7 +2009,7 @@ function createNewPassCardButton(cardindex) {
 	 */
 	cardBtn.addEventListener("click", passCardSelected);
 	cardBtn.addEventListener("dblclick", passCardSelected);
-	passWindow.document.getElementById("passDiv").appendChild(cardBtn);
+	document.getElementById("passDiv").appendChild(cardBtn);
 	return cardBtn;
 }
 
@@ -1995,7 +2053,9 @@ function passCardsFromButtonPress(event) {
 	// this doesn't work for windows...
 	// passWindow.visibility = "hidden";
 	// just close it and create a new one...
-	passWindow.close();
+	// hhh
+	hidePassDiv();
+	
 	xstatusUpdate("Passing:" + msg);
 }
 
@@ -2043,6 +2103,54 @@ function addCardToPassDialog(cardindex) {
 		var passBtn;
 		passWindow.document.getElementById("passCardsButton").disabled = false;
 		passBtn = passWindow.document.getElementById("passCardsButton");
+		passBtn.addEventListener("click", passCardsFromButtonPress);
+	}
+}
+
+function addCardToPassDiv(cardindex) {
+	var card = theDeck[cardindex];
+	var i = iCurrentFreeCardinPass;
+	// push cardPassWindow to top
+	//passWindow.focus();
+	if (i >= iPassSize) {
+		// Ooh. Bad User.
+		// trying to select more cards to pass than is legal
+		// alert("Warning: Can only pass " + iPassSize + " cards. i=" + i);
+		alert("Click on card to return it to hand. Can only pass " + iPassSize + " cards. i=" + i);
+		return;
+	}
+	passCards[i] = createNewPassCardButton(cardindex);
+	var cardBtn = passCards[i];
+    // with images: don't set innerText
+	// cardBtn.innerText = card.friendlyName;
+	// cardBtn.innerText = card.shortName;
+	/*
+	 * Experiment with adding an image... ++
+	 */
+	// spadesCardImages
+	console.log("Get ready...");
+	cardBtn.style.imagefile = spadesCardImages;
+	cardBtn.style.backgroundImage = spadesCardImages;
+	cardBtn.style.backgroundImage = "http://localhost:8080/Spades/Spades.jpg";
+	/*
+	 * --
+	 */
+	cardBtn.name = card.shortName;
+	cardBtn.style.visibility = "visible";
+	cardBtn.style.height = "250px";	// was "75px" "250px" by "180px" works but is big..
+	cardBtn.style.width = "180px";	// was "54px"
+
+	iCurrentFreeCardinPass++;
+	// iPassSize cards? enable the send button
+	if (i >= iPassSize - 1) {
+		var passBtn;
+		/*
+		passWindow.document.getElementById("passCardsButton").disabled = false;
+		passBtn = passWindow.document.getElementById("passCardsButton");
+		passBtn.addEventListener("click", passCardsFromButtonPress);
+		*/
+		document.getElementById("passCardsButton").disabled = false;
+		passBtn = document.getElementById("passCardsButton");
 		passBtn.addEventListener("click", passCardsFromButtonPress);
 	}
 }
