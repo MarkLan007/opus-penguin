@@ -16,7 +16,7 @@ public class ProtocolMessage {
 	 	[CommandChar][PlayerIDorX][Zero or more RS pairs representing Cards]%[MessageString]
 	 Player->G	 	
 	 	= Play Card
-	 	~ Pass Card(S)
+	 	~ Pass Card(S) S is of the form 'NCards to pass left' where N is the actual number
 	 	Q Query
 	 	S Text (TBD)
 	 G->Player

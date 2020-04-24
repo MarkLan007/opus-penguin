@@ -425,7 +425,9 @@ public class CardGame implements GameInterface {
 		// number of players, number of cards to pass for error checking
 		MailBoxExchange mbx=new MailBoxExchange(pt, nPlayers, 3);
 		// Now send the pass messages, telling the user what
-		// the pass type is
+		// the pass type is. Remember...
+		//cardString of the form 'NCards to pass left' where N is the actual number
+
 	}
 
 	MailBoxExchange.PassType currentPassType=MailBoxExchange.PassType.PassHold;

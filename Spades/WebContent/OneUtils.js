@@ -2,6 +2,12 @@
  * CardUtils - card data structures and utility functions
  */
 'use strict';
+/*
+ * Naming:
+ *  wsXXX - routines that involve web socket sending or receiving messages
+ *  ...DialogWindow -- dialog done the window way (TODO: move to retired code)
+ *  ...DialogDiv -- dialog done with divs (better.)
+ */
 const minorVersion = "1b";
 const versionString1 = "OneUtils.js version 0." +
 	minorVersion +
@@ -181,8 +187,8 @@ function cardSelected(event) {
 	// if the pass dialog is up, pass it.
 	// otherwise play it
 	if (bPassingCardsInProgress)
-		//addCardToPassDialog(cardIndex);
-		addCardToPassDiv(cardIndex);
+		//addCardToPassDialogWindow(cardIndex);
+		addCardToPassDialogDiv(cardIndex);
 	else
 		sendCardFromButtonPress(cardIndex);
 }
@@ -1674,7 +1680,11 @@ function processCardString(cardString) {
 			wsScoreDialog(cardString);
 			break;
 		case '~':
+			//cardString of the form 'NCards to pass left' where N is the actual number
+			// just 'know' 3 for now...
 			console.log("Pass message.. working on it...");
+			wsPassDialog(3, cardString);
+			break;
 		default:
 			console.log("unimplemented protocol msg:"
 				+ c0
@@ -1714,17 +1724,17 @@ function wsInitPassDialog(n, sMsg) {
 }
 
 var scoreWindow;
-var bScoreDialogInit = false;
+var bScoreDialogWindowInit = false;
 
-function dismissScoreDialog(event) {
+function dismissScoreDialogWindow(event) {
 	console.log("Close-Button seen")
 	scoreWindow.close();
 }
-function enableScoreCloseButton() {
+function enableScoreCloseWindowButton() {
 
 	scoreWindow.document.getElementById("dismissScoresButton").disabled = false;
 	var closeBtn = scoreWindow.document.getElementById("dismissScoresButton");
-	closeBtn.addEventListener("click", dismissScoreDialog);
+	closeBtn.addEventListener("click", dismissScoreDialogWindow);
 	console.log("Clsoe button enabled...");
 	}
 
@@ -1787,23 +1797,23 @@ function formatScore(score) {
 		}
 }
 
-function wsInitScoreDialog(sMsg) {
+function wsInitScoreDialogWindow(sMsg) {
 	// divert selected cards to the dialog
 	var w = window.open("PlayerScores.html",
 		"Hand Results",
 		"width=600,height=370,status=no,toolbars=no,resizeable=yes,location=no"
 		// was 410x325
 	);
-	//cardBtn.addEventListener("click", dismissScoreDialog);
-	//cardBtn.addEventListener("dblclick", dismissScoreDialog);
+	//cardBtn.addEventListener("click", dismissScoreDialogWindow);
+	//cardBtn.addEventListener("dblclick", dismissScoreDialogWindow);
 	scoreWindow = w;
-	bScoreDialogInit = true;
+	bScoreDialogWindowInit = true;
 
 	window.addEventListener('load', (event) => {
 		  console.log('page is fully loaded');
 			scoreWindow.document.getElementById("dismissScoresButton").disabled = false;
 			closeBtn = scoreWindow.document.getElementById("dismissScoresButton");
-			closeBtn.addEventListener("click", dismissScoreDialog);
+			closeBtn.addEventListener("click", dismissScoreDialogWindow);
 		});
 
 	/*
@@ -1813,7 +1823,7 @@ function wsInitScoreDialog(sMsg) {
 	scoreWindow.document.getElementById("dismissScoresButton").disabled = false;
 	var closeBtn;
 	closeBtn = scoreWindow.document.getElementById("dismissScoresButton");
-	closeBtn.addEventListener("click", dismissScoreDialog);
+	closeBtn.addEventListener("click", dismissScoreDialogWindow);
 	*/
 }
 
@@ -1822,7 +1832,7 @@ function scoreHandlerInstall() {
 	var closeBtn=null;
 	scoreWindow.document.getElementById("dismissScoresButton").disabled = false;
 	closeBtn = scoreWindow.document.getElementById("dismissScoresButton");
-	closeBtn.addEventListener("click", dismissScoreDialog);
+	closeBtn.addEventListener("click", dismissScoreDialogWindow);
 }
 
 /*
@@ -1862,25 +1872,42 @@ function initModal() {
 
 }
 
-function showPassDiv() {
+/*
+ *  passDialogDivBtnCall - exercise the pass cards dialog done with a div
+ *   called from a button on index page
+ *   should just delegate and call wsPassDialog(2)
+ * cf: wsPassDialog -- the new window version
+ */
+function passDialogDivBtnCall(nCards, sMsg) {
+	wsPassDialog(nCards,sMsg);
+	/*
+	// call wsPassDialog
+	console.log("Modal div for passing cards" + sMsg);
+	initPassDialogDiv(nCards, sMsg);
+	showPassDialogDiv();
+	*/
+}
+
+function showPassDialogDiv() {
 	var modal = document.getElementById("passMsgDiv");
 	modal.style.display = "block";
 	}
 
-function hidePassDiv() {
+function hidePassDialogDiv() {
 	var modalDiv = document.getElementById("passMsgDiv");
 	  modalDiv.style.display = "none";
 	}
+
 var defaultPassMsg="Pass 3 cards to the left/right/across";
-function initPassDiv(nCards, sMsg) {
+function initPassDialogDiv(nCards, sMsg) {
 	var modalDiv = document.getElementById("passMsgDiv");
 
 	// Get the button that opens the modalDiv
 	var btn = document.getElementById("passCardsButton");
 
 	// Get the <span> element that closes the modalDiv
-	//var span = document.getElementsByClassName("closePassDiv")[0];
-	var span = document.getElementById("closePassDiv");
+	//var span = document.getElementsByClassName("closePassDialogDiv")[0];
+	var span = document.getElementById("closePassDialogDiv");
 
 	var msgDiv=document.getElementById("passMsgText");
 	if (sMsg == "")
@@ -1894,7 +1921,7 @@ function initPassDiv(nCards, sMsg) {
 	}
 
 	// When the user clicks on <span> (x), close the modalDiv
-	span.onclick = hidePassDiv;
+	span.onclick = hidePassDialogDiv;
 
 	// When the user clicks anywhere outside of the modalDiv, close it
 	window.onclick = function(event) {
@@ -1916,19 +1943,21 @@ function initPassDiv(nCards, sMsg) {
 }
 
 /*
- *  passDiv - exercise the pass cards dialog done with a div
- * cf: wsPassDialog -- the new window version
+ * wsScoreDialogDiv - pass the score
+ *  fully modal score over the play field
  */
-function passDivBtnCall(nCards, sMsg) {
-	console.log("Modal div for passing cards");
-	initPassDiv(sMsg);
-	showPassDiv();
+// wsScoreDialogDiv
+/*
+ * wsScoreDialog - call either the window or div style score dialog
+ */
+function wsScoreDialog(sMsg) {
+	wsScoreDialogDiv(sMsg);
+	// wsScoreDialogWindow(sMsg);
 }
 
-function experimentalFunction(score) {
+function wsScoreDialogDiv(score) {
 	initFullModal();
 	
-	console.log("You never know what you're going to get");
 	var fullymodal = document.getElementById("myFullyModal");
 	// both block and inline-block seem to work
 	fullymodal.style.display = "inline-block";
@@ -1936,29 +1965,39 @@ function experimentalFunction(score) {
 	var s="fjkasd$buzz=0.0$joe=93.95$laura=3.3$anne=0.26$bob=0.26$patti=0.26$";
 	if (score == "")
 		score = s;
-	
-	formatScore(score);
-
-	//initModal();
-	//showModal();
-	
+	formatScore(score);	
 }
 
-function wsScoreDialog(sMsg) {
-	// somehow closing it destroys the window;
-	// for now, create it every time...
-	console.log("Parsing:" + sMsg);
-	//bScoreDialogInit = false;
-	if (!bScoreDialogInit)
-		wsInitScoreDialog(sMsg);
-	formatScore(sMsg);
+function experimentalFunction(score) {
+	wsScoreDialogDiv(score);
 }
+
+function experimentalFunction1(s) {
+	console.log("You never know what you're going to get");
+}
+
+/*
+ * wsScoreDialogWindow - not used anymore (div dialogs are better)
+ */
+function wsScoreDialogWindow(sMsg) {
+// somehow closing it destroys the window;
+// for now, create it every time...
+console.log("Parsing:" + sMsg);
+bScoreDialogWindowInit = false;
+if (!bScoreDialogWindowInit)
+	wsInitScoreDialogWindow(sMsg);
+formatScore(sMsg);	// harmless in window version... the div is still there...
+}
+
 
 /*
  * wsPassDialog - bring up the pass card dialog
  * -- likely obsolete with routines doing dialog with divs --
+ * No. Hook into the appropriate window or div version
+ * TODO: retire this code and comment
  */
-function wsPassDialog(n, sMsg) {
+/*
+function wsPassDialog(n, sMsg) { //... should be wsPassDialogWindow
 	// somehow closing it destroys the window;
 	// for now, create it every time...
 	bPassDialogInit = false;
@@ -1969,6 +2008,15 @@ function wsPassDialog(n, sMsg) {
 	// passBtn = w.document.getElementById("passCardsButton");
 	// passBtn.addEventListener("click", passCardsFromButtonPress);
 	// passWindow.visibility = "visible";
+} */
+
+/*
+ * wsPassDialog - call either the window or div version of the routines
+ */
+function wsPassDialog(nCards, sMsg) {
+	console.log("Modal div for passing cards" + sMsg);
+	initPassDialogDiv(nCards, sMsg);
+	showPassDialogDiv();
 }
 
 // get a button card that is the cardback
@@ -2032,6 +2080,15 @@ function createNewPassCardButton(cardindex) {
 	return cardBtn;
 }
 
+/*
+ * TODO: use or replace passCardSelected
+ * unused!
+ * passCardSelected - click on the card in the pass dialog
+ * 
+ * No just unimplemented. Should return card to hand 
+ * all local. sends no message.
+ * Or is this done somewhere else?
+ */
 function passCardSelected(event) {
 	// return the card to the hand, delete from the dialog
 	// actually just make it not visible.
@@ -2073,7 +2130,7 @@ function passCardsFromButtonPress(event) {
 	// passWindow.visibility = "hidden";
 	// just close it and create a new one...
 	// hhh
-	hidePassDiv();
+	hidePassDialogDiv();
 	
 	xstatusUpdate("Passing:" + msg);
 }
@@ -2081,8 +2138,12 @@ function passCardsFromButtonPress(event) {
 /*
  * Todo: Note that clicking on the card in the dialog to return it is not
  * actually implemented
+ * 
+ * This is the window (not div) version
+ * 
+ * Todo: expendable when you purge the window-creation versions of pass dialogs...
  */
-function addCardToPassDialog(cardindex) {
+function addCardToPassDialogWindow(cardindex) {
 	var card = theDeck[cardindex];
 	// xxx get card from index...
 	var i = iCurrentFreeCardinPass;
@@ -2126,7 +2187,7 @@ function addCardToPassDialog(cardindex) {
 	}
 }
 
-function addCardToPassDiv(cardindex) {
+function addCardToPassDialogDiv(cardindex) {
 	var card = theDeck[cardindex];
 	var i = iCurrentFreeCardinPass;
 	// push cardPassWindow to top
@@ -2622,8 +2683,9 @@ function processLocalCommand(line) {
 		// clearCardTable(true);
 		xstatusUpdate("Table Cleared and Reset.");
 	} else if (line.includes("close")) {
-		//dismissScoreDialog(null);
-		enableScoreCloseButton();
+		// command obsolete... has to do with window style dialogs (using div version)
+		//dismissScoreDialogWindow(null);
+		enableScoreCloseWindowButton();
 		xstatusUpdate("manually close score dialog window");
 	} else if (line.includes("score")) {
 		// shouldn't matter if you specify an = or not in this command
@@ -2689,7 +2751,7 @@ function appendTextToTextArea(newtext) {
 
 // The functions called directly from HTML... Last...
 
-function wsSendMessage1() {
+function wsSendMessage() {
 	var line = getMsgText();
 	xstatusUpdate("[submit-button]Sending{" + line + "} to server...");
 	processSubmitAndClearMsgText();
