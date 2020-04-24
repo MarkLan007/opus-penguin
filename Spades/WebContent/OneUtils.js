@@ -1955,10 +1955,47 @@ function wsScoreDialog(sMsg) {
 	// wsScoreDialogWindow(sMsg);
 }
 
+function initScoreDialogDiv() {
+	// Get the fullymodal
+	var fullymodal = document.getElementById("scoreDialogDiv");
+
+	// Get the <span> element that fcloses the fullymodal
+	var span = document.getElementsByClassName("fclose")[0];
+
+	// OH. Bug.
+	// fmybtn is the experimental button at the bottom of the page...
+	// so this makes that button work...
+
+	/*
+	// Get the button that opens the fullymodal
+	var btn = document.getElementById("fmyBtn");
+	// When the user clicks the button, open the fullymodal 
+	btn.onclick = function() {
+		initScoreDialogDiv();
+		fullymodal.style.display = "block";
+	}
+	*/
+
+	// When the user clicks on <span> (x), close the fullymodal
+	span.onclick = function() {
+		initScoreDialogDiv();
+		fullymodal.style.display = "none";
+	}
+
+	// When the user clicks anywhere outside of the fullymodal, close it
+	window.onclick = function(event) {
+		initScoreDialogDiv();		
+		if (event.target == fullymodal) {
+			fullymodal.style.display = "none";
+		}
+	}
+
+}
+
 function wsScoreDialogDiv(score) {
-	initFullModal();
+	initScoreDialogDiv();
 	
-	var fullymodal = document.getElementById("myFullyModal");
+	var fullymodal = document.getElementById("scoreDialogDiv");
 	// both block and inline-block seem to work
 	fullymodal.style.display = "inline-block";
 	

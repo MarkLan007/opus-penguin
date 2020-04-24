@@ -513,7 +513,7 @@ window.onclick = function(event) {
 <button id="fmyBtn">Open FullyModal</button>
 
 <!-- The FullyModal -->
-<div id="myFullyModal" class="fullymodal">
+<div id="scoreDialogDiv" class="fullymodal">
 
   <!-- FullyModal content -->
   <div class="fullymodal-content">
@@ -569,43 +569,7 @@ window.onclick = function(event) {
   </div>
 
 </div>
-
-<script>
-
-	function initFullModal() {
-		// Get the fullymodal
-		var fullymodal = document.getElementById("myFullyModal");
-
-		// Get the button that opens the fullymodal
-		var btn = document.getElementById("fmyBtn");
-
-		// Get the <span> element that fcloses the fullymodal
-		var span = document.getElementsByClassName("fclose")[0];
-
-		// When the user clicks the button, open the fullymodal 
-		btn.onclick = function() {
-			initFullModal();
-			fullymodal.style.display = "block";
-		}
-
-		// When the user clicks on <span> (x), close the fullymodal
-		span.onclick = function() {
-			initFullModal();
-			fullymodal.style.display = "none";
-		}
-
-		// When the user clicks anywhere outside of the fullymodal, close it
-		window.onclick = function(event) {
-			initFullModal();
-			if (event.target == fullymodal) {
-				fullymodal.style.display = "none";
-			}
-		}
-
-	}
-
-</script>
-
+</div>
 </body>
 
 </html>
