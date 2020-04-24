@@ -443,12 +443,13 @@ insert modal stuff here ->
 <button id="myBtn">Open Modal</button>
 
 <!-- The Modal Dialogs here -->
-<div id="myExperimentalModal" class="Modal">
+<div id="myExperimentalModal" class="modal">
+<!-- Learning that class names are case sensitive the hard way...
+ -->
   <!-- Modal content -->
   <div class="modal-content">
     <span class="close">&times;</span>
-    <p>Some text in the Modal..</p>
-            <p>Something's wrong. You shouldn't see this until you press the button...</p>
+    <p>Some vacuous text in the Modal..</p>
     
   </div>
 </div>
@@ -508,9 +509,21 @@ window.onclick = function(event) {
 <body>
 
 <h2>FullyModal Example</h2>
+xx
+<div id="myGenericModal" class="modal">
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span id="spanCloseXXX" class="close">&times;</span>
+    <p>Some text in the Modal..</p>
+    <p> Completely broken. Button doesn't close. "open fullymodal" does nothing. </p>
+    <p>Something's wrong. You shouldn't see this until you press the button...</p>
+    
+  </div>
+</div>
 
+xx
 <!-- Trigger/Open The FullyModal -->
-<button id="fmyBtn">Open FullyModal</button>
+<button id="modelModalBtn">Open FullyModal</button>
 
 <!-- The FullyModal -->
 <div id="scoreDialogDiv" class="fullymodal">
@@ -522,11 +535,51 @@ window.onclick = function(event) {
     <p>Some text in the FullyModal..</p>
      -->
     	<p id="passMsg" style="text-align: center">Player Scores</p>
-    	<!-- is this my bug? is 'passDiv' should be 'scoreDiv'???
-    		Found you, you little bastard!
-    	 -->
 	<div class="scoreGrid" id="passDiv"
 		style="align-items: center;  background-color: powderblue;">
+    
+<script>
+/*
+ * Note that code must be AFTER all the items that are referenced...
+ * for example this must follow the button that is created since 
+ * init is called on it...
+ */
+
+function initModelModalCode() {
+	// Get the fullymodal
+	var fullymodal = document.getElementById("myGenericModal");
+
+	// don't forget to hook the button to open the div
+	// it's modelModalBtn ... xxx
+	var btn = document.getElementById("modelModalBtn");
+		btn.onclick = function() {
+		fullymodal.style.display = "block";
+	}
+
+	// Get the <span> element that closes the fullymodal
+	// tricky because gets by type and assumes this if the first one...
+	// so make sure that the classname is unique
+	var span = document.getElementsByClassName("close")[0];
+
+	var span = document.getElementById("spanCloseXXX");
+	// When the user clicks on <span> (x), close the fullymodal
+	span.onclick = function() {
+		console.log("X click.");
+		fullymodal.style.display = "none";
+	}
+
+	// When the user clicks anywhere outside of the fullymodal, close it
+	window.onclick = function(event) {
+		if (event.target == fullymodal) {
+			fullymodal.style.display = "none";
+		}
+	}
+
+}
+
+initModelModalCode();
+
+</script>
     
 <table>
   <tr>
