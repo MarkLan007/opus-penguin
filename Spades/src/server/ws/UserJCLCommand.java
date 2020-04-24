@@ -25,6 +25,7 @@ public class UserJCLCommand {
 		JCLNewdeal, JCLMisdeal,
 		JCLShuffle,
 		JCLStatus,
+		JCLScore,
 		JCLPoke, JCLResume, 	// poke or resume the server
 		JCLWhoAmI,
 	}
@@ -118,6 +119,7 @@ public class UserJCLCommand {
 	String jclMisdeal = "misdeal";	//synonyms...
 	String jclNewdeal = "newdeal";
 	String jclStatus = "status";
+	String jclScore = "score";
 	String jclShuffle = "shuffle";
 	String jclStart = "start";
 
@@ -135,6 +137,7 @@ public class UserJCLCommand {
 	Pattern jclMisdealRegex = Pattern.compile(jclMisdeal);
 	Pattern jclNewdealRegex = Pattern.compile(jclNewdeal);
 	Pattern jclStatusRegex = Pattern.compile(jclStatus);
+	Pattern jclScoreRegex = Pattern.compile(jclScore);
 	Pattern jclShuffleRegex = Pattern.compile(jclShuffle);
 	Pattern jclStartRegex = Pattern.compile(jclStart);
 	
@@ -330,6 +333,30 @@ public class UserJCLCommand {
 				}
 			}
 			return; // "//+Join game(" + sName + ")";
+		}
+
+		// scan for score
+		m = jclScoreRegex.matcher(commandString);
+		if (m.find()) { // i.e. look for 'setname' then an identifier
+			type = JCLType.JCLScore;
+			/*
+			 * status options a future possibility
+			 *  status game, status network, etc.
+			 */
+			String sName = "no-params"; // default name string
+			Matcher identifier = jclIdentierRegex.matcher(commandString);
+			for (int i = 0; identifier.find(); i++) {
+				switch (i) {
+				case 0:
+					continue; // the command itself
+				case 1:
+					sName = identifier.group();
+					NameValuePair p1 = new NameValuePair("name", sName);
+					argv.add(p1);
+					break;
+				}
+			}
+			return; // "//score [noparams];
 		}
 
 		m = jclResendRegex.matcher(commandString);

@@ -1925,16 +1925,19 @@ function passDivBtnCall(nCards, sMsg) {
 	showPassDiv();
 }
 
-function experimentalFunction() {
+function experimentalFunction(score) {
 	initFullModal();
 	
 	console.log("You never know what you're going to get");
 	var fullymodal = document.getElementById("myFullyModal");
 	// both block and inline-block seem to work
 	fullymodal.style.display = "inline-block";
+	
 	var s="fjkasd$buzz=0.0$joe=93.95$laura=3.3$anne=0.26$bob=0.26$patti=0.26$";
-
-	formatScore(s);
+	if (score == "")
+		score = s;
+	
+	formatScore(score);
 
 	//initModal();
 	//showModal();
@@ -2558,6 +2561,7 @@ function processLocalCommand(line) {
 	} else if (line.includes("status=")) {
 		// Todo: Review: Not sure this is useful anymore...
 		// from the 2nd char after the = to the end
+		// ... just tests the status message
 		gamestatusUpdate(line.slice(8));
 	} else if (line.includes("unhack")) {
 		unHack();
@@ -2621,10 +2625,18 @@ function processLocalCommand(line) {
 		//dismissScoreDialog(null);
 		enableScoreCloseButton();
 		xstatusUpdate("manually close score dialog window");
-	} else if (line.includes("score=")) {
+	} else if (line.includes("score")) {
+		// shouldn't matter if you specify an = or not in this command
+		// because slice starts at six and format ignores the first character assuming protocol stuff
 		var score = line.slice(6);
 		var s="fjkasd$buzz=0.0$joe=93.95$laura=3.3$anne=0.26$bob=0.26$patti=0.26$";
-		formatScore(s);
+		//s =  "#S0gXpX#/default=0.0#$robot1=10.10#$robot2=13.13#$robot3=3.3#";
+		if (score == "")
+			score = s;
+		// experimentalFunction formats the score if sent...
+		//formatScore(score);
+		// TODO: change this name!!!
+		experimentalFunction(score);
 		xstatusUpdate("score["+s+"]");
 	} else if (line.includes("reorg")) {
 		//Array of div names

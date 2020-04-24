@@ -352,8 +352,17 @@ public class WsServer {
 			// ... JCLRefresh which sends the whole context
 			us.game.resend(us);
 			break;
-		case JCLStatus:
+		case JCLScore:
 			int playerId=us.getpid();
+			if (playerId == -1) {
+				write(us, "Not currently in a game; can't get status");
+				break;
+			}
+			us.game.sendScore(playerId);			
+			//write(us, "" + jcl.type + "(" + playerId + "): under construction");
+			break;
+		case JCLStatus:
+			playerId=us.getpid();
 			if (playerId == -1) {
 				write(us, "Not currently in a game; can't get status");
 				break;
