@@ -487,6 +487,7 @@ public class CardGame implements GameInterface {
 		return false;
 	}
 	
+	// i.e. who
 	void sendFormatedPlayerInfo(int pid) {
 		if (!validPid(pid))
 				return;
@@ -509,7 +510,9 @@ public class CardGame implements GameInterface {
 					+ sessionName + "."
 					+ playerArray[i].isRobot() ;
 		}
-		return sTemp + '$';
+		sTemp += '$';
+		sTemp += "#User#Session Id#IsRobot?#";
+		return sTemp;
 		
 	}
 	String getFormatedGameScore() {
@@ -519,7 +522,7 @@ public class CardGame implements GameInterface {
 			sTemp = sTemp + "$" + playerArray[i].getName() + "=" 
 					+ playerArray[i].handScore + "."
 					+ playerArray[i].totalScore ;
-		return sTemp + '$';
+		return sTemp + '$' + "#Player#Points#Totals#";
 	}
 	
 	private int gensymName=1;

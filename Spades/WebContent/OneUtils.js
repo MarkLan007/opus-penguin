@@ -1746,6 +1746,8 @@ function enableScoreCloseWindowButton() {
 /*
  * formatScore - parse formatted string and place fields in HTML table
  */
+var tempHeaders=["_Player", "_Points", "_Total", "???"];
+
 function formatScore(score) {
 	var w=scoreWindow;	
 	var name="",row=0;
@@ -1762,6 +1764,8 @@ function formatScore(score) {
 	for (row=0,i++; i<score.length; i++,row++){
 		// j points at first char after the $ (first char of name)
 		// scan past the name while accumulating it;
+		if (i > 5 && score.charAt(i) == '#') // we are starting into headers...
+			break;
 		for (name="",j=i; j<score.length; j++) {
 			c = score.charAt(j);
 			// scan up to = for NAME saving chars
@@ -1783,7 +1787,7 @@ function formatScore(score) {
 		// scan past the second digit string
 		for (gamescore="",j++; j<score.length; j++) {
 			c = score.charAt(j);
-			if (c == '$' || c == '#')
+			if (c == '$')
 				break;
 			else
 				gamescore += c;
@@ -1800,11 +1804,44 @@ function formatScore(score) {
 		elem = prefix + "s1";
 		document.getElementById(elem).innerText = gamescore;
 		}
+	// Headers at the end of the string
+	// have a header if i is pointing at #
+	// ttt
+	if (i < score.length) {
+		c = score.charAt(i);
+	}
+	else {
+		console.log("No header!");
+	}
+	//
+	// at the top of the loop, char[i] == '#'
+	for (var h=0;i<score.length; h++) {
+		header = "";
+		c = score.charAt(i);
+		if (c != '#')	// not
+			break;
+		for (j=i+1; j<score.length; j++) {
+			c = score.charAt(j);
+			if (c == '#')
+				break;
+			else
+				header += c;
+		}
+		if (header.length > 0)
+			tempHeaders[h] = header;
+		i = j;
+	}
+	var table=document.getElementById("formattedScoreTable")
+	var headerItems = table.getElementsByTagName("th");
+	for (var k=0; k<headerItems.length; k++) {
+		var header=headerItems.item(k);
+		header.innerText = tempHeaders[k];
+	}
 	// now, go through rows and make visible if I put data in it
 	// invisible otherwise.
 	// do this for all the rows in the table (i.e. get element and done when there aren't any more
 	// should just do getElementsByTagname
-	var table=document.getElementById("formattedScoreTable")
+	//...var table=document.getElementById("formattedScoreTable")
 	// can set the headers the same way... i.e. iterate the cells in "th"
 	// keep in mind that the header is an element
 	var rows = table.getElementsByTagName("tr");
@@ -2755,6 +2792,7 @@ function processLocalCommand(line) {
 		// experimentalFunction formats the score if sent...
 		//formatScore(score);
 		// TODO: change this name!!!
+		// cf //score which actually gets the score and routes to format
 		experimentalFunction(score);
 		xstatusUpdate("score["+s+"]");
 	} else if (line.includes("reorg")) {
