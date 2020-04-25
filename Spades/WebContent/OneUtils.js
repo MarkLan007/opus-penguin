@@ -1572,6 +1572,8 @@ var protocolMessageTypes = {
 	'$': true,	// player scores
 	'%': true,	// player error
 	'>': true,	// player welcome
+	'~': true,	// pass cards
+	'Q': true,  // result of a query
 };
 
 /*
@@ -1637,6 +1639,8 @@ function processCardString(cardString) {
 						addCardToHand(card.cardIndex);
 				}
 			}
+			// reorg the hand so cards are sorted nicely
+			reorgButtons();
 			break;
 		case '?':
 			// tell user: your move
@@ -1675,6 +1679,7 @@ function processCardString(cardString) {
 			// report user error
 			gamestatusUpdate("error:" + cardString);
 			break;
+		case 'Q':
 		case '$':
 			console.log("Starting scoredialog...");
 			wsScoreDialog(cardString);
@@ -1778,7 +1783,7 @@ function formatScore(score) {
 		// scan past the second digit string
 		for (gamescore="",j++; j<score.length; j++) {
 			c = score.charAt(j);
-			if (c == '$')
+			if (c == '$' || c == '#')
 				break;
 			else
 				gamescore += c;
@@ -1795,6 +1800,21 @@ function formatScore(score) {
 		elem = prefix + "s1";
 		document.getElementById(elem).innerText = gamescore;
 		}
+	// now, go through rows and make visible if I put data in it
+	// invisible otherwise.
+	// do this for all the rows in the table (i.e. get element and done when there aren't any more
+	// should just do getElementsByTagname
+	var table=document.getElementById("formattedScoreTable")
+	// can set the headers the same way... i.e. iterate the cells in "th"
+	// keep in mind that the header is an element
+	var rows = table.getElementsByTagName("tr");
+	for (i=0; i<rows.length; i++) {
+		row=rows.item(i);
+		if (i < nTableSize+1)	// nTableSize is number of players in the game
+			row.style.display = '';
+		else
+			row.style.display = 'none';
+	}
 }
 
 function wsInitScoreDialogWindow(sMsg) {
@@ -2743,7 +2763,6 @@ function processLocalCommand(line) {
 		// get buttons
 		// place into a temp array in reverse card-sorted order
 		// add back into div
-		// rrr
 		reorgButtons();
 		xstatusUpdate("reorg of button divs complete.");
 	} else if (line.includes("repaint")) {

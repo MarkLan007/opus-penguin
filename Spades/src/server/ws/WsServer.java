@@ -72,12 +72,28 @@ public class WsServer {
 	
 	/*
 	 * remove from broadcast queue...
+	 * session has been closed
+	 *  if user was in any games, notify the game and 
+	 *  remove from the broadcast queue
 	 */
 	@OnClose
-	public void onClose(Session sess){
+	public void onClose(Session sess) {
+		UserSession us = SessionManager.getUserSession(sess);
+
+		if (us == null)	// nothing more we can do...
+			return;
+		CardGame g = us.getGame();
+		if (g == null) {
+			; // not in a game nothing to do
+		} else {
+			// disconnect with the pid that CardGame gave us
+			g.disconnect(us.getpid());
+		}
+		//
+		// remove from broadcast queue, etc
 		SessionManager.remove(sess);
 		System.out.println("Close Connection ...");
-	}  
+	}
 	
 	static Vector<String> history=new Vector(10, 5);
 	
@@ -230,6 +246,14 @@ public class WsServer {
 		case JCLSuperUser:
 			us.setSuperUser(true);
 			break;
+		case JCLWho:
+			int playerId=us.getpid();
+			if (playerId == -1) {
+				write(us, "Not currently in a game; can't get status");
+				break;
+			}
+			us.game.sendFormatedPlayerInfo(playerId);		
+			break;
 		case JCLWhoAmI:			
 			String s = "";
 			if (us.superuser())
@@ -267,16 +291,20 @@ public class WsServer {
 			/*
 			 * sparam needs to be managed more intensely
 			 */
+			/*
+			 * Wait... there is no game in session... this is join after all...
+			 */
 			g=lookupGameFromSession(sparam);
 			if (g == null)
 				g = getDefaultGame();
 			us.game = g;
-			String pname=us.getName();
-			boolean bJoinStatus = g.join(us, us.sessionId + "/" + pname);
+			String friendlyName=us.getName();
+			friendlyName = g.uniqueName(friendlyName);
+			boolean bJoinStatus = g.join(us, friendlyName);
 			if (bJoinStatus) {
 				// joined ok...
 				//
-				write(us, "Successfully joined game as " + pname + "...");
+				write(us, "Successfully joined game as " + friendlyName + "...");
 				write(us, "issue start command to initiate play.");
 			}
 			else if (!bJoinStatus  && (sparam.contains("bygod") ||
@@ -353,7 +381,7 @@ public class WsServer {
 			us.game.resend(us);
 			break;
 		case JCLScore:
-			int playerId=us.getpid();
+			playerId=us.getpid();
 			if (playerId == -1) {
 				write(us, "Not currently in a game; can't get status");
 				break;
@@ -475,7 +503,7 @@ public class WsServer {
 	// static version of write...
 	static public void send(UserSession us, String msg) {
 		Session sess=us.getSession();
-		boolean verbose=true;	// local version...
+		//boolean verbose=true;	// local version...
 		/*RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 			
 		if (verbose) {
 			System.out.println("send(" + us.username + "):" + msg);

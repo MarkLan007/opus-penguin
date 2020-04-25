@@ -18,6 +18,11 @@ public class MailBoxExchange {
 		  index = pts.length;
 	  return pts[--index];
 	}
+	/*
+	 * for now make this a hold hand first...
+	 * TODO: should start with a PassLeft
+	 */
+	static public PassType first() { return PassType.PassLeft; }
 	//
 	
 	public class MailBox {
@@ -59,6 +64,7 @@ public class MailBoxExchange {
 			int right;
 			for (i=0, right=exchangeSize-1; i<exchangeSize; i++) {
 				mb = exchange[i];
+				mb.to = i;
 				mb.from = right;
 				right = (right + 1) % exchangeSize;
 			}
@@ -67,6 +73,7 @@ public class MailBoxExchange {
 			int left;
 			for (i=0,left=exchangeSize-1; i<exchangeSize; i++) {
 				mb = exchange[i];
+				mb.to = i;
 				mb.from = left;
 				left = (left + 1) % exchangeSize;
 			}
@@ -83,6 +90,16 @@ public class MailBoxExchange {
 			System.out.println("MailBox:setRouting: Can't Happen.");			
 		}
 		
+	}
+	
+	int getRecipient(int from) {
+		int i;
+		for (i=0; i<exchangeSize; i++) 
+			if (exchange[i].from == from)
+				return i;
+		// Uh oh.
+		System.out.println("Can't route for:" + from + ". recipient not found");
+		return 0;
 	}
 
 	void route(int to, Subdeck contents) {

@@ -27,7 +27,8 @@ public class UserJCLCommand {
 		JCLStatus,
 		JCLScore,
 		JCLPoke, JCLResume, 	// poke or resume the server
-		JCLWhoAmI,
+		JCLWhoAmI, JCLWho,
+
 	}
 
 	JCLType type = JCLType.JCLNotJCL;
@@ -111,6 +112,7 @@ public class UserJCLCommand {
 	String jclJoinPattern = "join";
 	String jclRejoinPattern = "rejoin";
 	String jclWhoAmIPattern = "whoami";
+	String jclWhoPattern = "who";
 	String jclPoke = "poke";
 	String jclResume = "resume";
 	String jclSuperUser = "su";
@@ -129,6 +131,7 @@ public class UserJCLCommand {
 	Pattern jclJoinRegex = Pattern.compile(jclJoinPattern);
 	Pattern jclRejoinRegex = Pattern.compile(jclRejoinPattern);
 	Pattern jclWhoAmIRegex = Pattern.compile(jclWhoAmIPattern);
+	Pattern jclWhoRegex = Pattern.compile(jclWhoPattern);
 	Pattern jclSuperUserRegex = Pattern.compile(jclSuperUser);
 	Pattern jclResumeRegex = Pattern.compile(jclResume);
 	Pattern jclPokeRegex = Pattern.compile(jclPoke);
@@ -408,7 +411,27 @@ public class UserJCLCommand {
 					break;
 				}
 			}
-			return; // "//+Join game(" + sName + ")";
+			return; // "//+whoami no-args
+		}
+		// Note: must follow whoami, since it's a substring.
+		m = jclWhoRegex.matcher(commandString);
+		if (m.find()) { // i.e. look for 'setname' then an identifier
+			type = JCLType.JCLWho;
+			String sName = "game0"; // default name string
+			Matcher identifier = jclIdentierRegex.matcher(commandString);
+			for (int i = 0; identifier.find(); i++) {
+				switch (i) {
+				case 0:
+					NameValuePair p0 = new NameValuePair(jclWhoAmIPattern, "");
+					argv.add(p0);
+					continue; // the command itself
+				case 1:
+					// args ignored...
+					// sName = identifier.group();
+					break;
+				}
+			}
+			return; // "//+whoami no-args
 		}
 		m = jclSuperUserRegex.matcher(commandString);
 		if (m.find()) { // i.e. look for 'setname' then an identifier

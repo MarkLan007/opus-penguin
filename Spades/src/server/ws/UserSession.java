@@ -24,6 +24,12 @@ public class UserSession {	// wrapper for data to keep with Session
 	CardGameKernel cgk=null;	// kernel queue
 	String username="";
 
+	/*
+	 * sessionId allows user to rejoin a game if connection dropped.
+	 * After session is dropped replaced by robot player.
+	 * robot's sessionId is never set by robot, and will get copied. So 
+	 * it can be looked up and the robot targeted for replacement.
+	 */
 	public String sessionId="";
 	
 	public UserSession(Session sess) {
@@ -57,6 +63,9 @@ public class UserSession {	// wrapper for data to keep with Session
 	 */
 	public void setName(String name) {
 		username = name;
+	}
+	public void setSessionId(String sessId) {
+		sessionId = sessId;
 	}
 	public String getName() {
 		return username;

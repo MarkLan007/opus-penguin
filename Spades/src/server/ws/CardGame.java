@@ -7,6 +7,7 @@ package server.ws;
 
 public class CardGame implements GameInterface {
 	int nPlayers = 4;
+	MailBoxExchange mbx=null;
 	private int nCurrentTurn = -1; // index of player with current turn or -1 if undefined
 	Trick[] trickArray = new Trick[(52 / nPlayers) + 1];
 	final int LAST_TRICK = (52/nPlayers);
@@ -15,6 +16,8 @@ public class CardGame implements GameInterface {
 	boolean bDebugCardCf=true;
 	boolean bGameAborted=false;
 	boolean bGameOver=false;
+	
+	MailBoxExchange.PassType currentPass=MailBoxExchange.first();
 	
 	/*
 	 * TODO: global game shouldn't be managed this way; 
@@ -228,8 +231,17 @@ public class CardGame implements GameInterface {
 	}
 	*/
 
+	/*
+	 * copyPlayer
+	 *  Note: if copying from human to robot set the sessionId
+	 *  but if copying from robot to human DO NOT set the sessionId
+	 */
 	void copyPlayer(Player from, Player to) {
 		to.pid = from.pid;
+		if (from.isRobot())
+			;
+		else
+			to.userSession = from.userSession;
 		to.bIsMyMove = from.bIsMyMove;
 		to.subdeck = from.subdeck;
 		to.handScore = from.handScore;
@@ -241,14 +253,11 @@ public class CardGame implements GameInterface {
 	 * called by WsServer
 	 *  -- called any time human player joins -- 
 	 */
-	boolean join(UserSession us, String sessionName) {
+	boolean join(UserSession us, String friendlyName) {
 		HumanPlayer hp=new HumanPlayer(us);
-		hp.setName(sessionName);
+		hp.setName(friendlyName);
 		// todo: multiple human players...
 		// find a robot player to displace
-		// xxx
-		// write something:
-		System.out.println("Obsolete join called..");
 		int i;
 		for (i=0; i<nPlayers; i++) {
 			Player p = playerArray[i];
@@ -413,39 +422,56 @@ public class CardGame implements GameInterface {
 			gameErrorLog("Game over.");
 	}
 	
+	
 	/*
 	 * initiatePass -- set up exchnage mail boxes, 
 	 * 	set routing, and send the pass cards request
 	 * 
-	 * At end of hand, set currentPassType to the next passtype
+	 * don't forget... At end of hand, set currentPass to the next passtype
 	 */
 	void initiatePass(MailBoxExchange.PassType pt) {
 		if (pt == MailBoxExchange.PassType.PassHold)
 			return;
 		// number of players, number of cards to pass for error checking
-		MailBoxExchange mbx=new MailBoxExchange(pt, nPlayers, 3);
+		mbx=new MailBoxExchange(pt, nPlayers, 3);
 		// Now send the pass messages, telling the user what
 		// the pass type is. Remember...
 		//cardString of the form 'NCards to pass left' where N is the actual number
-
+		mbx.setRouting(pt);
+		ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PASS_CARD,
+				3 + "Pass 3 cards to the " + currentPass);
+		broadcastUpdate(pm);
 	}
 
-	MailBoxExchange.PassType currentPassType=MailBoxExchange.PassType.PassHold;
+/* one of these is enough
 	void initiatePass() {
 		MailBoxExchange.PassType pass;
-		
-		pass=MailBoxExchange.PassType.PassHold;
+
+		pass = MailBoxExchange.PassType.PassHold;
 		if (pass == MailBoxExchange.PassType.PassHold)
 			return;
 		// number of players, number of cards to pass for error checking
-		MailBoxExchange mbx=new MailBoxExchange(currentPassType, nPlayers, 3);
+		MailBoxExchange mbx = new MailBoxExchange(currentPassType, nPlayers, 3);
 		// Now send the pass messages, telling the user what
-		// the pass type is
-	}
+		ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PASS_CARD,
+				3 + "Pass 3 cards to the " + currentPassType);
+		broadcastUpdate(pm);
+	} */
 
+	/*
+	 * WTF version of broadcastUpdate... 
+	 *
+	*/
+	/*
+	 * broadcastUpdate - send the same message to all the players
+	 *  works even if there is no current turn... i.e. during pass
+	 */
 	void broadcastUpdate(ProtocolMessage pmsg) {
 		int i, j;
-		j = nCurrentTurn; 
+		if (nCurrentTurn > -1)
+			j = nCurrentTurn;
+		else 
+			j = 0;
 		for (i=0; i<nPlayers; i++) {
 			Player p = playerArray[j++];
 			p.sendToClient(pmsg);
@@ -454,17 +480,56 @@ public class CardGame implements GameInterface {
 			}
 		
 		}
-
+	
+	boolean validPid(int pid) {
+		if (pid >=0 && pid < nPlayers)
+			return true;
+		return false;
+	}
+	
+	void sendFormatedPlayerInfo(int pid) {
+		if (!validPid(pid))
+				return;
+		Player p=playerArray[pid];
+		System.out.println("New Query Code...");
+		ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.GAME_QUERY,
+				getFormatedPlayerInfo());
+		p.sendToClient(pm);
+	}
+	
+	String getFormatedPlayerInfo() {
+		int i;
+		String sTemp = "";
+		for (i = 0; i < nPlayers; i++) {
+			var sessionName="(none)";
+			if (!playerArray[i].isRobot())
+				sessionName = playerArray[i].userSession.sessionId;
+					
+			sTemp = sTemp + "$" + playerArray[i].getName() + "=" 
+					+ sessionName + "."
+					+ playerArray[i].isRobot() ;
+		}
+		return sTemp + '$';
+		
+	}
 	String getFormatedGameScore() {
 		int i;
 		String sTemp = "";
 		for (i = 0; i < nPlayers; i++)
 			sTemp = sTemp + "$" + playerArray[i].getName() + "=" 
 					+ playerArray[i].handScore + "."
-					+ playerArray[i].totalScore + "#";
-		return sTemp;
+					+ playerArray[i].totalScore ;
+		return sTemp + '$';
 	}
 	
+	private int gensymName=1;
+	
+	String uniqueName(String fname) {
+		for (int i=0; i<nPlayers; i++)
+			if (playerArray[i].playerName.equalsIgnoreCase(fname))
+				return fname + gensymName ++;
+		return fname;
+	}
 	/*
 	 * totalScores - total the scores for the hand checks for moonshooting and
 	 * game-end
@@ -788,6 +853,19 @@ public class CardGame implements GameInterface {
 			// has the player to whom the card should be sent passed cards? If not queue it
 			// up
 			// empty queue of passes if any built up
+			//
+			System.out.println("Server>Pass UserText:" + m.usertext);
+			// make sure I'm in a pass
+			// make sure user has cards. If not reject and resend pass message.
+			// store cards to MailBoxExchange
+			Subdeck sd=new Subdeck(m.usertext);
+			int to=mbx.getRecipient(m.sender);
+			
+			mbx.route(to, sd);
+			// delete cards in players hands
+			// if mailboxExchange is complete
+			// foreach mbox, get cards from mailbox and route to sender
+			//
 			break;
 		case GAME_QUERY:
 			
@@ -847,6 +925,7 @@ public class CardGame implements GameInterface {
 		reset();
 	}
 	public void start() {
+		// shuffle? Not hear. Cards already assigned.
 		initiatePlay();		
 	}
 	/*
@@ -959,6 +1038,7 @@ public class CardGame implements GameInterface {
 	 *  then start...
 	 *  This is the first really asynch thing to be done...
 	 */
+	
 	void initiatePlay() {
 		/*
 		 * Can't setup trick yet, till after the (maybe) pass
@@ -977,14 +1057,21 @@ public class CardGame implements GameInterface {
 
 		//
 		// send (individual) welcome message
-		// shouldn't join do this?
+		// shouldn't join do this? No because user might be waiting for multiple joins...
 		for (i = 0; i < nPlayers; i++) {
 			p = playerArray[i];
 			ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PLAYER_WELCOME, p.getName());
 			p.sendToClient(pm);
 		}
-				
-		// lookup pass type for this hand...
+
+		//
+		// send clear-hand =* message before adding the dealt cards?
+		/* Need to modify the robots to understand this
+		ProtocolMessage deleteAll = new ProtocolMessage(ProtocolMessageTypes.DELETE_CARDS);
+		deleteAll.usertext = "*";
+		broadcastUpdate(deleteAll);
+		*/
+		
 		//
 		// Now send the protocol message to add cards to the players hand
 		for (i = 0; i < nPlayers; i++) {
@@ -1001,7 +1088,7 @@ public class CardGame implements GameInterface {
 
 		// So do the pass, if a pass hand.
 		//  when the pass is complete it will call send next move
-		
+
 		// otherwise sendnextmove
 		//
 		// Send the message to the first player to start...
@@ -1009,18 +1096,28 @@ public class CardGame implements GameInterface {
 		// Todo: This is pretty big
 		// Make what is now reset() manage what
 		// type of hand this is...
-		// And to do that... 
+		// And to do that...
 		// Todo:
 		// Need to play consecutive hands
 		// as part of a game
-		boolean holdHand = true;
-		if (!holdHand)	// This is just to compile; not implemented fully yet
-			initiatePass(MailBoxExchange.PassType.PassHold);
-		else {
-			setFirstMove();
-			sendNextMove();
-			}
+		// lookup pass type for this hand...
+		//
+		if (currentPass!= MailBoxExchange.PassType.PassHold) {
+			initiatePass(currentPass);
+			// once pass cards messages are complete, the exchange will call go();
+		} else {
+			go();
+		}
 	}
+	
+	/*
+	 * go - Pass is complete. Start play
+	 */
+	void go() {
+		setFirstMove();
+		sendNextMove();
+	}
+	
 
 	/*
 	 * disconnect -- delete human player entry that this was attached to, and add robot player
