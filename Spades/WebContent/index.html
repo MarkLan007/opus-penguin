@@ -194,7 +194,7 @@ body {
   /*
    * cover the play felt
    */
-  width: 50%; /* partial width */
+  width: 422px; /* partial width */
   height: 56%; /* partial height */
   /* width: 590px; */
   /* height: 270px; */
@@ -206,8 +206,9 @@ body {
 /* Modal Content */
 .semi-modal-content {
   background-color: #fefefe;
+  width: 410px;
   margin: auto;
-  padding: 0px;
+  padding: 5px;
   border: 1px solid #888;
   /*width: 80%;*/
 }
@@ -373,9 +374,10 @@ tr:nth-child(even) {
 			type="button">
 		<input onclick="turnover1card();" value="Show 1 Card" 
 			type="button">
-		<input onclick="wsCloseConnection();" value="Disconnect" type="button"
-			disabled> <input onclick="wsReconnect();"
-			id="reconnectButton" value="Reconnect" type="button" disabled>
+		<input onclick="wsCloseConnection();" value="Disconnect" 
+			type="button" disabled> 
+		<input onclick="wsReconnect();" id="reconnectButton" value="Reconnect" 
+			type="button" disabled>
 		<br>
 		<!-- Move text area up (delete this...) 
 	<textarea id="echoText" rows="15" cols="60" readonly></textarea>
@@ -447,10 +449,10 @@ insert modal stuff here ->
 <!-- Learning that class names are case sensitive the hard way...
  -->
   <!-- Modal content -->
-  <div class="modal-content">
+  <div class="modal-content" >
     <span class="close">&times;</span>
     <p>Some vacuous text in the Modal..</p>
-    
+    <p> bug: clicking outside the dialog doesn't close it..</p>
   </div>
 </div>
 
@@ -497,6 +499,10 @@ span.onclick = function() {
   modal.style.display = "none";
 }
 
+// I see... you need to set this every time it comes up..
+// hook the onshow event... unfortunately it's only supported in firefox
+// at the moment...
+// so last init wins!
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
   if (event.target == modal) {
@@ -517,7 +523,7 @@ xx
     <p>Some text in the Modal..</p>
     <p> Completely broken. Button doesn't close. "open fullymodal" does nothing. </p>
     <p>Something's wrong. You shouldn't see this until you press the button...</p>
-    
+        <p>fixed...</p>
   </div>
 </div>
 
