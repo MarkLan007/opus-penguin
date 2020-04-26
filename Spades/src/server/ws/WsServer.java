@@ -162,6 +162,18 @@ public class WsServer {
 	}
 	// --
 	
+
+	static int stringToNumber(String sparam, int defaultValue) {
+	for (int n=0; n<sparam.length(); n++) {
+		char c=sparam.charAt(n);
+		if (c < '0' || c > '9') {
+			return defaultValue;
+		}
+	}
+	int number=Integer.parseInt(sparam);
+	return number;
+	}
+
 	/*
 	 * Main role of onMessage is to detect JCL commands and process them,
 	 * but it also wraps the protocol messages by calling join with 
@@ -245,6 +257,7 @@ public class WsServer {
 			break;
 		case JCLSuperUser:
 			us.setSuperUser(true);
+			write(us, "With great power comes great responsibility...");
 			break;
 		case JCLWho:
 			int playerId=us.getpid();
@@ -252,13 +265,42 @@ public class WsServer {
 				write(us, "Not currently in a game; can't get status");
 				break;
 			}
-			us.game.sendFormatedPlayerInfo(playerId);		
+			us.game.sendFormattedPlayerInfo(playerId, us.isSuperUser());		
+			break;
+		case JCLPeek:
+			// argc, argv...
+			playerId=us.getpid();
+			if (!us.isSuperUser()) {
+				write(us, "No peeking!");
+				break;
+			}
+			if (playerId == -1) {
+				write(us, "Not currently in a game; can't peek");
+				break;
+			}
+			String s = "";
+			int nparam=0;
+			sname="";
+			sparam="";
+			if (jcl.argc() > 1) {	// argc is always at least 1
+				sname=jcl.getName(1);
+				sparam=jcl.getValue(1);
+				nparam = stringToNumber(sparam,0);
+				}
+			else {
+				sparam = "?";
+			}
+			//us.game.sendFormattedPlayerInfo(playerId);		
+			String cards=us.game.peek(nparam);
+			s = "Peek(" + nparam + ")=<" + cards + ">";
+			write(us, s);
 			break;
 		case JCLWhoAmI:			
-			String s = "";
+			s = "";
 			if (us.superuser())
 				s = s + "+";
 			s += us.sessionId + us.getName();
+			us.setSuperUser(true);
 			write(us, s);
 			break;
 		case JCLStart:

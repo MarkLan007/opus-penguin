@@ -25,6 +25,7 @@ public class UserJCLCommand {
 		JCLNewdeal, JCLMisdeal,
 		JCLShuffle,
 		JCLStatus,
+		JCLPeek,	// peek at a hand
 		JCLScore,
 		JCLPoke, JCLResume, 	// poke or resume the server
 		JCLWhoAmI, JCLWho,
@@ -122,6 +123,7 @@ public class UserJCLCommand {
 	String jclNewdeal = "newdeal";
 	String jclStatus = "status";
 	String jclScore = "score";
+	String jclPeek = "peek";
 	String jclShuffle = "shuffle";
 	String jclStart = "start";
 
@@ -135,6 +137,7 @@ public class UserJCLCommand {
 	Pattern jclSuperUserRegex = Pattern.compile(jclSuperUser);
 	Pattern jclResumeRegex = Pattern.compile(jclResume);
 	Pattern jclPokeRegex = Pattern.compile(jclPoke);
+	Pattern jclPeekRegex = Pattern.compile(jclPeek);
 	Pattern jclResendRegex = Pattern.compile(jclResend);
 	Pattern jclResetRegex = Pattern.compile(jclReset);
 	Pattern jclMisdealRegex = Pattern.compile(jclMisdeal);
@@ -494,6 +497,29 @@ public class UserJCLCommand {
 					// todo: Add some damn security!
 					// consider making the su add the time in hours +- 1...
 					// sName = identifier.group();
+					break;
+				}
+			}
+			return;
+		}
+		m = jclPeekRegex.matcher(commandString);
+		if (m.find()) { // i.e. look for 'peek' then an identifier
+			type = JCLType.JCLPeek;
+			// String sName = "root"; // default name string
+			// Matcher identifier = jclIdentierRegex.matcher(commandString);
+			String sParam;
+			Matcher identifier = jclIdentierRegex.matcher(commandString);
+			for (int i = 0; identifier.find(); i++) {
+				switch (i) {
+				case 0:
+					NameValuePair pair = new NameValuePair("peek", "");
+					argv.add(pair);
+					continue; // the command itself
+				case 1:
+					sParam = identifier.group(); // the pattern match
+					// great. grabbed the name.
+					NameValuePair p1 = new NameValuePair("hand", sParam);
+					argv.add(p1);
 					break;
 				}
 			}

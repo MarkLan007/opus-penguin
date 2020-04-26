@@ -46,6 +46,9 @@ public class UserSession {	// wrapper for data to keep with Session
 	public void setSuperUser(boolean flag) {
 		bSuperUser = flag;
 	}
+	public boolean isSuperUser() {
+		return bSuperUser;
+	}
 
 	/*
 	 * used by CardGame.join to make sure that userSession 

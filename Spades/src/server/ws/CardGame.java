@@ -319,7 +319,7 @@ public class CardGame implements GameInterface {
 	 *  other routine totalScores() and consolodate
 	 */
 	String getGameStatus() {
-		return getFormatedGameScore();
+		return getFormattedGameScore();
 		/*
 		String sStatus = "";
 		//
@@ -488,17 +488,42 @@ public class CardGame implements GameInterface {
 	}
 	
 	// i.e. who
-	void sendFormatedPlayerInfo(int pid) {
+	void sendFormattedPlayerInfo(int pid) {
 		if (!validPid(pid))
 				return;
 		Player p=playerArray[pid];
 		System.out.println("New Query Code...");
 		ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.GAME_QUERY,
-				getFormatedPlayerInfo());
+				getFormattedPlayerInfo());
 		p.sendToClient(pm);
 	}
 	
-	String getFormatedPlayerInfo() {
+	void sendFormattedPlayerInfo(int pid, boolean su) {
+		if (!validPid(pid))
+				return;
+		Player p=playerArray[pid];
+		System.out.println("New Query Code...");
+		String playerinfo;
+		if (su) 
+			playerinfo = getFormattedPlayerHand();
+		else
+			playerinfo = getFormattedPlayerInfo();
+		ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.GAME_QUERY,
+				playerinfo);
+		p.sendToClient(pm);
+	}
+
+	String peek(int pid) {
+		String cardString = "Invalid Pid";
+		if (pid >= 0 && pid < nPlayers) {
+			Player p = playerArray[pid];
+			Subdeck sd = p.subdeck;
+			cardString = sd.encode();
+		}
+		return cardString;
+	}
+	
+	String getFormattedPlayerInfo() {
 		int i;
 		String sTemp = "";
 		for (i = 0; i < nPlayers; i++) {
@@ -515,7 +540,26 @@ public class CardGame implements GameInterface {
 		return sTemp;
 		
 	}
-	String getFormatedGameScore() {
+
+	String getFormattedPlayerHand() {
+		int i;
+		String sTemp = "";
+		for (i = 0; i < nPlayers; i++) {
+			var sessionName="(none)";
+			if (!playerArray[i].isRobot())
+				sessionName = playerArray[i].userSession.sessionId;
+					
+			sTemp = sTemp + "$" + playerArray[i].getName() + "=" 
+					+ sessionName + "."
+					+ playerArray[i].subdeck.encode();
+		}
+		sTemp += '$';
+		sTemp += "#User#Session Id#IsRobot?#";
+		return sTemp;
+		
+	}
+
+	String getFormattedGameScore() {
 		int i;
 		String sTemp = "";
 		for (i = 0; i < nPlayers; i++)
@@ -578,7 +622,7 @@ public class CardGame implements GameInterface {
 				gameEnds = true;
 		}
 
-		String sTemp=getFormatedGameScore();
+		String sTemp=getFormattedGameScore();
 
 		if (gameEnds)
 			gameOver();
@@ -874,7 +918,7 @@ public class CardGame implements GameInterface {
 			
 			System.out.println("New Query Code...");
 			returnMessage = new ProtocolMessage(ProtocolMessageTypes.GAME_QUERY,
-					getFormatedGameScore());
+					getFormattedGameScore());
 			p.sendToClient(returnMessage);
 			break;
 			
@@ -906,7 +950,7 @@ public class CardGame implements GameInterface {
 	void sendScore(int playerId) {
 		// xxx
 		Player p = playerArray[playerId];
-		String sTemp=getFormatedGameScore();
+		String sTemp=getFormattedGameScore();
 		ProtocolMessage pm = new ProtocolMessage(
 				ProtocolMessageTypes.PLAYER_SCORES, 
 				sTemp);
