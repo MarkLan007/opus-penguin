@@ -139,11 +139,61 @@ public class WsServer {
 		return msg;
 	}
 	static CardGame[] cardGames = new CardGame[4];
-	// total stub routines...
+
+	// returns a fake protocol message that will cause the score dialog to put it up for user
+	String listGames() {
+		String sTemp="";
+		for (int i=0; i<cardGames.length; i++) {
+			if (cardGames[i] == null)
+				continue;
+			sTemp += "$" + cardGames[i].sGameName + "="
+					+ cardGames[i].nPlayers + "."
+					+ cardGames[i].bGameInProgress ;
+		}
+		sTemp += '$';
+		sTemp += "#game#Players#InProgress?#";
+		ProtocolMessage returnMessage = new ProtocolMessage(ProtocolMessageTypes.GAME_QUERY,
+				sTemp);
+
+		return returnMessage.encode();
+		/*
+		 * 		for (i = 0; i < nPlayers; i++) {
+			var sessionName="(none)";
+			if (!playerArray[i].isRobot())
+				sessionName = playerArray[i].userSession.sessionId;
+					
+			sTemp = sTemp + "$" + playerArray[i].getName() + "=" 
+					+ sessionName + "."
+					+ playerArray[i].isRobot() ;
+		}
+		sTemp += '$';
+		sTemp += "#User#Session Id#IsRobot?#";
+
+		 */
+	}
 	CardGame lookupGameFromSession(String sessionString) {
 		if (sessionString.isEmpty())
 			return cardGames[0];
 		return cardGames[0];
+	}
+	boolean intern(CardGame g) {
+		for (int i=0; i<cardGames.length; i++)
+			if (cardGames[i] == null) {
+				cardGames[i] = g;
+				return true;
+			}
+		return false;
+	}
+	
+	CardGame lookupGameByName(String sname) {
+		int i;
+		for (i=0; i<cardGames.length; i++)
+			if (cardGames[i] != null &&
+				sname.equalsIgnoreCase(cardGames[i].getName())) {
+				// found it
+				return cardGames[i];
+			}
+		return null;
 	}
 	void setNewDefaultGame() {
 		cardGames[0] = new CardGame();
@@ -323,9 +373,31 @@ public class WsServer {
 			g.start();
 			break;
 		case JCLNew:	// create a new game...
-			setNewDefaultGame();
-			System.out.println("new game.");
-			write(us, "new game created. Join in to keep playing!");
+			sname="";
+			sparam="";
+			String sUserMsg="new game created. Join in to keep playing!";
+			int argc=jcl.argc();
+			if (argc > 1) {	// argc is always at least 1
+				sname=jcl.getName(1);
+				sparam=jcl.getValue(1);
+				sUserMsg = "new game created:" + sparam + ". Join by name to play!";
+				g = new CardGame(sparam);
+				if (!intern(g)) {
+					write(us, "Created but can't intern game:" + g.getName());
+				}
+			else
+				setNewDefaultGame(); 
+				// No parameter? Just create a new nameless game
+			}
+			System.out.println("new game:" + sname);
+			write(us, sUserMsg);
+			break;
+		case JCLLs:	// list available games...
+			sname="";
+			sparam="";
+			// ggg
+			sparam = listGames();
+			write(us, sparam); // need a "wrap as protocol message command from game"
 			break;
 		case JCLJoin:
 			// here is the confluence of the http server and the gameserver
@@ -338,14 +410,17 @@ public class WsServer {
 			if (jcl.argc() > 1) {	// argc is always at least 1
 				sname=jcl.getName(1);
 				sparam=jcl.getValue(1);
+				g = lookupGameByName(sparam);
 				}
-			/*
-			 * sparam needs to be managed more intensely
-			 */
-			/*
-			 * Wait... there is no game in session... this is join after all...
-			 */
-			g=lookupGameFromSession(sparam);
+			else {
+				/*
+				 * sparam needs to be managed more intensely
+				 */
+				/*
+				 * Wait... there is no game in session... this is join after all...
+				 */
+				g = lookupGameFromSession(sparam);
+			}
 			if (g == null)
 				g = getDefaultGame();
 			us.game = g;
@@ -359,7 +434,7 @@ public class WsServer {
 			if (bJoinStatus) {
 				// joined ok...
 				//
-				write(us, "Successfully joined game as " + friendlyName + "...");
+				write(us, "Successfully joined game:" + g.sGameName + " as " + friendlyName + "...");
 				write(us, "issue start command to initiate play.");
 			}
 			else if (!bJoinStatus  && (sparam.contains("bygod") ||

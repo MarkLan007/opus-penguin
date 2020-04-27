@@ -17,6 +17,9 @@ public class CardGame implements GameInterface {
 	boolean bGameAborted=false;
 	boolean bHandOver=false;
 	boolean bGameInProgress=true;
+	
+	String sGameName="_AnonHearts";
+	
 	public boolean gameInProgress() {
 		return bGameInProgress;
 	}
@@ -103,6 +106,18 @@ public class CardGame implements GameInterface {
 		populatePlayers();
 		// xxx reset as part of creation?
 		reset();
+	}
+	
+	public void setName(String s) {
+		sGameName = s;
+	}
+	public String getName() {
+		return sGameName;
+	}
+	
+	CardGame(String gamename) {
+		this();
+		setName(gamename);
 	}
 
 	private void populatePlayers() {

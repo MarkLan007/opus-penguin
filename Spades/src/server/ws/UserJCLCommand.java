@@ -19,6 +19,7 @@ public class UserJCLCommand {
 		JCLCommandNotImplemented, // Command is not implemented
 		JCLSetname, // set the name attached to user
 		JCLJoin, // Join, Rejoin games
+		JCLLs,
 		JCLNew,		// create a new game
 		JCLStart,
 		JCLRejoin, JCLSuperUser, // SuperUser
@@ -128,6 +129,7 @@ public class UserJCLCommand {
 	String jclShuffle = "shuffle";
 	String jclStart = "start";
 	String jclNew = "new";	// new game... Shortest... Must do last...
+	String jclLs = "ls";	// ls way shortest... do last
 
 	String jclIdentifierPattern = "[a-zA-Z0-9]+";
 	Pattern jclRegex = Pattern.compile(jclPattern);
@@ -149,6 +151,7 @@ public class UserJCLCommand {
 	Pattern jclShuffleRegex = Pattern.compile(jclShuffle);
 	Pattern jclStartRegex = Pattern.compile(jclStart);
 	Pattern jclNewRegex = Pattern.compile(jclNew);
+	Pattern jclLsRegex = Pattern.compile(jclLs);
 	
 	Pattern jclIdentierRegex = Pattern.compile(jclIdentifierPattern);
 
@@ -528,29 +531,57 @@ public class UserJCLCommand {
 			}
 			return; // "//+start sSession
 		}
-		// scan for new
+		// scan for new (game)
 		m = jclNewRegex.matcher(commandString);
 		if (m.find()) { // i.e. look for 'start' then an identifier
 			type = JCLType.JCLNew;
 			/*
 			 * param is ignored for start
 			 */
-			String sSession = "no"; // default name string
+			String sgamename = "default-game-name"; // default name string
 			Matcher identifier = jclIdentierRegex.matcher(commandString);
 			for (int i = 0; identifier.find(); i++) {
+				NameValuePair arg=null;
 				switch (i) {
 				case 0:
-					continue; // the command itself
+					arg = new NameValuePair("new", sgamename);
+					break; // the command itself
 				case 1:
-					sSession = identifier.group();
-					NameValuePair p1 = new NameValuePair("session", sSession);
-					argv.add(p1);
+					sgamename = identifier.group();
+					arg = new NameValuePair("game", sgamename);
 					break;
 				}
+				argv.add(arg);
 			}
 			return; // New Game 
 		}
 
+		// scan for ls (list games)
+		m = jclLsRegex.matcher(commandString);
+		if (m.find()) { // i.e. look for 'start' then an identifier
+			type = JCLType.JCLLs;
+			/*
+			 * param is ignored for start
+			 */
+			String sgamename = "default-game-name"; // default name string
+			Matcher identifier = jclIdentierRegex.matcher(commandString);
+			for (int i = 0; identifier.find(); i++) {
+				NameValuePair arg=null;
+				switch (i) {
+				case 0:
+					arg = new NameValuePair("new", sgamename);
+					break; // the command itself
+				case 1:
+					sgamename = identifier.group();
+					arg = new NameValuePair("game", sgamename);
+					break;
+				}
+				argv.add(arg);
+			}
+			return; // New Game 
+		}
+
+		
 		// - new commands...
 
 		type = JCLType.JCLCommandNotRecognized;
