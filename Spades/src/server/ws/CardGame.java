@@ -828,9 +828,64 @@ public class CardGame implements GameInterface {
 	
 	 //* xxx	new (but unimplemented) gameInterface methods here...
 
-	public void passCards(int nsender, Subdeck cards) {
-		gameErrorLog("Can't happen: Game received unimplemented PASS_CARDS request.");		
+	/*
+	 * send client an error message sError with string s in the message format that
+	 * the client can display, and log it
+	 */
+	public void sendPlayerUserErrorMsg(Player p, String sError) {
+		gameErrorLog("Error:" + p.pid + ")" + sError);
+		ProtocolMessageTypes mtype = ProtocolMessageTypes.PLAYER_ERROR;
+		ProtocolMessage pm = new ProtocolMessage(mtype, "%MSG:" + sError + "%");
+		p.sendToClient(pm);
+	}
+
+	/*
+	 * passCards - detect if the sender can legally pass these cards; 
+	 *    TODO: i.e. are we in a pass?
+	 *    emit error message if not
+	 *  if legal, add to the mailbox
+	 */
+	public void passCards(int nsender, Subdeck sd) {
+		int recipient = mbx.lookupRecipient(nsender);
+
+		mbx.route(recipient, sd);
+		if (!mbx.isFull())
+			return; // waiting for more players to pass their cards
+		//
+		// Mailbox is full! time to route cards to players, deleting old cards
+		// and start play!
+		// foreach mailbox, delete cards in from and add cards to to;
+		for (int i = 0; i < mbx.size(); i++) {
+			MailBoxExchange.MailBox mb = mbx.itemAt(i);
+			int from = mb.from, to = mb.to;
+			sd = mb.contents;
+			System.out.println("Passing:(" + sd.size() + ")=" + sd.toString());
+			Player p = playerArray[from];
+			/*
+			 * Actually delete the cards to the player's hand internally
+			 * for (c: sd.subdeck) {				
+			} */
+			// actually delete the card from the player's hand i.e. subdeck
+			// i.e. the game has to know the actual state of the player's hand
+			for (var c: sd.subdeck)
+				p.ssDeleteCard(c);
+			ProtocolMessage pmFrom = new ProtocolMessage(
+					ProtocolMessageTypes.DELETE_CARDS, sd);
+			// is iterator destructive? Seems to be. Recreate subdeck...
+			p.sendToClient(pmFrom);
+			sd = mb.contents;
+			// actually add the card to the player subdeck
+			p = playerArray[to];
+			for (var c: sd.subdeck)
+				p.ssAddCard(c);
+			ProtocolMessage pmTo = new ProtocolMessage(
+					ProtocolMessageTypes.ADD_CARDS, sd);
+			p.sendToClient(pmTo);
 		}
+		// yea! Pass successfully completed
+		// buckle-up...
+		go();
+	}
 
 	public void bidTricks(int nsender, Subdeck cards) {
 		gameErrorLog("Can't happen: Game received unimplemented BID request. Bidding not yet implemented.");		
@@ -901,21 +956,16 @@ public class CardGame implements GameInterface {
 			// up
 			// empty queue of passes if any built up
 			//
+			// todo: emit error if not in a pass
 			System.out.println("Server>Pass UserText:" + m.usertext);
+			Subdeck passcards = new Subdeck(m.usertext);
+			passCards(nSender, passcards);
 			// make sure I'm in a pass
 			// make sure user has cards. If not reject and resend pass message.
-			// store cards to MailBoxExchange
-			Subdeck sd=new Subdeck(m.usertext);
-			int to=mbx.getRecipient(m.sender);
-			
-			mbx.route(to, sd);
-			// delete cards in players hands
-			// if mailboxExchange is complete
-			// foreach mbox, get cards from mailbox and route to sender
-			//
+			// ...Here? or in passcards...
 			break;
-		case GAME_QUERY:
 			
+		case GAME_QUERY:			
 			System.out.println("New Query Code...");
 			returnMessage = new ProtocolMessage(ProtocolMessageTypes.GAME_QUERY,
 					getFormattedGameScore());
@@ -926,6 +976,7 @@ public class CardGame implements GameInterface {
 			String sStatus = getGameStatus();
 			break;
 		default:
+			
 			// Unhandled message in process game kernel.
 			// TODO: Log errors, etc.
 		}

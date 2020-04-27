@@ -214,7 +214,8 @@ public class WsServer {
 					// sleep before every move to let writes finish
 					// temporary hack...
 					// xxx yyy
-					CardGameKernel.msleep(10);
+					/// Causes Tomcat warnings for memory leak?
+					//    CardGameKernel.msleep(10);
 					g.process(pm);
 					// was...
 					//us.game.process(pm);
@@ -323,7 +324,7 @@ public class WsServer {
 			// create a game if one does not exist, and insert this session into it
 			// xxx
 			System.out.println("User: '" + us.username + "' Joining...");
-			boolean byGod=false;
+			//boolean byGod=false;
 			sname="";
 			sparam="";
 			if (jcl.argc() > 1) {	// argc is always at least 1
@@ -353,7 +354,7 @@ public class WsServer {
 					(sname.contains("bygod")))) {
 				broadcast("Game reset by divine providence. Mortals will need to rejoin.");
 				System.out.println("Game reset by divine providence. Mortals will need to rejoin.");
-				byGod = true;
+				//byGod = true;
 				g.reset();
 				if (g.join(us, us.sessionId + "/God"))
 					write(us, "%msg%ByGod join successfull");
@@ -579,7 +580,7 @@ public class WsServer {
 			//Basic br=sess.getBasicRemote();
 			RemoteEndpoint.Basic basicRemote=sess.getBasicRemote();
 
-			RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 			
+			//RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 			
 			if (verbose) {
 				System.out.println("writing(" + i + "):" + msg);
 			}

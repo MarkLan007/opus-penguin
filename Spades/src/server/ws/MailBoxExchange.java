@@ -5,19 +5,20 @@ public class MailBoxExchange {
 		PassHold, PassLeft, PassRight, PassAcross;
 	}
 	static PassType[] pts = PassType.values();
-	static public PassType getNextPass(PassType e)
-	{
-	  int index = e.ordinal();
-	  int next = (index + 1) % pts.length;
-	  return pts[next];
+
+	static public PassType getNextPass(PassType e) {
+		int index = e.ordinal();
+		int next = (index + 1) % pts.length;
+		return pts[next];
 	}
-	static public PassType getPrevPass(PassType e)
-	{
-	  int index = e.ordinal();
-	  if (index == 0)
-		  index = pts.length;
-	  return pts[--index];
+
+	static public PassType getPrevPass(PassType e) {
+		int index = e.ordinal();
+		if (index == 0)
+			index = pts.length;
+		return pts[--index];
 	}
+
 	/*
 	 * for now make this a hold hand first...
 	 * TODO: should start with a PassLeft
@@ -33,10 +34,18 @@ public class MailBoxExchange {
 	}
 	//
 	// maintained by route
-	boolean full=false;	
-	boolean isfull() { return full; }
-	int exchangeSize;
+//	boolean full=false;	
+//	boolean isfull() { return full; }
+	private int exchangeSize;
 	MailBox exchange[]=null;
+
+	int size() { return exchangeSize; }
+	
+	MailBox itemAt(int index) {
+		if (index < exchangeSize)
+			return exchange[index];
+		return null;
+	}
 	
 	/*
 	 * MailBoxExchange - create an exchange with nplayers mailboxes
@@ -48,6 +57,7 @@ public class MailBoxExchange {
 		int i;
 		for (i=0; i<nplayers; i++) {
 			exchange[i] = new MailBox();
+			exchange[i].contents = null;
 			exchange[i].to = i;
 		}
 		setRouting(pt);
@@ -92,18 +102,26 @@ public class MailBoxExchange {
 		
 	}
 	
-	int getRecipient(int from) {
+	int lookupRecipient(int from) {
 		int i;
-		for (i=0; i<exchangeSize; i++) 
+		//return exchange[from].to;
+		// wait... this is lookup sender
+		/*
+		 * No, completely wrong...
+		 */
+		 for (i=0; i<exchangeSize; i++) 
 			if (exchange[i].from == from)
 				return i;
+				/* */
 		// Uh oh.
-		System.out.println("Can't route for:" + from + ". recipient not found");
-		return 0;
+		//System.out.println("Can't route for:" + from + ". recipient not found");
+		 return 0;
 	}
 
 	void route(int to, Subdeck contents) {
 		MailBox mb;
+		if (contents.size() != 3)
+			System.out.println("MBE: Uh oh. Someone is passing wrong number offew cards:" + contents.size());
 		mb = exchange[to];
 		mb.contents = contents;
 		mb.empty = false;
@@ -115,6 +133,14 @@ public class MailBoxExchange {
 			return null;
 		}
 		return exchange[to].contents;
+	}
+	
+	public boolean isFull() {
+		int i;
+		for (i=0; i<exchangeSize; i++)
+			if (exchange[i].contents == null)
+				return false;
+		return true;
 	}
 }
 
@@ -132,24 +158,19 @@ public class MailBoxExchange {
  * 3. One line shorter...
 */
 /*
-static Cars[] cars = Cars.values();
-static public Cars getNextCar(Cars e)
-{
+class Cars {
+	static Cars[] cars = Cars.values();
+
+static public Cars getNextCar(Cars e) {
   int index = e.ordinal();
   int next = (index + 1) % cars.length;
   return cars[next];
 }
-*/
+}*/
 /*
- * And don't forget about prev
- * Here's a snappy version
+ * And don't forget about prev Here's a snappy version
  */
 /*
-static public PassType getPrevCar(PassType e)
-{
-  int index = e.ordinal();
-  if (index == 0)
-	  index = cars.length;
-  return cars[--index];
-}
-*/
+ * static public PassType getPrevCar(PassType e) { int index = e.ordinal(); if
+ * (index == 0) index = cars.length; return cars[--index]; }
+ */

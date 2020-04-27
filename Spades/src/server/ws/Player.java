@@ -164,7 +164,6 @@ public class Player /*implements PlayerInterface */{
 		 *  for robotplayers. RobotXXX
 		 */
 		process(pm);
-
 		}
 
 	//@Override

@@ -196,9 +196,9 @@ function cardSelected(event) {
 function cardSelected2(event) {
 	var t = event.target;
 	var uniqueId = t.type + t.id;
-	console.log("Double Whoa!" + uniqueid);
+	console.log("Double Whoa!" + uniqueId);
 	alert("Whoa Nellie! a doubleclick was seen in:" + t.id);
-	sendCardFromButtonPress(parseInt(t.id, 10));
+	//sendCardFromButtonPress(parseInt(t.id, 10));
 }
 
 /*
@@ -273,6 +273,8 @@ function wsHandInit() {
 	/*
 	 * Place cards in suit-related div
 	 */
+	arrangeCardsInDivs();
+	/*
 	var controlDiv = document.getElementById("ClubsInHandDiv");
 	for (i = 0; i < 52; i++) {
 		card = theDeck[i];
@@ -289,7 +291,7 @@ function wsHandInit() {
 				break;
 		}
 		controlDiv.appendChild(cardBtn);
-	}
+	} */
 
 }
 
@@ -1715,6 +1717,7 @@ var iPassSize = 3;
 var passWindow = null;
 var passDiv = null;
 var bPassDialogInit = false;
+var bNeedToArrange = true;
 function wsInitPassDialog(n, sMsg) {
 	// divert selected cards to the dialog
 	bPassingCardsInProgress = true;
@@ -1726,6 +1729,7 @@ function wsInitPassDialog(n, sMsg) {
 	);
 	passWindow = w;
 	bPassDialogInit = true;
+	bNeedToArrange = true;
 }
 
 var scoreWindow;
@@ -2524,9 +2528,6 @@ function processSubmitAndClearMsgText() {
 	document.getElementById("msgText").focus();
 }
 
-function getDescendantElements(parent) {
-	return [].slice.call(parent.getElementsByTagName('*'));
-}
 function rankOrdinal(c) {
 	if (parseInt(c))
 		return c;
@@ -2577,12 +2578,9 @@ function sortByCardOrder(a) {
 	return a;
 }
 var rowMaxButtons = 8;	// max of 8 cards in a row...
-/*
- * blankBtn padding doesn't work. It's bad. Kill it. Now.
- */
-//var blankBtn=null;		// for padding...
 function reorgButtonsInDiv(sdiv) {
-//	blankBtn = getCardBackBtn();
+	if (bNeedToArrange)
+		arrangeCardsInDivs();
 	var buttonList=null; //= new Array();
 	var cardBtn=null;
 	// start with "ClubsInHandDiv"
@@ -2665,6 +2663,48 @@ var cardDivs=[
 	"SpadesInHandDiv",
 	"HeartsInHandDiv",
 ];
+
+function getDescendantElements(parent) {
+	return [].slice.call(parent.getElementsByTagName('*'));
+}
+
+function clearDivs() {
+	for (var j=0; j<cardDivs.length; j++) {
+		var sdiv=cardDivs[j];
+		var div=document.getElementById(sdiv);
+		var buttonList = getDescendantElements(div);
+		//buttonList = sortByCardOrder(buttonList);
+		// remove the items add them back to the div
+		//var i, j, nSkipped=0;
+		// div.style.left = "50px";
+		for (var i=0; i<buttonList.length; i++) {
+			var cardBtn = buttonList[i];
+			div.removeChild(cardBtn);
+		}
+	}
+}
+
+function arrangeCardsInDivs() {
+		clearDivs();
+		var controlDiv = document.getElementById("ClubsInHandDiv");
+		for (var i = 0; i < 52; i++) {
+			var card = theDeck[i];
+			var cardBtn = card.handButton;
+			switch (i) {
+				case 13:
+					controlDiv = document.getElementById("DiamondsInHandDiv");
+					break;
+				case 26:
+					controlDiv = document.getElementById("SpadesInHandDiv");
+					break;
+				case 39:
+					controlDiv = document.getElementById("HeartsInHandDiv");
+					break;
+			}
+			controlDiv.appendChild(cardBtn);
+		}
+	}
+
 function reorgButtons() {
 	// put the hand-index over the top of the table-canvas
 	//.style.zIndex
