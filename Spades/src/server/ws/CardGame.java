@@ -15,8 +15,11 @@ public class CardGame implements GameInterface {
 	int nTrickId = 0;
 	boolean bDebugCardCf=true;
 	boolean bGameAborted=false;
-	boolean bGameOver=false;
-	
+	boolean bHandOver=false;
+	boolean bGameInProgress=true;
+	public boolean gameInProgress() {
+		return bGameInProgress;
+	}
 	MailBoxExchange.PassType currentPass=MailBoxExchange.first();
 	
 	/*
@@ -252,6 +255,7 @@ public class CardGame implements GameInterface {
 	 * passed user session (for communications wiring) and internal session name 
 	 * called by WsServer
 	 *  -- called any time human player joins -- 
+	 *  -- this is the only working/supported version of join --
 	 */
 	boolean join(UserSession us, String friendlyName) {
 		HumanPlayer hp=new HumanPlayer(us);
@@ -393,7 +397,7 @@ public class CardGame implements GameInterface {
 			// TODO:
 			// so should rotate the pass order pt=nextPassType();
 			// shuffle and deal
-			gameOver();
+			handOver();
 			return;
 		}
 		ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.YOUR_TURN);
@@ -408,6 +412,9 @@ public class CardGame implements GameInterface {
 		 * No it shouldn't. But it should send a %msg text attachment if first move,
 		 * ?0%msg: lead the 2c if leading, ?0%msg: your lead else ?0%msg: your turn
 		 */
+		/*
+		 * TODO: should not send your turn if the game is over...
+		 */
 		String msg;
 		if (nCurrentTurn == -1 && (currentTrick == null || currentTrick.subdeck.size() == 0))
 			msg = "%Play the 2 of clubs";
@@ -418,8 +425,10 @@ public class CardGame implements GameInterface {
 		pm.setUsertext(msg);
 		p.sendToClient(pm);
 		// }
-		if (nCurrentTurn == -1)
-			gameErrorLog("Game over.");
+		if (nCurrentTurn == -1) {
+			gameErrorLog("Game over...");
+			handOver();
+		}
 	}
 	
 	
@@ -583,7 +592,6 @@ public class CardGame implements GameInterface {
 	 */
 	void totalScores() {
 		int i, iTrickTotal;
-		boolean gameEnds = false;
 		for (i = 0; i < nTrickId; i++) {
 			Trick t = trickArray[i];
 			// sum up the no of hearts in the trick, the QS and give to the winner
@@ -615,23 +623,12 @@ public class CardGame implements GameInterface {
 				else
 					playerArray[i].handScore = 26;
 		}
-		// Total the score
-		for (i = 0; i < nPlayers; i++) {
-			playerArray[i].totalScore += playerArray[i].handScore;
-			if (playerArray[i].totalScore >= 100)
-				gameEnds = true;
-		}
-
-		String sTemp=getFormattedGameScore();
-
+		/* Not here... do this in turn
 		if (gameEnds)
-			gameOver();
+			handOver();
+			*/
 		// ToDo:
 		// should sort by total score...
-		ProtocolMessage pm = new ProtocolMessage(
-				ProtocolMessageTypes.PLAYER_SCORES, 
-				sTemp);
-		broadcastUpdate(pm);
 	}
 	
 	/*
@@ -991,7 +988,7 @@ public class CardGame implements GameInterface {
 	 */
 	public void reset() {
 		bGameAborted=false;
-		bGameOver=false;
+		bHandOver=false;
 		nCurrentTurn=-1;
 		
 		//populatePlayers();
@@ -1012,11 +1009,44 @@ public class CardGame implements GameInterface {
 	public boolean isAborted() {
 		return bGameAborted;
 	}
+	
 	void gameOver() {
-		bGameOver = true;
+		bGameInProgress = false;
 	}
+	
+	/*
+	 * handOver - normal successful completion
+	 *  display scores and see if game is over
+	 */
+	void handOver() {
+		bHandOver = true;
+		boolean gameEnds = false;
+		gameErrorLog("Hand completed.");
+		
+		// Total the score
+		for (int i = 0; i < nPlayers; i++) {
+			playerArray[i].totalScore += playerArray[i].handScore;
+			if (playerArray[i].totalScore >= 100)
+				gameEnds = true;
+		}
+
+		// get the score and broadcast it
+		String sTemp=getFormattedGameScore();
+		ProtocolMessage pm = new ProtocolMessage(
+				ProtocolMessageTypes.PLAYER_SCORES, 
+				sTemp);
+		broadcastUpdate(pm);
+		
+		// indicate game over or reset the hand
+		if (gameEnds)
+			gameOver();
+		else
+			reset();
+	}
+	
 	void abort() {
 		bGameAborted = true;
+		bGameInProgress = false;
 	}
 	void reset(Boolean shuffle) {
 		bShuffle = shuffle;

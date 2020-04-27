@@ -64,6 +64,8 @@ public class RobotBrain {
 		Subdeck pass = new Subdeck();
 		for (int tries = 0; pass.size() < 3 && tries < 50;) {
 			Card c = hand.randomCard();
+			if (c == null)
+				break;
 			if (pass.find(c))
 				tries++;
 			else

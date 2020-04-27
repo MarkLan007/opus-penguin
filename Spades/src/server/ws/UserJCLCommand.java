@@ -19,6 +19,7 @@ public class UserJCLCommand {
 		JCLCommandNotImplemented, // Command is not implemented
 		JCLSetname, // set the name attached to user
 		JCLJoin, // Join, Rejoin games
+		JCLNew,		// create a new game
 		JCLStart,
 		JCLRejoin, JCLSuperUser, // SuperUser
 		JCLResend, JCLReset,
@@ -126,6 +127,7 @@ public class UserJCLCommand {
 	String jclPeek = "peek";
 	String jclShuffle = "shuffle";
 	String jclStart = "start";
+	String jclNew = "new";	// new game... Shortest... Must do last...
 
 	String jclIdentifierPattern = "[a-zA-Z0-9]+";
 	Pattern jclRegex = Pattern.compile(jclPattern);
@@ -146,6 +148,7 @@ public class UserJCLCommand {
 	Pattern jclScoreRegex = Pattern.compile(jclScore);
 	Pattern jclShuffleRegex = Pattern.compile(jclShuffle);
 	Pattern jclStartRegex = Pattern.compile(jclStart);
+	Pattern jclNewRegex = Pattern.compile(jclNew);
 	
 	Pattern jclIdentierRegex = Pattern.compile(jclIdentifierPattern);
 
@@ -295,28 +298,6 @@ public class UserJCLCommand {
 			}
 			return; // "//+Join game(" + sName + ")";
 		}
-		// scan for Start
-		m = jclStartRegex.matcher(commandString);
-		if (m.find()) { // i.e. look for 'start' then an identifier
-			type = JCLType.JCLStart;
-			/*
-			 * param is ignored for start
-			 */
-			String sSession = "no"; // default name string
-			Matcher identifier = jclIdentierRegex.matcher(commandString);
-			for (int i = 0; identifier.find(); i++) {
-				switch (i) {
-				case 0:
-					continue; // the command itself
-				case 1:
-					sSession = identifier.group();
-					NameValuePair p1 = new NameValuePair("session", sSession);
-					argv.add(p1);
-					break;
-				}
-			}
-			return; // "//+start sSession
-		}
 		// scan for status
 		m = jclStatusRegex.matcher(commandString);
 		if (m.find()) { // i.e. look for 'setname' then an identifier
@@ -457,7 +438,7 @@ public class UserJCLCommand {
 			}
 			return;
 		}
-		// +new
+		//
 		m = jclPokeRegex.matcher(commandString);
 		if (m.find()) { // i.e. look for 'setname' then an identifier
 			type = JCLType.JCLPoke;
@@ -525,7 +506,52 @@ public class UserJCLCommand {
 			}
 			return;
 		}
-		// - new
+		// scan for Start
+		m = jclStartRegex.matcher(commandString);
+		if (m.find()) { // i.e. look for 'start' then an identifier
+			type = JCLType.JCLStart;
+			/*
+			 * param is ignored for start
+			 */
+			String sSession = "no"; // default name string
+			Matcher identifier = jclIdentierRegex.matcher(commandString);
+			for (int i = 0; identifier.find(); i++) {
+				switch (i) {
+				case 0:
+					continue; // the command itself
+				case 1:
+					sSession = identifier.group();
+					NameValuePair p1 = new NameValuePair("session", sSession);
+					argv.add(p1);
+					break;
+				}
+			}
+			return; // "//+start sSession
+		}
+		// scan for new
+		m = jclNewRegex.matcher(commandString);
+		if (m.find()) { // i.e. look for 'start' then an identifier
+			type = JCLType.JCLNew;
+			/*
+			 * param is ignored for start
+			 */
+			String sSession = "no"; // default name string
+			Matcher identifier = jclIdentierRegex.matcher(commandString);
+			for (int i = 0; identifier.find(); i++) {
+				switch (i) {
+				case 0:
+					continue; // the command itself
+				case 1:
+					sSession = identifier.group();
+					NameValuePair p1 = new NameValuePair("session", sSession);
+					argv.add(p1);
+					break;
+				}
+			}
+			return; // New Game 
+		}
+
+		// - new commands...
 
 		type = JCLType.JCLCommandNotRecognized;
 		return; // "//JCL unimplemented command";

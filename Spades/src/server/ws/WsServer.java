@@ -145,6 +145,9 @@ public class WsServer {
 			return cardGames[0];
 		return cardGames[0];
 	}
+	void setNewDefaultGame() {
+		cardGames[0] = new CardGame();
+	}
 	CardGame getDefaultGame() {
 		if (cardGames[0] == null) {
 			System.out.println("Generating new (default) game...");
@@ -319,6 +322,11 @@ public class WsServer {
 				g = getDefaultGame();
 			g.start();
 			break;
+		case JCLNew:	// create a new game...
+			setNewDefaultGame();
+			System.out.println("new game.");
+			write(us, "new game created. Join in to keep playing!");
+			break;
 		case JCLJoin:
 			// here is the confluence of the http server and the gameserver
 			// create a game if one does not exist, and insert this session into it
@@ -343,6 +351,10 @@ public class WsServer {
 			us.game = g;
 			String friendlyName=us.getName();
 			friendlyName = g.uniqueName(friendlyName);
+			if (!g.gameInProgress()) {
+				write(us, "Game not in progress. Create a new one.");
+				break;
+			}
 			boolean bJoinStatus = g.join(us, friendlyName);
 			if (bJoinStatus) {
 				// joined ok...
