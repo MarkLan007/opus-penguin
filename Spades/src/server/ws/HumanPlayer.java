@@ -90,6 +90,13 @@ public class HumanPlayer extends Player implements PlayerInterface {
 	}
 
 	@Override
+	public void reset() {
+		super.reset();
+		ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.DELETE_CARDS, "*");
+		sendToClient(pm);
+	}
+
+	@Override
 	public void logClientError(String s) {
 		// TODO Auto-generated method stub
 

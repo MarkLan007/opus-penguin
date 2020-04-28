@@ -73,6 +73,10 @@ public class RobotBrain {
 		}
 		if (pass.size() != 3)
 			System.out.println("Cannot find 3 cards to pass...");
+		for(Card c : pass.subdeck)
+			if (c.rank == Rank.DEUCE &&
+				c.suit == Suit.CLUBS)
+				System.out.println("Passing the 2C... Har, har");
 		return pass;
 	}
 

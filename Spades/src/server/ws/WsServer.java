@@ -530,12 +530,17 @@ public class WsServer {
 			break;
 		case JCLMisdeal:
 		case JCLNewdeal:
-			String sPasstype="";
-			if (jcl.argc() > 1)
-				sPasstype = jcl.getValue(1);
-			else
-				sPasstype = "hold";
-			write(us, "" + jcl.type + "(" + sPasstype + "): under construction");
+			if (us.game == null) {
+				write(us, "Can't declare a misdeal. You aren't in a game.");
+				break;
+			}
+			if (jcl.type == UserJCLCommand.JCLType.JCLMisdeal) {
+				write(us, "Misdeal declared:");
+				System.out.println("Player(" + us.getpid() +") declares misdeal.");				
+			}
+			us.game.handReset();
+			write(us, "Reseting Hand:");
+
 			break;
 		case JCLShuffle:
 			String sOnOff="";

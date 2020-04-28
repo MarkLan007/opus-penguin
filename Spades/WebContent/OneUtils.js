@@ -297,6 +297,7 @@ function wsHandInit() {
 
 /*
  * make card (by cardindex) visible in hand
+ *  -- just sets the card to be visible in the hand
  */
 function addCardToHand(cardindex) {
 	var card = theDeck[cardindex];
@@ -332,6 +333,12 @@ function deleteCardFromHand(cardindex) {
 	// card.handButton.style.height = "75px";
 	// card.handButton.style.width = "54px";
 	return true;
+}
+
+function deleteAllCardsFromHand() {
+	var i;
+	for (i=0; i<theDeck.length; i++)
+		deleteCardFromHand(i);
 }
 
 // show the game felt board
@@ -1619,6 +1626,12 @@ function processCardString(cardString) {
 			console.log("Welcome:" + cardString);
 			break;
 		case '-':
+			// check for -*
+			if (cardString.includes('*')) {
+				deleteAllCardsFromHand();
+				reorgButtons();
+				break;
+			}
 			bDelete = true;
 		case '+':
 			// char 1 is the user id.
@@ -2306,7 +2319,7 @@ function addCardToPassDialogDiv(cardindex) {
 	 * Experiment with adding an image... ++
 	 */
 	// spadesCardImages
-	console.log("Get ready...");
+	//console.log("Get ready...");
 	cardBtn.style.imagefile = spadesCardImages;
 	cardBtn.style.backgroundImage = spadesCardImages;
 	cardBtn.style.backgroundImage = "http://localhost:8080/Spades/Spades.jpg";
@@ -2579,7 +2592,7 @@ function sortByCardOrder(a) {
 }
 var rowMaxButtons = 8;	// max of 8 cards in a row...
 function reorgButtonsInDiv(sdiv) {
-	if (bNeedToArrange)
+	if (bNeedToArrange)	// should work off bCardsAdded
 		arrangeCardsInDivs();
 	var buttonList=null; //= new Array();
 	var cardBtn=null;
@@ -2592,14 +2605,20 @@ function reorgButtonsInDiv(sdiv) {
 	// remove the items add them back to the div
 	var i, j, nSkipped=0;
 	// div.style.left = "50px";
+	/*
+	 * remove all the cards from the div,
+	 *  and add back the visible ones
+	 */
 	for (i=0; i<buttonList.length; i++) {
 		cardBtn = buttonList[i];
 		div.removeChild(cardBtn);
-		/*
+		/* comment now invalid?... TODO: fix comment?
 		 * for now squirrel away a card that is not visible...
+		 *  i.e. take it out of the div
 		 */
 	}
-	var minmargin = 0;
+	// minmargin no longer used? Delete??
+	// var minmargin = 0;
 	/*
 	 * Ok, so count the blank buttons in the array and then
 	 * pad the buttonlist from the left
@@ -2617,10 +2636,10 @@ function reorgButtonsInDiv(sdiv) {
 		}
 	}
 	*/
-	var k=0;
 	/*
 	 * No don't. Really.
 	 *
+	//var k=0;
 	// append nSkipped blanks to div
 	for (j=0; j<nSkipped; j++) {
 		if (blankBtn != null) {
@@ -2629,32 +2648,25 @@ function reorgButtonsInDiv(sdiv) {
 		}
 	}
 	*/
-	console.log("Prepending " + k + " blanks to " + sdiv)
-	// append (sorted, nonblank) cards to div
+	//console.log("Prepending " + k + " blanks to " + sdiv)
+	/*
+	 * now, append sorted (visible) cards to the div
+	 */
 	for (i=0; i<buttonList.length; i++) {
-		// should only append if it's visible... i.e. actually in the hand...
 		cardBtn=buttonList[i];
-		// don't add in cards that should be hidden
+		// skip hidden cards
 		if (cardBtn.style.visibility == "hidden") {
 			nSkipped++;
 		} else {
-			/* the values I started with work better...
-			cardBtn.style.minWidth = 160;
-			cardBtn.style.minHeight = 200;
-			cardBtn.style.height = "200px";	// was 75px
-			cardBtn.style.width = "183px";	// was 54px xxx
-			*/
-			//cardBtn.style.left = "40px";
-			//cardBtn.style.alignItems = "left";	// Does nothing here...
 			div.appendChild(cardBtn);
-			minmargin += 140;
+			//minmargin += 140;
 			}
 	}
 	div.className = "buttonGrid";
 	// alignRight is another interesting option...
-	// need to make cards narrower, though.. perhaps float...
 	//div.className = "alignRight";
-	console.log("Reorg consolidated " + nSkipped + " cards.");
+	// TODO: perhaps need to make cards narrower, though.. perhaps float...
+	console.log("Reorg consolidated " + nSkipped + " cards in" + sdiv);
 }
 
 var cardDivs=[
@@ -2687,19 +2699,27 @@ function clearDivs() {
 function arrangeCardsInDivs() {
 		clearDivs();
 		var controlDiv = document.getElementById("ClubsInHandDiv");
-		for (var i = 0; i < 52; i++) {
+		for (var i = 0; i < theDeck.length; i++) {
 			var card = theDeck[i];
 			var cardBtn = card.handButton;
-			switch (i) {
-				case 13:
-					controlDiv = document.getElementById("DiamondsInHandDiv");
-					break;
-				case 26:
-					controlDiv = document.getElementById("SpadesInHandDiv");
-					break;
-				case 39:
-					controlDiv = document.getElementById("HeartsInHandDiv");
-					break;
+			if (cardBtn.style.visibility == "hidden")
+				continue;
+			// Hmmm TODO:
+			// should put all the divs in an array and just pull them
+			// out of the array...
+			switch (card.suit) {
+			case CLUBS:
+				controlDiv = document.getElementById("ClubsInHandDiv");
+				break;
+			case DIAMONDS:
+				controlDiv = document.getElementById("DiamondsInHandDiv");
+				break;
+			case SPADES:
+				controlDiv = document.getElementById("SpadesInHandDiv");
+				break;
+			case HEARTS:
+				controlDiv = document.getElementById("HeartsInHandDiv");
+				break;
 			}
 			controlDiv.appendChild(cardBtn);
 		}

@@ -1111,9 +1111,13 @@ public class CardGame implements GameInterface {
 	 */
 	public void handReset() {
 		/*
-		 * Knock out cards from client
-		 * and reset robot players
+		 * Knock out cards from client and reset robot players
+		 *  note humanPlayer.reset calls super.reset()...
 		 */
+		for (int i = 0; i < nPlayers; i++) {
+			Player p = playerArray[i];
+			p.reset();
+		}
 		deal();
 	}
 
