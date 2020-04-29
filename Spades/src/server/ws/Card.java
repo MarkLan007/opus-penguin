@@ -22,6 +22,16 @@ class Card {
 		return c;
 		}
 	
+	public Card higherCard(Card c) {
+		if (c.rank == Rank.ACE)
+			return c;
+		else if (rank == Rank.ACE)
+			return this;
+		if (c.rank.ordinal() > rank.ordinal())
+			return c;
+		return this;
+	}
+	
 	private void computeCardIndex(Rank rk, Suit st) {
 		int base = st.ordinal();
 		int i = rk.ordinal();

@@ -3,6 +3,7 @@ package server.ws;
 //package cardGame;
 
 import java.util.Comparator;
+import java.util.Iterator;
 /*
  * Subdeck -- manage a portion of a deck, from 0-N cards
  */
@@ -18,9 +19,14 @@ import java.util.Random;
 /*
  * TODO: can I implement Iteration interface? Can I delegate to LinkedList.next? etc?
  */
-public class Subdeck {
+public class Subdeck implements Iterable<Card> {
 	LinkedList<Card> subdeck ;
 	boolean isSorted=false;
+	
+	public Iterator iterator() {
+		return subdeck.iterator();
+	}
+	
 	/*
 	 * TODO: Implement these by delegating to LinkedList. Will that work?
 	 * First iteration stuff...

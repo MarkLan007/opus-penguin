@@ -1695,6 +1695,9 @@ function processCardString(cardString) {
 			gamestatusUpdate("error:" + cardString);
 			break;
 		case 'Q':
+		case 'B':
+			gameStatusUpdate("Hearts are Broken!");
+			break;
 		case '$':
 			console.log("Starting scoredialog...");
 			wsScoreDialog(cardString);
@@ -1954,12 +1957,6 @@ function initModal() {
  */
 function passDialogDivBtnCall(nCards, sMsg) {
 	wsPassDialog(nCards,sMsg);
-	/*
-	// call wsPassDialog
-	console.log("Modal div for passing cards" + sMsg);
-	initPassDialogDiv(nCards, sMsg);
-	showPassDialogDiv();
-	*/
 }
 
 function showPassDialogDiv() {
@@ -2003,16 +2000,26 @@ function initPassDialogDiv(nCards, sMsg) {
 	    modalDiv.style.display = "none";
 	  }
 	}
+	if (bPassingCardsInProgress) {
+		// this dialog got put up and the previous cards 
+		// have not been sent.
+		// So don't clear them out...
+		return;
+	}
 	bPassingCardsInProgress = true;
-	iCurrentFreeCardinPass = 0;
+	//++
+	var div=document.getElementById("passDiv");
+	var buttonList = getDescendantElements(div);
+	// remove the items add them back to the div
 	/*
-	var w = window.open("PassCards.html",
-		"Pass Cards",
-		"width=600,height=370,status=no,toolbars=no,resizeable=yes,location=no"
-		// was 410x325
-	);
-		passWindow = w;
+	 * remove any cards in the div,
 	 */
+	for (var i=0; i<buttonList.length; i++) {
+		var cardBtn = buttonList[i];
+		div.removeChild(cardBtn);
+	}
+	iCurrentFreeCardinPass = 0;	
+	//--
 	bPassDialogInit = true;
 }
 
@@ -2100,26 +2107,6 @@ if (!bScoreDialogWindowInit)
 formatScore(sMsg);	// harmless in window version... the div is still there...
 }
 
-
-/*
- * wsPassDialog - bring up the pass card dialog
- * -- likely obsolete with routines doing dialog with divs --
- * No. Hook into the appropriate window or div version
- * TODO: retire this code and comment
- */
-/*
-function wsPassDialog(n, sMsg) { //... should be wsPassDialogWindow
-	// somehow closing it destroys the window;
-	// for now, create it every time...
-	bPassDialogInit = false;
-	if (!bPassDialogInit)
-		wsInitPassDialog(n, sMsg);
-	// This doesn't work when we do this here.
-	// Why? Don't know. Blame javascript.
-	// passBtn = w.document.getElementById("passCardsButton");
-	// passBtn.addEventListener("click", passCardsFromButtonPress);
-	// passWindow.visibility = "visible";
-} */
 
 /*
  * wsPassDialog - call either the window or div version of the routines

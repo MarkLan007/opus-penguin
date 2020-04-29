@@ -586,10 +586,17 @@ public class CardGame implements GameInterface {
 	String getFormattedGameScore() {
 		int i;
 		String sTemp = "";
-		for (i = 0; i < nPlayers; i++)
-			sTemp = sTemp + "$" + playerArray[i].getName() + "=" 
+		boolean bGameInProgress = nCurrentTurn != -1;
+		String x="";
+		for (i = 0; i < nPlayers; i++) {
+			if (bGameInProgress && i == nCurrentTurn)
+				x = "*";
+			else
+				x = "";
+			sTemp = sTemp + "$" + x + playerArray[i].getName() + "=" 
 					+ playerArray[i].handScore + "."
 					+ playerArray[i].totalScore ;
+		}
 		return sTemp + '$' + "#Player#Points#Totals#";
 	}
 	
@@ -877,7 +884,8 @@ public class CardGame implements GameInterface {
 			 * Actually delete the cards to the player's hand internally
 			 * for (c: sd.subdeck) {				
 			} */
-			// actually delete the card from the player's hand i.e. subdeck
+			// delete the card from the player's (server-side representation) of
+			// the hand i.e. subdeck. (ss routines)
 			// i.e. the game has to know the actual state of the player's hand
 			for (var c: sd.subdeck)
 				p.ssDeleteCard(c);
@@ -1055,8 +1063,10 @@ public class CardGame implements GameInterface {
 		// indicate game over or reset the hand
 		if (gameEnds)
 			gameOver();
-		else
+		else {
+			currentPass = currentPass.next();
 			reset();
+			}
 	}
 	
 	void abort() {
@@ -1125,14 +1135,6 @@ public class CardGame implements GameInterface {
 	 * create a pack of cards and deal them
 	 */
 	void deal() {
-		/* Can't know the leader yet...
-		 * move to initiate play
-		nTrickId = 0;
-		Trick t = new Trick(nTrickId);
-		t.leader = nCurrentTurn;
-		trickArray[nTrickId] = t;
-		currentTrick = t;
-		*/
 		int i;
 		Player p;
 
@@ -1149,18 +1151,14 @@ public class CardGame implements GameInterface {
 		 * no need to set current turn here
 		 * the two might get passed to someone else
 		 */
-		for (i = 0; pack.size() > 0; i++) {
-			i = i % nPlayers;
-			Card c = pack.pullTopCard();
+		i = 0;
+		for (Card c : pack) { //; pack.size() > 0; i++) {
+			//c = pack.pullTopCard();
 			/*
 			 * if there aren't a full complement of players cards get thrown away for now...
 			 * should abort and throw an exception and a hissy fit.
 			 */
 			if (playerArray[i] != null) {
-				/* updateTurn done after pass...
-				if (c.equals(Rank.DEUCE, Suit.CLUBS))
-					updateTurn(i);	//	nCurrentTurn = i;
-					*/
 				if (playerArray[i].subdeck == null)
 					gameErrorLog("can't happen:null subdeck.");
 				//
@@ -1168,6 +1166,7 @@ public class CardGame implements GameInterface {
 				// is ssAddCard still a thing?
 				playerArray[i].subdeck.add(c);
 			}
+			i = (i + 1) % nPlayers;
 		}
 
 	}

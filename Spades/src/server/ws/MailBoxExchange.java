@@ -3,28 +3,21 @@ package server.ws;
 public class MailBoxExchange {
 	public enum PassType {
 		PassHold, PassLeft, PassRight, PassAcross;
-	}
-	static PassType[] pts = PassType.values();
+		static PassType[] pts = PassType.values();
+		public PassType next() {
+			int index = ordinal();
+			int next = (index + 1) % pts.length;
+			return pts[next];
+		}
 
-	static public PassType getNextPass(PassType e) {
-		int index = e.ordinal();
-		int next = (index + 1) % pts.length;
-		return pts[next];
+		public PassType prev() {
+			int index = ordinal();
+			if (index == 0)
+				index = pts.length;
+			return pts[--index];
+		}
 	}
-
-	static public PassType getPrevPass(PassType e) {
-		int index = e.ordinal();
-		if (index == 0)
-			index = pts.length;
-		return pts[--index];
-	}
-
-	/*
-	 * for now make this a hold hand first...
-	 * TODO: should start with a PassLeft
-	 */
 	static public PassType first() { return PassType.PassLeft; }
-	//
 	
 	public class MailBox {
 		int from, to;	// to is redundant; stored by place

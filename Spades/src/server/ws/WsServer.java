@@ -346,7 +346,7 @@ public class WsServer {
 			}
 			//us.game.sendFormattedPlayerInfo(playerId);		
 			String cards=us.game.peek(nparam);
-			s = "Peek(" + nparam + ")=<" + cards + ">";
+			s = "Peek(" + nparam + ")=[" + cards.length()/2 + "]<" + cards + ">";
 			write(us, s);
 			break;
 		case JCLWhoAmI:			
@@ -611,9 +611,12 @@ public class WsServer {
 	*/
 	
 	boolean verbose=true;
+	boolean bNeverSleep=true;
 	public void write(UserSession us, String msg) {
 		Session sess=us.getSession();
-		if (bBypassKernel)
+		if (bNeverSleep)
+			;
+		else if (bBypassKernel)
 			CardGameKernel.msleep(10);	// still necessary?
 		/*
 		 * to prevent the error: 

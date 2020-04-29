@@ -106,6 +106,14 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		 * Otherwise use robotBrain to determine what to play...
 		 */
 		c = robotBrain.playCard();
+		if (c == null) {
+			// Uh oh... brain failed
+			// note cardLead and currentTrick
+			System.out.println(getName() + ":Catastrophic Brain failure on lead:"); 
+//					+ cardLead.toString() );
+			robotBrain.brainDump(true);
+			c = robotBrain.playAnything();
+		}
 		cardgame.playCard(getPID(), c); // yyy
 	}
 
