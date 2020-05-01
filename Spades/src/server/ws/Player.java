@@ -38,6 +38,10 @@ public class Player /*implements PlayerInterface */{
 	int handScore=0;
 	int totalScore=0;
 	// pid, critically, corresponds to table-seat
+	// wait... Is this used? Yes.
+	// it gets set in the subclasses. new robotplayer
+	// human player (oddly) takes the pid from userSession
+	// this is probably correct... Review:?
 	protected int pid; 	// Player-id for protocol messages
 	/*
 	 * NIOClientSession is private to make sure that it is only called through HumanPlayer

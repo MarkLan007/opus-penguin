@@ -163,6 +163,30 @@ public class Subdeck implements Iterable<Card> {
 		
 		}
 	
+	public Subdeck(int n, int specialDeal /* 0 for moon */) {
+		this(n);
+
+		if (specialDeal == 0) {
+			Card filler[]=new Card[39];
+			Card clubs[]=new Card[13];
+			for (int i=0; i<13; i++)
+				clubs[i] = subdeck.pop();			
+			for (int j=0; j<39; j++)
+				filler[j] = subdeck.pop();
+			int k = 0;
+			for (int i = 0; i<13; i++) {
+				subdeck.addLast(clubs[i]);
+				for (int j=0; j<3; j++)
+					subdeck.addLast(filler[k++]);
+			}
+
+		}
+		
+		if (subdeck.size() != n)
+			System.out.println("special deal: Uh oh, spaghetti-o");
+
+	}
+
 	/*
 	 * delete -- delete the FIRST instance of card(Rank,Suit) from the subdeck
 	 *   -- only delete the first one so this is suitable for removing a card when it is played...

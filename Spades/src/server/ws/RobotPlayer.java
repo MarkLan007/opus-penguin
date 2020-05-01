@@ -25,7 +25,21 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		/*
 		 * Just digest and process the message synchronously
 		 */
+		if (pm.type == ProtocolMessageTypes.PLAYER_ERROR) {
+			int trickid;
+			if (cardGame != null)
+				trickid = cardGame.getCurrentTrickId();
+			else
+				trickid = -2;
+			badRobot(playerName, trickid, pid, subdeck, pm);
+		}
 		processLocalMessage(pm);
+	}
+
+	private void badRobot(String playerName, int nTrickId, int pid, Subdeck subdeck, ProtocolMessage pm) {
+		System.out.println(playerName + " has been a bad robot.");
+		System.out.println("On " + nTrickId + "th Trick with <" + subdeck.size() + ">=[" + subdeck.encode() + "] has been carded for:");
+		System.out.println(pm.encode());
 	}
 
 	@Override
@@ -36,6 +50,22 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		MainServer.enqueue(pm);
 	}
 
+	@Override
+	void reset() {
+		GameInterface gi=cardGame;
+		//super.reset();
+		robotBrain.reset();	// clear the brain too...
+		
+		// but make sure you don't clobber cardgame
+		if (cardGame == null) {
+			System.out.println("Uh oh... Little Lost robot");
+		}
+		if (gi != null && cardGame == null) {
+			System.out.println("Self-help employed...");
+			setCardgame(gi);	// self help
+		}
+	}
+	
 	@Override
 	public void logClientError(String s) {
 		MainServer.echo(s);
@@ -117,93 +147,9 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		cardgame.playCard(getPID(), c); // yyy
 	}
 
-
-	/*
-	 * this is just a backup copy... Can be deleted when construction complete...
-	 */
-	void robotPlayOld(Subdeck sd) {
-		Card c;
-		/*
-		 * NoBrainer: Always play the 2C if you have it
-		 */
-		if (hand.find(Rank.DEUCE, Suit.CLUBS)) {
-			c = new Card(Rank.DEUCE, Suit.CLUBS);
-			cardgame.playCard(getPID(), c); // yyy
-			/*
-			 * outmsg = new ProtocolMessage(getPID(), ProtocolMessageTypes.PLAY_CARD, c);
-			 * playerErrorLog("RobotPlayer" + getPID() + ": Playing 2C.<" + c.encode() +
-			 * ">"); sendToServer(outmsg);
-			 */
-			return;
-		}
-
-		/*
-		 * See the state of the trick and follow suit. Otherwise just guess
-		 */
-		if (cardLead == null) {
-			c = hand.peek();
-			playerErrorLog("RobotPlayer Leading" + getPID() + ": No idea what to play. Guessing:" + c.encode());
-			if (c != null) {
-				cardgame.playCard(getPID(), c); // yyy
-				return;
-			}
-			/*
-			 * else { // dead code???
-			 * logClientError("Play Card requested with null trick passed and when hand is empty."
-			 * ); return; }
-			 */
-
-		}
-		/*
-		 * Try to follow suit, ducking tricks if possible
-		 * 
-		 * get the cards of that suit; play lowest. if trick will get taken anyway, play
-		 * highest
-		 */
-		// Card cardLead = sd.peek(); -- Set by newtrick, etc.
-		// TODO: intelligent sloughing...
-		Suit currentSuit = cardLead.suit; // Suit.CLUBS;
-		Subdeck cs = new Subdeck();
-		for (Card card : hand.subdeck) {
-			if (cardLead.suit == currentSuit)
-				cs.add(card);
-		}
-		// if no cards of the suit, slough
-		if (cs.size() == 0) {
-			if (sd.find(Rank.QUEEN, Suit.SPADES)) {
-				c = new Card(Rank.QUEEN, Suit.SPADES); // yay! slough the queen!
-				cardgame.playCard(getPID(), c); // yyy
-				return;
-			}
-			// slough a heart!
-		} else {
-			c = cs.peek(); // return the first one; this is simple-minded, wrong and temporary
-			cardgame.playCard(getPID(), c); // yyy
-			return;
-		}
-
-		/*
-		 * Otherwise play the first card in the hand...
-		 * 
-		 */
-		c = hand.peek();
-		playerErrorLog("RobotPlayer" + getPID() + ": No idea what to play. Guessing:" + c.encode());
-		if (c != null) {
-			// this is all this should do: callback into cardgame
-			cardgame.playCard(getPID(), c); // yyy
-			/*
-			 * outmsg = new ProtocolMessage(getPID(), ProtocolMessageTypes.PLAY_CARD, c);
-			 * sendToServer(outmsg);
-			 */
-			return;
-		}
-		//logClientError("Play Card requested when hand is empty.");
-	}
-
 	void robotPlay(ProtocolMessage pm) {
 		robotPlay(pm.subdeck);
 	}
-
 	
 	void addToHand(Card c) {
 		hand.add(c);

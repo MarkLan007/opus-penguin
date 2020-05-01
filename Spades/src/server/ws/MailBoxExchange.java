@@ -18,6 +18,7 @@ public class MailBoxExchange {
 		}
 	}
 	static public PassType first() { return PassType.PassLeft; }
+	static public PassType last() { return PassType.PassHold; }
 	
 	public class MailBox {
 		int from, to;	// to is redundant; stored by place

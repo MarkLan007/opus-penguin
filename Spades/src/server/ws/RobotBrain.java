@@ -13,6 +13,11 @@ public class RobotBrain {
 		pid = n;
 	}
 
+	void reset() {
+		trickCount = 0;
+		hand = new Hand();
+	}
+	
 	boolean bThinkingOutLoud=false;
 	void thinkOutLoud(boolean b) {
 		bThinkingOutLoud = b;
@@ -127,6 +132,9 @@ public class RobotBrain {
 	}
 
 	void deleteCard(Card c) {
+		if (!hand.find(c)) {
+			System.out.println("Holy Shit: *** Trying to delete a card I don't think I have! ***");
+		}
 		hand.delete(c);
 	}
 

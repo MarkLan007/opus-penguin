@@ -370,7 +370,9 @@ public class WsServer {
 			g=lookupGameFromSession(sparam);
 			if (g == null)
 				g = getDefaultGame();
-			g.start();
+			if (!g.start()) {
+				write(us, "Play Initiated. Can't start. Use 'misdeal' or 'reset'  to reset.");
+			}
 			break;
 		case JCLNew:	// create a new game...
 			sname="";
@@ -529,7 +531,6 @@ public class WsServer {
 			//write(us, "" + jcl.type + "(" + playerId + "): under construction");
 			break;
 		case JCLMisdeal:
-		case JCLNewdeal:
 			if (us.game == null) {
 				write(us, "Can't declare a misdeal. You aren't in a game.");
 				break;
@@ -538,9 +539,13 @@ public class WsServer {
 				write(us, "Misdeal declared:");
 				System.out.println("Player(" + us.getpid() +") declares misdeal.");				
 			}
-			us.game.handReset();
+			us.game.reset();
+			us.game.start();
 			write(us, "Reseting Hand:");
 
+			break;
+		case JCLNewdeal:
+			us.game.handOver();
 			break;
 		case JCLShuffle:
 			String sOnOff="";
@@ -555,9 +560,9 @@ public class WsServer {
 				bShuffle = true;
 			// set for game
 			if (us.game == null)
-				write(us, "No game yet to set shuffle;");
+				write(us, "Must join a game first. No game yet to set shuffle;");
 			else
-				us.game.setShuffle(bShuffle);
+				us.game.reset(bShuffle);
 			break;
 		case JCLError: // JCL command but malformed
 		case JCLCommandNotRecognized: // Command is not recognized
