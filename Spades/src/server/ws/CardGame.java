@@ -15,7 +15,7 @@ public class CardGame implements GameInterface {
 	MailBoxExchange mbx = null;
 	private int nTrickId = 0;
 
-	int getCurrentTrickId() {
+	public int getCurrentTrickId() {
 		return nTrickId;
 	}
 
@@ -45,6 +45,10 @@ public class CardGame implements GameInterface {
 		return nCurrentTurn;
 	}
 
+	// some special cards
+	final Card deuceClubs=new Card(Rank.DEUCE, Suit.CLUBS);
+	final Card queenSpades=new Card(Rank.QUEEN, Suit.SPADES);
+	
 	/*
 	 * true if in this GAME cfirst is higher than csecond; assume csecond was the
 	 * one lead (or beat the one lead) isHigher(2C,AC) -> false isHigher(2C,3C) ->
@@ -572,7 +576,7 @@ public class CardGame implements GameInterface {
 			iTrickTotal = 0;
 			for (Card c : t.subdeck.subdeck) {
 				if (c.suit == Suit.HEARTS)
-					iTrickTotal = iTrickTotal + 1;
+					iTrickTotal++ ;
 				else if (c.rank == Rank.QUEEN && c.suit == Suit.SPADES)
 					iTrickTotal = iTrickTotal + 13;
 			}
@@ -726,8 +730,37 @@ public class CardGame implements GameInterface {
 			p.sendToClient(returnMessage);
 			return;
 		}
-
+		//
 		// So I know that the player has that card.
+		// easy restriction on the first trick
+		if (nTrickId == 0) {
+			// does the player have the 2c and didn't play it?
+			if (!c.equals(deuceClubs) && p.has(deuceClubs)) {
+				returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
+						"%MSG:Player" + p.pid + " must lead <" + deuceClubs.rank + deuceClubs.suit + ">!%");
+				p.sendToClient(returnMessage);
+				return;
+			}
+		}
+		// trickier restrictions on the first trick
+		// did the player lay a the qs?
+		// did the player lay a heart (and had non-hearts)
+		if (nTrickId == 0) {
+			if (c.suit == Suit.HEARTS) {
+				// almost certainly a foul but check...
+				//int nonHearts=
+				int nonPoints = p.countNon(Suit.HEARTS);;
+				if (p.has(queenSpades))
+					nonPoints--;
+				if (nonPoints > 0) {
+					returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
+							"%MSG:Player" + p.pid + " Illegal:" + c.encode() + ". must play <Non-QS Non-Heart Card>!%");
+					p.sendToClient(returnMessage);
+					return;
+				}
+			}
+		}
+
 		// Is this a legal follow?
 		// It's a legal follow if it's the same as the lead
 		// or if it's a slough then the player doesn't have any cards the same suit as
@@ -1042,7 +1075,7 @@ public class CardGame implements GameInterface {
 		int i;
 		Player p;
 		Subdeck sd;
-		Card theTwo = new Card(Rank.DEUCE, Suit.CLUBS);
+		Card theTwo = deuceClubs;
 
 		// go through players list
 		// find who has the two of clubs.

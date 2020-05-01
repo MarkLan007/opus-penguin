@@ -30,6 +30,33 @@ public class Player /*implements PlayerInterface */{
 	protected CardGame cardGame=null;
 	Boolean bIsMyMove = false;
 	public Subdeck subdeck=new Subdeck();	/* this is the server's copy of the cards */
+	
+	public boolean has(Card card) {
+		return subdeck.find(card);
+	}
+	
+	public int count(Suit suit) {
+		return subdeck.count(suit);	// delegate
+		/*
+		int n=0;
+		for (Card c : subdeck) 
+			if (c.suit == suit)
+				n++;
+		return n;
+		*/
+	}
+	
+	public int countNon(Suit suit) {
+		return subdeck.countNon(suit);	// delegate
+		/*
+		int n=0;
+		for (Card c : subdeck) 
+			if (c.suit != suit)
+				n++;
+		return n;
+		*/		
+	}
+	
 	void reset() {
 		subdeck = new Subdeck();
 		bIsMyMove = false;

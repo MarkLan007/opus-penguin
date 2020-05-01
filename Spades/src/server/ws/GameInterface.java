@@ -21,6 +21,6 @@ public interface GameInterface {
 	void query(int fromPlayer, String msg);
 	void superuser(int fromPlayer, String msg);
 	void disconnect(int pid);	// disconnect from game;
-	
+	int getCurrentTrickId();
 }
 

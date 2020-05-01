@@ -20,6 +20,12 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		return hand;
 	}
 
+	int getGameTrickCount() {
+		if (cardGame == null)
+			System.out.println("Fatal Error: no cardgame.");
+		return cardGame.getCurrentTrickId();
+	}
+
 	@Override
 	public void sendToClient(ProtocolMessage pm) {
 		/*
@@ -76,12 +82,12 @@ public class RobotPlayer extends Player implements PlayerInterface {
 	 * players, too...) Also requires a compatible GameInterface for callbacks to
 	 * playCard, passCards and query!
 	 */
-	GameInterface cardgame = null; // this is here; RobotPlayer and later HumanPlayer have different
+	GameInterface cardGame = null; // this is here; RobotPlayer and later HumanPlayer have different
 									// implementations of these interfaces
 
 	@Override
 	public void setCardgame(GameInterface gameInterfaceCallbacks) {
-		cardgame = gameInterfaceCallbacks;
+		cardGame = gameInterfaceCallbacks;
 	}
 
 	void setPID(int id) {
@@ -123,7 +129,7 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		 */
 		if (hand.find(Rank.DEUCE, Suit.CLUBS)) {
 			c = new Card(Rank.DEUCE, Suit.CLUBS);
-			cardgame.playCard(getPID(), c); // yyy
+			cardGame.playCard(getPID(), c); // yyy
 			/*
 			 * outmsg = new ProtocolMessage(getPID(), ProtocolMessageTypes.PLAY_CARD, c);
 			 * playerErrorLog("RobotPlayer" + getPID() + ": Playing 2C.<" + c.encode() +
@@ -135,7 +141,7 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		/*
 		 * Otherwise use robotBrain to determine what to play...
 		 */
-		c = robotBrain.playCard();
+		c = robotBrain.playCard(getGameTrickCount());
 		if (c == null) {
 			// Uh oh... brain failed
 			// note cardLead and currentTrick
@@ -144,7 +150,7 @@ public class RobotPlayer extends Player implements PlayerInterface {
 			robotBrain.brainDump(true);
 			c = robotBrain.playAnything();
 		}
-		cardgame.playCard(getPID(), c); // yyy
+		cardGame.playCard(getPID(), c); // yyy
 	}
 
 	void robotPlay(ProtocolMessage pm) {
@@ -237,7 +243,7 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		// playerErrorLog("RobotPlayer" + "Passing Under Construction!");
 		// for now, get random cards and pass them...
 		Subdeck sd = robotBrain.getPass(3);
-		cardgame.passCards(self(), sd);
+		cardGame.passCards(self(), sd);
 	}
 
 	/*
@@ -339,6 +345,8 @@ break;
 		case BROKEN_SUIT: // B hearts/spades are broken
 		case PLAYER_ERROR: // %Text {Please play 2c, Follow Suit, Hearts/Spades not broken, not-your-turn,
 							// don't-have-that-card, user-error}
+			// TODO: ok, play another card...
+			// brain failed so just get something...
 			break;
 		case PLAY_CARD: // CARD
 			// this is a client-to-server message; should never be seen

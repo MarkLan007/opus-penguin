@@ -89,7 +89,23 @@ public class Subdeck implements Iterable<Card> {
 				return false;
 		return true;		
 		}
+
+	public int count(Suit suit) {
+		int n=0;
+		for (Card c : subdeck) 
+			if (c.suit == suit)
+				n++;
+		return n;
+	}
 	
+	public int countNon(Suit suit) {
+		int n=0;
+		for (Card c : subdeck) 
+			if (c.suit != suit)
+				n++;
+		return n;		
+	}
+
 	public String encode() {
 		String s="";
 		for (Card c: subdeck)
