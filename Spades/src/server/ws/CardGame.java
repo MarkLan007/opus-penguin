@@ -85,11 +85,16 @@ public class CardGame implements GameInterface {
 	 * bStepTurns = bOnOff; } boolean stepTurns() { return bStepTurns; }
 	 */
 
+	/*
 	Boolean bShuffle = false;
+	String sShuffleType = "none";
+	
+	void setShuffle(String stype) {
+		bShuffle = true;	// obsolete... TODO: delete this boolean
+		sShuffleType = stype;
+	}*/
 
-	void setShuffle(boolean bs) {
-		bShuffle = bs;
-	}
+	// see 'new pack'
 
 	Player[] playerArray = new Player[nPlayers];
 	// Subdeck[] playerCards = new Subdeck[nPlayers]; // Key point: the game's
@@ -1053,7 +1058,7 @@ public class CardGame implements GameInterface {
 	}
 
 	public void reset(Boolean shuffle) {
-		bShuffle = shuffle;
+		//bShuffle = shuffle;
 		reset();
 	}
 
@@ -1141,8 +1146,9 @@ public class CardGame implements GameInterface {
 		//
 		// Create a new pack of cards and shuffle them
 		//
-		Subdeck pack = new Subdeck(52, 0);	// 52, t, seatid
-		if (bShuffle)
+		Subdeck pack = new Subdeck(52);	// 52, t, seatid
+		// shuffle manipulated by subdeck...
+		//if (bShuffle)
 			pack.shuffle();
 		//
 		// deal official copy of cards

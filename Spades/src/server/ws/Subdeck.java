@@ -179,29 +179,14 @@ public class Subdeck implements Iterable<Card> {
 		
 		}
 	
-	public Subdeck(int n, int specialDeal /* 0 for moon */) {
+	/*
+	// temporary... TODO: delete me...
+	// 0 for moon...
+	// folded into subdeck(int)
+	public Subdeck(int n, int specialDeal ) {
 		this(n);
-
-		if (specialDeal == 0) {
-			Card filler[]=new Card[39];
-			Card clubs[]=new Card[13];
-			for (int i=0; i<13; i++)
-				clubs[i] = subdeck.pop();			
-			for (int j=0; j<39; j++)
-				filler[j] = subdeck.pop();
-			int k = 0;
-			for (int i = 0; i<13; i++) {
-				subdeck.addLast(clubs[i]);
-				for (int j=0; j<3; j++)
-					subdeck.addLast(filler[k++]);
-			}
-
-		}
-		
-		if (subdeck.size() != n)
-			System.out.println("special deal: Uh oh, spaghetti-o");
-
 	}
+	*/
 
 	/*
 	 * delete -- delete the FIRST instance of card(Rank,Suit) from the subdeck
@@ -284,8 +269,40 @@ public class Subdeck implements Iterable<Card> {
 		Card c=new Card(n);
 		return c;
 		}
-		
+
+	static String shuffleTypes[]= {"none","yes","no","random","clubs","high"};
+	static boolean isValidShuffleType(String stype) {
+		for (int i=0; i<shuffleTypes.length; i++)
+			if (stype.equalsIgnoreCase(shuffleTypes[i]))
+				return true;
+		return false;
+	}
+	
+	static String sShuffleType="none";
+	// error checking done in WsServer
+	// and cardgame for now...
+	static void setShuffle(String shuffleType) {
+		sShuffleType = shuffleType;
+	}
+	
+	public void shuffle(String stype) {
+
+		if (stype.equalsIgnoreCase("clubs"))
+			shuffleAllClubs();
+		if (stype.equalsIgnoreCase("none"))
+			;
+		if (stype.equalsIgnoreCase("random"))
+			shuffle();
+		if (stype.equalsIgnoreCase("high"))
+			shuffleHigh();
+	}
+
 	public void shuffle() {
+		shuffle(sShuffleType);
+		// determine shuffle type and call that
+	}
+	
+	public void randomShuffle() {
 		int iLen = size();
 		int i;
 		for (i=0; i<iLen; i++) {
@@ -297,8 +314,86 @@ public class Subdeck implements Iterable<Card> {
 			put(i, t2);
 			put(index, t1);
 			}
-		
 		}
+	
+	private void shuffleAllClubs() {
+		System.out.println("subdeck: Doing the All clubs shuffle");
+		Card filler[] = new Card[39];
+		Card clubs[] = new Card[13];
+		for (int i = 0; i < 13; i++)
+			clubs[i] = subdeck.pop();
+		for (int j = 0; j < 39; j++)
+			filler[j] = subdeck.pop();
+		int k = 0;
+		for (int i = 0; i < 13; i++) {
+			subdeck.addLast(clubs[i]);
+			for (int j = 0; j < 3; j++)
+				subdeck.addLast(filler[k++]);
+		}
+
+		if (subdeck.size() != 52)
+			System.out.println("special deal: Uh oh, spaghetti-o");
+	}
+
+	private void shuffleHigh() {
+		Card filler[] = new Card[39];
+		Card myhand[] = new Card[13];
+		// get aces
+		int j=0;	// index into first free in myhand[]
+		// aces every 13th card; 
+		// grab from back so don't have to adjust index for removals
+		for (int i=39; i>=0; i-=13) {	// at 39, 26, 13, 0
+			Card ace=subdeck.remove(i);
+			myhand[j++] = ace;
+		}
+		String stemp="";
+		int n=0;
+		for (int m=0; m<4; m++)
+			stemp = stemp + "," + myhand[n++].encode();
+		System.out.println("Aces?" + stemp);
+			
+		// kings now every 12th card
+		for (int i=47; i>0; i-=12) {	// at 47, 35, 23, 11
+			Card king=subdeck.remove(i);
+			myhand[j++] = king;
+		}
+		for (int m=0; m<4; m++)
+			stemp = stemp + "," + myhand[n++].encode();
+		System.out.println("kings?" + stemp);
+		
+		// queens now every 11th card
+		for (int i=43; i>0; i-=11) {	// at 43, 32, 21, 10
+			Card queen=subdeck.remove(i);
+			myhand[j++] = queen;
+		}
+		for (int m=0; m<4; m++)
+			stemp = stemp + "," + myhand[n++].encode();
+		System.out.println("queens?" + stemp);
+
+		// jacks every 10...
+		myhand[j++] = subdeck.remove(9);
+		System.out.println("jack?" + myhand[n++].encode());
+
+		//
+		// grab the rest of the cards...
+		for (j = 0; j < 39; j++)
+			filler[j] = subdeck.pop();
+
+		if (!subdeck.isEmpty()) {
+			System.out.println("Subdeck:" + subdeck.size() + " Crap.This is going to blow up.");
+		}
+		//
+		// Now put them every 4 cards apart
+		int k = 0;	// k walks through 39 filler cards
+		for (int i = 0; i < 13; i++) {
+			for (j = 0; j < 3; j++)
+				subdeck.push(filler[k++]);
+			subdeck.push(myhand[i]);
+		}
+
+		if (subdeck.size() != 52)
+			System.out.println("special deal: Uh oh, spaghetti-o");
+	}
 
 	public Card pop() {
 		// TODO Auto-generated method stub

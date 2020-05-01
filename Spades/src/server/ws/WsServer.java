@@ -548,21 +548,33 @@ public class WsServer {
 			us.game.handOver();
 			break;
 		case JCLShuffle:
+			//String shuffleTypes[]=["none","yes","no","random","clubs","high"];
+			/*if (us.game == null)  {
+				write(us, "You have no game. Must join a game first. No game to set shuffle;");
+				break;
+			}*/
 			String sOnOff="";
-			boolean bShuffle=false;
 			if (jcl.argc() > 1)
 				sOnOff = jcl.getValue(1);
 			else
 				sOnOff = "no";
-			write(us, "" + jcl.type + "(" + sOnOff + "): under construction");
-			if (sOnOff.equalsIgnoreCase("yes") ||
-					sOnOff.equalsIgnoreCase("true"))
-				bShuffle = true;
-			// set for game
-			if (us.game == null)
-				write(us, "Must join a game first. No game yet to set shuffle;");
+			// Can't do that here. This will shuffle with the default type...
+			// g = getDefaultGame();
+			if (Subdeck.isValidShuffleType(sOnOff)) {
+				// unfortunately cards are distributed at join
+				// to affect the shuffle, must do it globally
+				//us.game.setShuffle(sOnOff);
+				Subdeck.setShuffle(sOnOff);
+				write(us, "shuffle:" + sOnOff);
+			}
 			else
-				us.game.reset(bShuffle);
+				write(us, "invalid shuffle type:" + sOnOff 
+						+ "-use none, random, moon, or high");
+			write(us, "" + jcl.type + "(" + sOnOff + "): under construction");
+			/*if (sOnOff.equalsIgnoreCase("yes") ||
+					sOnOff.equalsIgnoreCase("true"))
+				bShuffle = true; */
+			// set for game
 			break;
 		case JCLError: // JCL command but malformed
 		case JCLCommandNotRecognized: // Command is not recognized

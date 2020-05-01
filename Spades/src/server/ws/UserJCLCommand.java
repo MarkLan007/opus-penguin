@@ -291,6 +291,8 @@ public class UserJCLCommand {
 			for (int i = 0; identifier.find(); i++) {
 				switch (i) {
 				case 0:
+					NameValuePair p0 = new NameValuePair("shuffle", "shuffle");
+					argv.add(p0);
 					continue; // the command itself
 				case 1:
 					sOnOff = identifier.group();

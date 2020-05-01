@@ -43,7 +43,7 @@ public class RobotPlayer extends Player implements PlayerInterface {
 	}
 
 	private void badRobot(String playerName, int nTrickId, int pid, Subdeck subdeck, ProtocolMessage pm) {
-		System.out.println(playerName + " has been a bad robot.");
+		System.out.println(playerName + " has been a bad robot for illegal play.");
 		System.out.println("On " + nTrickId + "th Trick with <" + subdeck.size() + ">=[" + subdeck.encode() + "] has been carded for:");
 		System.out.println(pm.encode());
 	}
