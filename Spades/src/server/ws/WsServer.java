@@ -257,6 +257,8 @@ public class WsServer {
 			if (ProtocolMessage.isProtocolMessage(message)) {
 				String msg=stripSessionInfo(message);
 				ProtocolMessage pm = new ProtocolMessage(msg);
+				// Never trust the client about the seat id.
+				pm.setSender(us.pid);
 				g=lookupGameFromSession(sRemoteSession);
 				if (g == null)
 					g = getDefaultGame();
@@ -354,7 +356,8 @@ public class WsServer {
 			if (us.superuser())
 				s = s + "+";
 			s += us.sessionId + us.getName();
-			us.setSuperUser(true);
+			if (us.game != null) 
+				s += " AKA " + "g" + "0" + us.pid; 
 			write(us, s);
 			break;
 		case JCLStart:

@@ -869,7 +869,7 @@ public class CardGame implements GameInterface {
 			MailBoxExchange.MailBox mb = mbx.itemAt(i);
 			int from = mb.from, to = mb.to;
 			sd = mb.contents;
-			System.out.println("Passing:(" + sd.size() + ")=" + sd.toString());
+			System.out.println("Passing:(" + sd.size() + ")=" + sd.encode());
 			Player p = playerArray[from];
 			/*
 			 * Actually delete the cards to the player's hand internally for (c: sd.subdeck)
@@ -1095,6 +1095,7 @@ public class CardGame implements GameInterface {
 			if (sd.find(theTwo))
 				nCurrentTurn = i;
 		}
+		gameErrorLog("Player " + nCurrentTurn + " has the 2c.");
 		if (nCurrentTurn == -1) {
 			// Uh oh. Can't happen. Nobody had the two of clubs...
 			System.out.println("Catastrophic error: No one has the two...");
