@@ -8,6 +8,19 @@ package server.ws;
 
 public class RobotPlayer extends Player implements PlayerInterface {
 
+	// On review...
+	// this is RobotPlayer's 2nd copy of the cards.
+	// player has official copy as part of game.
+	// robot brain has it's own copy.
+	// the only thing this is used for if the 2c is asked for
+	// on the first play. Could easily delegate this to robotbrain.
+	// and then hand could disappear entirely from RobotPlayer...
+	//
+	// Maybe I need a referee class in game for queries.
+	// ref.canIplay()
+	// or for godlike play
+	// ref.doesAnyoneElseHave(Suit)
+	//
 	// TODO: hand should be private to robotPlayer; (Afraid to do this right now...)
 	Subdeck hand = null; // new Subdeck(); // This is the robot player's copy of the cards; sent in via
 							// ADD_CARD etc.
@@ -59,7 +72,7 @@ public class RobotPlayer extends Player implements PlayerInterface {
 	@Override
 	void reset() {
 		GameInterface gi=cardGame;
-		//super.reset();
+		super.reset();
 		robotBrain.reset();	// clear the brain too...
 		
 		// but make sure you don't clobber cardgame

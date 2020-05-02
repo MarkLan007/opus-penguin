@@ -545,36 +545,37 @@ public class WsServer {
 
 			break;
 		case JCLNewdeal:
+			if (us.game == null) {
+				write(us, "Can't redeal. You aren't in a game.");
+				break;
+			}
+			if (jcl.type == UserJCLCommand.JCLType.JCLMisdeal) {
+				write(us, "Misdeal declared:");
+				System.out.println("Player(" + us.getpid() +") declares misdeal.");				
+			}
 			us.game.handOver();
 			break;
 		case JCLShuffle:
-			//String shuffleTypes[]=["none","yes","no","random","clubs","high"];
-			/*if (us.game == null)  {
-				write(us, "You have no game. Must join a game first. No game to set shuffle;");
-				break;
-			}*/
-			String sOnOff="";
+			// set shuffle game-wide
+			// for debugging purposes.
+			String sShuffleType="";
 			if (jcl.argc() > 1)
-				sOnOff = jcl.getValue(1);
+				sShuffleType = jcl.getValue(1);
 			else
-				sOnOff = "no";
+				sShuffleType = "none";
 			// Can't do that here. This will shuffle with the default type...
 			// g = getDefaultGame();
-			if (Subdeck.isValidShuffleType(sOnOff)) {
+			if (Subdeck.isValidShuffleType(sShuffleType)) {
 				// unfortunately cards are distributed at join
 				// to affect the shuffle, must do it globally
-				//us.game.setShuffle(sOnOff);
-				Subdeck.setShuffle(sOnOff);
-				write(us, "shuffle:" + sOnOff);
+				//us.game.setShuffle(sShuffleType);
+				Subdeck.setShuffle(sShuffleType);
+				write(us, "shuffle:" + sShuffleType);
 			}
 			else
-				write(us, "invalid shuffle type:" + sOnOff 
-						+ "-use none, random, moon, or high");
-			write(us, "" + jcl.type + "(" + sOnOff + "): under construction");
-			/*if (sOnOff.equalsIgnoreCase("yes") ||
-					sOnOff.equalsIgnoreCase("true"))
-				bShuffle = true; */
-			// set for game
+				write(us, "invalid shuffle type:" + sShuffleType 
+						+ "-use none, random, clubs, or high");
+			//write(us, "" + jcl.type + "(" + sShuffleType + "): under construction");
 			break;
 		case JCLError: // JCL command but malformed
 		case JCLCommandNotRecognized: // Command is not recognized

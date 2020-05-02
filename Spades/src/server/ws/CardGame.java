@@ -715,11 +715,17 @@ public class CardGame implements GameInterface {
 	 */
 	public void playCard(int nsender, Card c) {
 		Player p = playerArray[nsender];
-		Subdeck pcards = p.subdeck; // server side official representation of the player's hand
+		// review:
+		// bad idea to have a local copy pcards of p.subdeck
+		// when called through tail recursion the local copy
+		// still exists. So the cards never get deleted from player
+		// ???
+		//--Subdeck pcards = p.subdeck; // server side official representation of the player's hand
 		ProtocolMessage returnMessage = null;
 		ProtocolMessageTypes mtype = ProtocolMessageTypes.PLAY_CARD;
 
-		gameErrorLog("Msg<" + mtype + ">from(" + nsender + ") " + pcards.encode());
+		gameErrorLog("Msg<" + mtype + ">from(" + nsender + ") " 
+				+ p.subdeck.encode());	// pcards bugfix
 		if (c == null) {
 			returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR, "%MSG:Protocol error no card!%");
 			p.sendToClient(returnMessage);
@@ -727,9 +733,9 @@ public class CardGame implements GameInterface {
 		}
 		gameErrorLog("Housekeeping: player(" + nsender + ") plays <" + c.encode() + ">");
 
-		if (!pcards.find(c)) {
+		if (!p.subdeck.find(c)) {	// pcards bugfix
 			gameErrorLog("Housekeeping: find failed<" + c.encode() + "> from(" + nsender + ") subdeck size("
-					+ pcards.size() + "){" + pcards.encode() + "}");
+					+ p.subdeck.size() + "){" + p.subdeck.encode() + "}");
 			returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
 					"%MSG:Player" + p.pid + " doesn't have <" + c.rank + c.suit + ">!%");
 			p.sendToClient(returnMessage);
@@ -815,8 +821,8 @@ public class CardGame implements GameInterface {
 		 * Delete the games copy of the card in hand, and then send message to client to
 		 * delete the same card
 		 */
-		gameErrorLog("Housekeeping: delete<" + c.encode() + "> from {" + pcards.encode() + "}");
-		pcards.delete(c.rank, c.suit);
+		gameErrorLog("Housekeeping: delete<" + c.encode() + "> from {" + p.subdeck.encode() + "}");
+		p.subdeck.delete(c.rank, c.suit);	// pcards bugfix
 		returnMessage = new ProtocolMessage(ProtocolMessageTypes.DELETE_CARDS, c);
 		p.sendToClient(returnMessage);
 		gameErrorLog("Play_Card successful.");
@@ -923,10 +929,9 @@ public class CardGame implements GameInterface {
 			return;
 		}
 		Player p = playerArray[nSender];
-		Subdeck pcards = p.subdeck; // server side official representation of the player's hand
+		//Subdeck pcards = p.subdeck; // server side official representation of the player's hand
 		ProtocolMessage returnMessage = null;
-
-		gameErrorLog("Msg<" + m.type + ">from(" + nSender + ") " + pcards.encode());
+		gameErrorLog("Msg<" + m.type + ">from(" + nSender + ") " + p.subdeck.encode());
 
 		switch (m.type) {
 		case PLAY_CARD: // CARD

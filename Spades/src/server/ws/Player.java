@@ -58,9 +58,16 @@ public class Player /*implements PlayerInterface */{
 	}
 	
 	void reset() {
-		subdeck = new Subdeck();
+		if (subdeck != null)
+			subdeck = new Subdeck();
+		int i=0;
+		for (i=0; subdeck.size() != 0; i++)
+			subdeck.pop();
+		if (i > 0)
+			playerErrorLog("deleted " + i + " leftover cards.");
 		bIsMyMove = false;
 	}
+	
 	String playerName="";
 	int handScore=0;
 	int totalScore=0;

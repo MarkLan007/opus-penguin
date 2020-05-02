@@ -191,13 +191,17 @@ public class Subdeck implements Iterable<Card> {
 	/*
 	 * delete -- delete the FIRST instance of card(Rank,Suit) from the subdeck
 	 *   -- only delete the first one so this is suitable for removing a card when it is played...
+	 *   *** use this and not underlying remove because this works by value which is 
+	 *       generally right... remove the first [AC] not the specific pointer to an [AC]
+	 *       
 	 */
 	public void delete(Rank r, Suit st) {
 
 		for (Card c:subdeck) {
 			if (c.rank == r && c.suit == st) {
 				// Found it!
-				subdeck.remove(c);
+				if (!subdeck.remove(c))
+					System.out.println("Unexpected: Failed to remove card:" + c.rank + c.suit);
 				break; // remember only delete first one!
 				}	
 			}
@@ -219,7 +223,11 @@ public class Subdeck implements Iterable<Card> {
 		subdeck.add(c);
 		}
 	
-	public void put(int index, Card c) {
+	/*
+	 * set is generally dangerous...
+	 * only done by shuffle to exchange places
+	 */
+	private void put(int index, Card c) {
 		subdeck.set(index, c);
 		}
 	
@@ -270,17 +278,21 @@ public class Subdeck implements Iterable<Card> {
 		return c;
 		}
 
-	static String shuffleTypes[]= {"none","yes","no","random","clubs","high"};
+	static String shuffleTypes[]= {"none","random","clubs","high"};
+	// for error checking done in WsServer
+	// and cardgame. Done here for now...
+	// this is probably the right place for them long-term, too
 	static boolean isValidShuffleType(String stype) {
 		for (int i=0; i<shuffleTypes.length; i++)
 			if (stype.equalsIgnoreCase(shuffleTypes[i]))
 				return true;
 		return false;
 	}
-	
+
+	/*
+	 * default shuffle type set here:
+	 */
 	static String sShuffleType="none";
-	// error checking done in WsServer
-	// and cardgame for now...
 	static void setShuffle(String shuffleType) {
 		sShuffleType = shuffleType;
 	}
@@ -292,7 +304,7 @@ public class Subdeck implements Iterable<Card> {
 		if (stype.equalsIgnoreCase("none"))
 			;
 		if (stype.equalsIgnoreCase("random"))
-			shuffle();
+			randomShuffle();
 		if (stype.equalsIgnoreCase("high"))
 			shuffleHigh();
 	}
