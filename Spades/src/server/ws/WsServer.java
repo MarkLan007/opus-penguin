@@ -257,14 +257,25 @@ public class WsServer {
 			if (ProtocolMessage.isProtocolMessage(message)) {
 				String msg=stripSessionInfo(message);
 				ProtocolMessage pm = new ProtocolMessage(msg);
+				if (us.game == null) {
+					write(us, "Unexpected protocol message: You aren't currently in a game.");
+					return;
+				}
 				// Never trust the client about the seat id.
 				pm.setSender(us.pid);
-				g=lookupGameFromSession(sRemoteSession);
+				g = us.game;
+				/*
+				 * This would be good to do here...
+				 *
+				//g=lookupGameFromSession(sRemoteSession);
 				if (g == null)
 					g = getDefaultGame();
+					*/
 				// tell the client what protocol message parsed as:
 				if (remoteDebug)
 					write(us, "saw:" + pm.type + "sender:" + pm.sender + "{" + pm.usertext + "}");
+				g.process(pm);
+/*
 				if (bBypassKernel) {
 					// sleep before every move to let writes finish
 					// temporary hack...
