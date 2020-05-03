@@ -814,9 +814,6 @@ public class CardGame implements GameInterface {
 			}
 		}
 
-		// TODO: add to the trick and send to players
-		trickUpdate(nsender, c);
-
 		/*
 		 * Delete the games copy of the card in hand, and then send message to client to
 		 * delete the same card
@@ -826,6 +823,10 @@ public class CardGame implements GameInterface {
 		returnMessage = new ProtocolMessage(ProtocolMessageTypes.DELETE_CARDS, c);
 		p.sendToClient(returnMessage);
 		gameErrorLog("Play_Card successful.");
+		//
+		// Update the trick After notifying the player to delete...
+		trickUpdate(nsender, c);
+		
 		/*
 		 * A turn has successfully completed. the next player is up (updateTurn). then
 		 * call nextMove() to enqueue message.

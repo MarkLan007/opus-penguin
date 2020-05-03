@@ -708,9 +708,11 @@ function showClear() {
 	 * to creat a cardback card, turnover1c4(null,position)
 	*/
 	var winner=currentTrick.getWinner();
+	//turnover1card4(null, winner);
 	turnover1card4(null, winner);
-	if (!qEmpty())
-		animator();
+	animateMaybe();
+	/*if (!qEmpty())
+		animator(); */
 }
 
 var isBusy = false;
@@ -904,6 +906,7 @@ function turnover1card4(card, position) { // New rotation
 			 */
 			pc = new AnimatableCard(imagefile, 0, 0, 0, firstx, firsty, cardwidth, cardheight,
 				halfwidth = halfcardwidth, 0, cardwidth, cardheight);
+			//pc.friendlyName = card.friendlyName;
 			/*
 			 * feltContext.drawImage(card.cardImage, firstx, firsty, cardwidth,
 			 * cardheight, // source rectangle halfwidth-halfcardwidth, 0 ,
@@ -925,6 +928,7 @@ function turnover1card4(card, position) { // New rotation
 			pc = new AnimatableCard(imagefile, rotation, halfwidth, halfheight,
 				firstx, firsty, cardwidth, cardheight,
 				-cardwidth, -cardheight, cardwidth, cardheight);
+			//pc.friendlyName = card.friendlyName;
 
 			/*
 			 * feltContext.drawImage(card.cardImage, firstx, firsty, cardwidth,
@@ -952,6 +956,7 @@ function turnover1card4(card, position) { // New rotation
 			 */
 			pc = new AnimatableCard(imagefile, 0, 0, 0, firstx, firsty, cardwidth, cardheight,
 				halfwidth - halfcardwidth, halfheight, cardwidth, cardheight);
+			//pc.friendlyName = card.friendlyName;
 			break;
 		case 3:	// West
 			// genius use of 90-degree rotation
@@ -974,6 +979,7 @@ function turnover1card4(card, position) { // New rotation
 			 */
 			pc = new AnimatableCard(imagefile, rotation, 0, 0, firstx, firsty, cardwidth, cardheight,
 				halfwidth - halfcardwidth, -cardheight, cardwidth, cardheight);
+			//pc.friendlyName = card.friendlyName;
 
 			/*
 			 * feltContext.rotate(-rotation);
@@ -988,8 +994,19 @@ function turnover1card4(card, position) { // New rotation
 	 * aaa use CardAnimation and the queue
 	 */
 	var qItem = new CardAnimation(pc);	// takes an animated card...
-	qEnqueue(qItem);
 	currentTrick.add(pc);
+	// debugging
+	// this fixes the "first card not getting animated" bug...
+	// it shouldn't, but it does.
+	// TODO:
+	// figure this out...
+	if (qEmpty())	// put in twice if empty...
+		qEnqueue(qItem);
+	qEnqueue(qItem);
+	//animator();
+	// aaa
+	// check isbusy and start animator, if not?
+	// animateMaybe();
 	}
 
 
@@ -1101,6 +1118,7 @@ class AnimatableCard {
 		this.tgty = tgty;
 		this.tgtwidth = tgtwidth;
 		this.tgtheight = tgtheight;
+		this.friendlyName = "debugMe";
 	}
 
 	// pc = new AnimatableCard(imagefile, 0, 0, 0, firstx, firsty, cardwidth,
@@ -1212,14 +1230,14 @@ function qEnqueue(a) {
 
 //public entry points for the animator
 function qDequeue() {
-	var last = null;
+	var head = null;
 	if (qEmpty())
 		;
 	else {
-		last = theQueue[q_first];
+		head = theQueue[q_first];
 		q_first = qNextIndex(q_first);
 	}
-	return last;
+	return head;
 }
 
 // Scene functions aaa
@@ -1301,8 +1319,10 @@ class TrickAnimation extends AnimationScene {
 		// need to clear since writing over the
 		// prevous trick fainter doesn't really work
 		// aaa
-		for (i=0; i<this.list.length; i++) {
-			var pc=this.list[i];
+		// this needs to walk from leader to the length
+		var cp = 0; // No: trick is in order played... this.leader;	// current player
+		for (i=0; i<this.list.length; i++, cp=(cp + 1) % nTableSize) {
+			var pc=this.list[cp];
 			pc.paint(this.opacity);
 		}
 	}
@@ -1385,16 +1405,26 @@ var bAnimatorIdle = true;
 var animationItemX;	// animation item
 var gStart = 0;
 var gLast = 0;
+function animateMaybe() {
+	if (!bAnimatorIdle)
+		return;
+	if (qEmpty())
+		return;
+	animator();
+}
 function animator() {
 	
 	if (!bAnimatorIdle) {
 		// uh oh.. already running; get out!
 		return;
 	}
+	bAnimatorIdle = false; // set any time q is accessed...
 	animationItemX = qDequeue();
-	if (animationItemX == null)
+	if (animationItemX == null) {
+		bAnimatorIdle = true; // set any time q is accessed...
 		return;
-	bAnimatorIdle = false; // only set when item in-hand
+	}
+	console.log("Animating:" + animationItemX.friendlyName);
 	//while (animationItemX != null) {
 		animationItemX.init();
 
@@ -1467,17 +1497,11 @@ function clearTrick(sMsg) {
 			var se=new SpecialEffect();
 			se.setType(SpecialEffectType.CLEAR);
 			qEnqueue(se);
-			if (currentTrick) {
-				var w=currentTrick.winningCard();
-				qEnqueue(new CardAnimation(w));
-			}
 			/*
 			 * to creat a cardback card, turnover1c4(null,position)
 			*/
-			//var winner=currentTrick.getWinner();
 			turnover1card4(null, winner);
-			if (!qEmpty())
-				animator();
+			animator();
 			break;
 		case 6:
 			break;

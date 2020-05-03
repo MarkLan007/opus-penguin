@@ -593,8 +593,9 @@ public class UserJCLCommand {
 
 	public boolean isJCL(String commandString) {
 		// should make sure the first character is /
-		if (commandString.charAt(0) == '/' &&
-				commandString.charAt(1) == '/')
+		if (commandString.length() < 2)
+			return false;
+		if (commandString.charAt(0) == '/' && commandString.charAt(1) == '/')
 			return true;
 		return false;
 		/*
