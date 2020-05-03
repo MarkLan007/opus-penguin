@@ -526,6 +526,9 @@ public class WsServer {
 			// ... JCLRefresh which sends the whole context
 			us.game.resend(us);
 			break;
+		case JCLRefresh:
+			us.game.refresh(us.pid);
+			break;
 		case JCLScore:
 			playerId=us.getpid();
 			if (playerId == -1) {

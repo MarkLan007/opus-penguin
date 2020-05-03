@@ -423,9 +423,11 @@ public class CardGame implements GameInterface {
 	 * 
 	 * don't forget... At end of hand, set currentPass to the next passtype
 	 */
+	private boolean bPassingCardsInProgress=false;
 	void initiatePass(MailBoxExchange.PassType pt) {
 		if (pt == MailBoxExchange.PassType.PassHold)
 			return;
+		bPassingCardsInProgress = true;
 		// number of players, number of cards to pass for error checking
 		mbx = new MailBoxExchange(pt, nPlayers, 3);
 		// Now send the pass messages, telling the user what
@@ -853,7 +855,8 @@ public class CardGame implements GameInterface {
 	}
 
 	/*
-	 * passCards - detect if the sender can legally pass these cards; TODO: i.e. are
+	 * passCards - detect if the sender can legally pass these cards; 
+	 * TODO: i.e. are
 	 * we in a pass? emit error message if not if legal, add to the mailbox
 	 */
 	public void passCards(int nsender, Subdeck sd) {
@@ -894,9 +897,32 @@ public class CardGame implements GameInterface {
 		}
 		// yea! Pass successfully completed
 		// buckle-up...
+		bPassingCardsInProgress = false;
 		go();
 	}
 
+	public void refresh(int pid) {
+		Player p = playerArray[pid];
+		ProtocolMessage pm;
+		if (p.isRobot()) {
+			gameErrorLog("Robot at seat:" + pid + " requesting refresh...");
+		}
+		pm = new ProtocolMessage(ProtocolMessageTypes.DELETE_CARDS, "-*");
+		p.sendToClient(pm);
+		pm = new ProtocolMessage(ProtocolMessageTypes.ADD_CARDS, p.subdeck);
+		p.sendToClient(pm);
+		if (bPassingCardsInProgress) {
+			pm = new ProtocolMessage(ProtocolMessageTypes.PASS_CARD,
+				3 + "Pass 3 cards to the " + currentPass);
+			p.sendToClient(pm);
+		} else if (nCurrentTurn == pid) {
+			pm = new ProtocolMessage(ProtocolMessageTypes.YOUR_TURN);
+			p.sendToClient(pm);
+		}
+		// TODO:
+		// should also send where we are in the current trick...
+			
+	}
 	public void bidTricks(int nsender, Subdeck cards) {
 		gameErrorLog("Can't happen: Game received unimplemented BID request. Bidding not yet implemented.");
 	}

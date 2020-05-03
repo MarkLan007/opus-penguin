@@ -279,6 +279,14 @@ public class Subdeck implements Iterable<Card> {
 		}
 
 	static String shuffleTypes[]= {"none","random","clubs","high"};
+	static String sShuffleType="random";
+	/*
+	 * default shuffle type set here:
+	 */
+	static void setShuffle(String shuffleType) {
+		sShuffleType = shuffleType;
+	}
+	
 	// for error checking done in WsServer
 	// and cardgame. Done here for now...
 	// this is probably the right place for them long-term, too
@@ -289,14 +297,6 @@ public class Subdeck implements Iterable<Card> {
 		return false;
 	}
 
-	/*
-	 * default shuffle type set here:
-	 */
-	static String sShuffleType="none";
-	static void setShuffle(String shuffleType) {
-		sShuffleType = shuffleType;
-	}
-	
 	public void shuffle(String stype) {
 
 		if (stype.equalsIgnoreCase("clubs"))

@@ -3,10 +3,9 @@
  */
 'use strict';
 /*
- * Naming:
- *  wsXXX - routines that involve web socket sending or receiving messages
- *  ...DialogWindow -- dialog done the window way (TODO: move to retired code)
- *  ...DialogDiv -- dialog done with divs (better.)
+ * Naming: wsXXX - routines that involve web socket sending or receiving
+ * messages ...DialogWindow -- dialog done the window way (TODO: move to retired
+ * code) ...DialogDiv -- dialog done with divs (better.)
  */
 const minorVersion = "1b";
 const versionString1 = "OneUtils.js version 0." +
@@ -187,7 +186,7 @@ function cardSelected(event) {
 	// if the pass dialog is up, pass it.
 	// otherwise play it
 	if (bPassingCardsInProgress)
-		//addCardToPassDialogWindow(cardIndex);
+		// addCardToPassDialogWindow(cardIndex);
 		addCardToPassDialogDiv(cardIndex);
 	else
 		sendCardFromButtonPress(cardIndex);
@@ -198,7 +197,7 @@ function cardSelected2(event) {
 	var uniqueId = t.type + t.id;
 	console.log("Double Whoa!" + uniqueId);
 	alert("Whoa Nellie! a doubleclick was seen in:" + t.id);
-	//sendCardFromButtonPress(parseInt(t.id, 10));
+	// sendCardFromButtonPress(parseInt(t.id, 10));
 }
 
 /*
@@ -275,29 +274,19 @@ function wsHandInit() {
 	 */
 	arrangeCardsInDivs();
 	/*
-	var controlDiv = document.getElementById("ClubsInHandDiv");
-	for (i = 0; i < 52; i++) {
-		card = theDeck[i];
-		cardBtn = card.handButton;
-		switch (i) {
-			case 13:
-				controlDiv = document.getElementById("DiamondsInHandDiv");
-				break;
-			case 26:
-				controlDiv = document.getElementById("SpadesInHandDiv");
-				break;
-			case 39:
-				controlDiv = document.getElementById("HeartsInHandDiv");
-				break;
-		}
-		controlDiv.appendChild(cardBtn);
-	} */
+	 * var controlDiv = document.getElementById("ClubsInHandDiv"); for (i = 0; i <
+	 * 52; i++) { card = theDeck[i]; cardBtn = card.handButton; switch (i) {
+	 * case 13: controlDiv = document.getElementById("DiamondsInHandDiv");
+	 * break; case 26: controlDiv = document.getElementById("SpadesInHandDiv");
+	 * break; case 39: controlDiv = document.getElementById("HeartsInHandDiv");
+	 * break; } controlDiv.appendChild(cardBtn); }
+	 */
 
 }
 
 /*
- * make card (by cardindex) visible in hand
- *  -- just sets the card to be visible in the hand
+ * make card (by cardindex) visible in hand -- just sets the card to be visible
+ * in the hand
  */
 function addCardToHand(cardindex) {
 	var card = theDeck[cardindex];
@@ -471,8 +460,7 @@ function wsShowFelt() {
 					 * for (let i=0; i<52; i++) {
 					 * feltContext.fillRect(i*cardWidth,0,cardWidth,cardHeight);
 					 * feltContext.strokeRect(i*cardWidth,0,cardWidth,
-					 * cardHeight);
-					 *  }
+					 * cardHeight); }
 					 */
 					// Cardwidth=200 cardheight=500
 
@@ -651,7 +639,7 @@ function clearCardTable(bResetTrick) {
 /*
  * testing functions attached to buttons for debug
  */
-//generates consecutive cards to test transitions
+// generates consecutive cards to test transitions
 function turnover1card() { 
 	// in 1-4 and 1-6...
 	var randomcard = jrandom(52);	// pick a card, any card.
@@ -664,8 +652,8 @@ function turnover1card() {
 	switch (nTableSize) {
 		case 4:
 			turnover1card4(card, currentSeatToPlay);
-			//break;
-//			alert("turnover1card whoa!");
+			// break;
+// alert("turnover1card whoa!");
 			for (var i=0; i<nTableSize-1; i++) {
 				randomcard = jrandom(52);
 				card = theDeck[randomcard];
@@ -706,13 +694,14 @@ function showClear() {
 	}
 	/*
 	 * to creat a cardback card, turnover1c4(null,position)
-	*/
+	 */
 	var winner=currentTrick.getWinner();
-	//turnover1card4(null, winner);
+	// turnover1card4(null, winner);
 	turnover1card4(null, winner);
 	animateMaybe();
-	/*if (!qEmpty())
-		animator(); */
+	/*
+	 * if (!qEmpty()) animator();
+	 */
 }
 
 var isBusy = false;
@@ -828,8 +817,8 @@ function repaint(gestault) {
 }
 
 // ok, so
-/* aaa 
- * turnover1card4 show card in position; if the card is null... turn over a
+/*
+ * aaa turnover1card4 show card in position; if the card is null... turn over a
  * cardback in the position compute geometry, create a new animatable card and
  * enqueue it.
  */
@@ -906,7 +895,7 @@ function turnover1card4(card, position) { // New rotation
 			 */
 			pc = new AnimatableCard(imagefile, 0, 0, 0, firstx, firsty, cardwidth, cardheight,
 				halfwidth = halfcardwidth, 0, cardwidth, cardheight);
-			//pc.friendlyName = card.friendlyName;
+			// pc.friendlyName = card.friendlyName;
 			/*
 			 * feltContext.drawImage(card.cardImage, firstx, firsty, cardwidth,
 			 * cardheight, // source rectangle halfwidth-halfcardwidth, 0 ,
@@ -928,7 +917,7 @@ function turnover1card4(card, position) { // New rotation
 			pc = new AnimatableCard(imagefile, rotation, halfwidth, halfheight,
 				firstx, firsty, cardwidth, cardheight,
 				-cardwidth, -cardheight, cardwidth, cardheight);
-			//pc.friendlyName = card.friendlyName;
+			// pc.friendlyName = card.friendlyName;
 
 			/*
 			 * feltContext.drawImage(card.cardImage, firstx, firsty, cardwidth,
@@ -956,7 +945,7 @@ function turnover1card4(card, position) { // New rotation
 			 */
 			pc = new AnimatableCard(imagefile, 0, 0, 0, firstx, firsty, cardwidth, cardheight,
 				halfwidth - halfcardwidth, halfheight, cardwidth, cardheight);
-			//pc.friendlyName = card.friendlyName;
+			// pc.friendlyName = card.friendlyName;
 			break;
 		case 3:	// West
 			// genius use of 90-degree rotation
@@ -979,7 +968,7 @@ function turnover1card4(card, position) { // New rotation
 			 */
 			pc = new AnimatableCard(imagefile, rotation, 0, 0, firstx, firsty, cardwidth, cardheight,
 				halfwidth - halfcardwidth, -cardheight, cardwidth, cardheight);
-			//pc.friendlyName = card.friendlyName;
+			// pc.friendlyName = card.friendlyName;
 
 			/*
 			 * feltContext.rotate(-rotation);
@@ -1003,7 +992,7 @@ function turnover1card4(card, position) { // New rotation
 	if (qEmpty())	// put in twice if empty...
 		qEnqueue(qItem);
 	qEnqueue(qItem);
-	//animator();
+	// animator();
 	// aaa
 	// check isbusy and start animator, if not?
 	// animateMaybe();
@@ -1215,7 +1204,7 @@ function qNextIndex(index) {
 	return index;
 }
 
-//public entry points for the animator
+// public entry points for the animator
 function qEmpty() {
 	return q_first == q_last;
 }
@@ -1228,7 +1217,7 @@ function qEnqueue(a) {
 	// animator();
 }
 
-//public entry points for the animator
+// public entry points for the animator
 function qDequeue() {
 	var head = null;
 	if (qEmpty())
@@ -1320,7 +1309,8 @@ class TrickAnimation extends AnimationScene {
 		// prevous trick fainter doesn't really work
 		// aaa
 		// this needs to walk from leader to the length
-		var cp = 0; // No: trick is in order played... this.leader;	// current player
+		var cp = 0; // No: trick is in order played... this.leader; // current
+					// player
 		for (i=0; i<this.list.length; i++, cp=(cp + 1) % nTableSize) {
 			var pc=this.list[cp];
 			pc.paint(this.opacity);
@@ -1425,14 +1415,14 @@ function animator() {
 		return;
 	}
 	console.log("Animating:" + animationItemX.friendlyName);
-	//while (animationItemX != null) {
+	// while (animationItemX != null) {
 		animationItemX.init();
 
 		/*
 		 * keep drawing frames (and requesting a new animation frame) as long as
 		 * there are items in the queue
 		 */
-		//let promise = new Promise(function(resolve, reject) {
+		// let promise = new Promise(function(resolve, reject) {
 		(function paintAnimationFrames(timestamp) {
 			if (gStart == 0)
 				gStart = timestamp;
@@ -1450,30 +1440,24 @@ function animator() {
 			if (animationItemX != null)
 				requestAnimationFrame(paintAnimationFrames);
 		})();
-		//});
-	//}
+		// });
+	// }
 	bAnimatorIdle = true;
 }
 
 
 /*
- * (new) addCardToTrick using the new animation routines.
- * stillborn.
+ * (new) addCardToTrick using the new animation routines. stillborn.
  */
 /*
-function newAddCardToTrick(card, user, n) {
-	// Create an animation frame, put in the queue
-	// and kick the animation server if necessary
-	console.log("Adding{t=" + n + "}:" + card.friendlyName + "@" + user);
-	var frame=new AnimationFrame();
-	// qEnqueue(frame);
-	frame.enqueue();
-}
-*/
+ * function newAddCardToTrick(card, user, n) { // Create an animation frame, put
+ * in the queue // and kick the animation server if necessary
+ * console.log("Adding{t=" + n + "}:" + card.friendlyName + "@" + user); var
+ * frame=new AnimationFrame(); // qEnqueue(frame); frame.enqueue(); }
+ */
 
 /*
- * aaa 
- * clearTrick - close and enqueue currentTrick; start next trick
+ * aaa clearTrick - close and enqueue currentTrick; start next trick
  */
 function clearTrick(sMsg) {
 	document.getElementById("trickArea").textContent
@@ -1499,7 +1483,7 @@ function clearTrick(sMsg) {
 			qEnqueue(se);
 			/*
 			 * to creat a cardback card, turnover1c4(null,position)
-			*/
+			 */
 			turnover1card4(null, winner);
 			animator();
 			break;
@@ -1654,6 +1638,7 @@ function processCardString(cardString) {
 			if (cardString.includes('*')) {
 				deleteAllCardsFromHand();
 				reorgButtons();
+				clearCardTable(false);
 				break;
 			}
 			bDelete = true;
@@ -1663,7 +1648,7 @@ function processCardString(cardString) {
 				// when you are dealt cards set the seat value for future
 				// messages
 				// only set them if you HAVEN'T seen a welcome msg
-				//  which is the most trustrworthy way to set it
+				// which is the most trustrworthy way to set it
 				setSeatId(parseInt(cardString.charAt(1)));
 			}
 			for (i = 2; i < cardString.length; i += 2) {
@@ -1708,7 +1693,7 @@ function processCardString(cardString) {
 
 			break;
 		case '!':
-			//alert("Clear trick... pausing");
+			// alert("Clear trick... pausing");
 			// line.slice(8)
 			clearTrick(cardString);
 			// clearCardTable(true);
@@ -1727,7 +1712,8 @@ function processCardString(cardString) {
 			wsScoreDialog(cardString);
 			break;
 		case '~':
-			//cardString of the form 'NCards to pass left' where N is the actual number
+			// cardString of the form 'NCards to pass left' where N is the
+			// actual number
 			// just 'know' 3 for now...
 			console.log("Pass message.. working on it...");
 			wsPassDialog(3, cardString);
@@ -1751,17 +1737,17 @@ var bPassingCardsInProgress = false;
  * to pass on. Not ideal, obviously.
  */
 var passCards = [null, null, null];
-var iCurrentFreeCardinPass = 0;
+var iCurrentFreeCardInPass = 0;
 var iPassSize = 3;
 
 var passWindow = null;
 var passDiv = null;
 var bPassDialogInit = false;
 var bNeedToArrange = true;
-function wsInitPassDialog(n, sMsg) {
+function wsInitPassDialogWindow(n, sMsg) {
 	// divert selected cards to the dialog
 	bPassingCardsInProgress = true;
-	iCurrentFreeCardinPass = 0;
+	iCurrentFreeCardInPass = 0;
 	var w = window.open("PassCards.html",
 		"Pass Cards",
 		"width=600,height=370,status=no,toolbars=no,resizeable=yes,location=no"
@@ -1799,7 +1785,7 @@ function formatScore(score) {
 	var c, prefix, elem;
 	var i,j;
 	// 
-	// looking at  {$name=x.y$}+
+	// looking at {$name=x.y$}+
 	// scan upto $
 	for (i=1;i<score.length;i++)
 		if (score.charAt(i) == '$')
@@ -1808,7 +1794,8 @@ function formatScore(score) {
 	for (row=0,i++; i<score.length; i++,row++){
 		// j points at first char after the $ (first char of name)
 		// scan past the name while accumulating it;
-		if (i > 5 && score.charAt(i) == '#') // we are starting into headers...
+		if (i > 5 && score.charAt(i) == '#') // we are starting into
+												// headers...
 			break;
 		for (name="",j=i; j<score.length; j++) {
 			c = score.charAt(j);
@@ -1883,9 +1870,10 @@ function formatScore(score) {
 	}
 	// now, go through rows and make visible if I put data in it
 	// invisible otherwise.
-	// do this for all the rows in the table (i.e. get element and done when there aren't any more
+	// do this for all the rows in the table (i.e. get element and done when
+	// there aren't any more
 	// should just do getElementsByTagname
-	//...var table=document.getElementById("formattedScoreTable")
+	// ...var table=document.getElementById("formattedScoreTable")
 	// can set the headers the same way... i.e. iterate the cells in "th"
 	// keep in mind that the header is an element
 	var rows = table.getElementsByTagName("tr");
@@ -1905,8 +1893,8 @@ function wsInitScoreDialogWindow(sMsg) {
 		"width=600,height=370,status=no,toolbars=no,resizeable=yes,location=no"
 		// was 410x325
 	);
-	//cardBtn.addEventListener("click", dismissScoreDialogWindow);
-	//cardBtn.addEventListener("dblclick", dismissScoreDialogWindow);
+	// cardBtn.addEventListener("click", dismissScoreDialogWindow);
+	// cardBtn.addEventListener("dblclick", dismissScoreDialogWindow);
 	scoreWindow = w;
 	bScoreDialogWindowInit = true;
 
@@ -1921,11 +1909,11 @@ function wsInitScoreDialogWindow(sMsg) {
 	 * theory: fails here because window not fully initialized...
 	 */
 	/*
-	scoreWindow.document.getElementById("dismissScoresButton").disabled = false;
-	var closeBtn;
-	closeBtn = scoreWindow.document.getElementById("dismissScoresButton");
-	closeBtn.addEventListener("click", dismissScoreDialogWindow);
-	*/
+	 * scoreWindow.document.getElementById("dismissScoresButton").disabled =
+	 * false; var closeBtn; closeBtn =
+	 * scoreWindow.document.getElementById("dismissScoresButton");
+	 * closeBtn.addEventListener("click", dismissScoreDialogWindow);
+	 */
 }
 
 function scoreHandlerInstall() {
@@ -1937,8 +1925,8 @@ function scoreHandlerInstall() {
 }
 
 /*
- * experimentalFunction
- *  stub for experimenting with new elements invoked from index.html
+ * experimentalFunction stub for experimenting with new elements invoked from
+ * index.html
  */
 function showModal() {
 	var modal = document.getElementById("myExperimentalModal");
@@ -1954,7 +1942,7 @@ function initModal() {
 	// Get the <span> element that closes the modalDiv
 	var span = document.getElementsByClassName("close")[0];
 
-	// When the user clicks the button, open the modalDiv 
+	// When the user clicks the button, open the modalDiv
 	btn.onclick = function() {
 	  modalDiv.style.display = "block";
 	}
@@ -1974,10 +1962,9 @@ function initModal() {
 }
 
 /*
- *  passDialogDivBtnCall - exercise the pass cards dialog done with a div
- *   called from a button on index page
- *   should just delegate and call wsPassDialog(2)
- * cf: wsPassDialog -- the new window version
+ * passDialogDivBtnCall - exercise the pass cards dialog done with a div called
+ * from a button on index page should just delegate and call wsPassDialog(2) cf:
+ * wsPassDialog -- the new window version
  */
 function passDialogDivBtnCall(nCards, sMsg) {
 	wsPassDialog(nCards,sMsg);
@@ -2001,7 +1988,7 @@ function initPassDialogDiv(nCards, sMsg) {
 	var btn = document.getElementById("passCardsButton");
 
 	// Get the <span> element that closes the modalDiv
-	//var span = document.getElementsByClassName("closePassDialogDiv")[0];
+	// var span = document.getElementsByClassName("closePassDialogDiv")[0];
 	var span = document.getElementById("closePassDialogDiv");
 
 	var msgDiv=document.getElementById("passMsgText");
@@ -2010,7 +1997,7 @@ function initPassDialogDiv(nCards, sMsg) {
 	else
 		msgDiv.innerText = sMsg;
 	
-	// When the user clicks the button, open the modalDiv 
+	// When the user clicks the button, open the modalDiv
 	btn.onclick = function() {
 	  modalDiv.style.display = "block";
 	}
@@ -2025,13 +2012,13 @@ function initPassDialogDiv(nCards, sMsg) {
 	  }
 	}
 	if (bPassingCardsInProgress) {
-		// this dialog got put up and the previous cards 
+		// this dialog got put up and the previous cards
 		// have not been sent.
 		// So don't clear them out...
 		return;
 	}
 	bPassingCardsInProgress = true;
-	//++
+	// ++
 	var div=document.getElementById("passDiv");
 	var buttonList = getDescendantElements(div);
 	// remove the items add them back to the div
@@ -2042,14 +2029,13 @@ function initPassDialogDiv(nCards, sMsg) {
 		var cardBtn = buttonList[i];
 		div.removeChild(cardBtn);
 	}
-	iCurrentFreeCardinPass = 0;	
-	//--
+	iCurrentFreeCardInPass = 0;	
+	// --
 	bPassDialogInit = true;
 }
 
 /*
- * wsScoreDialogDiv - pass the score
- *  fully modal score over the play field
+ * wsScoreDialogDiv - pass the score fully modal score over the play field
  */
 // wsScoreDialogDiv
 /*
@@ -2072,14 +2058,11 @@ function initScoreDialogDiv() {
 	// so this makes that button work...
 
 	/*
-	// Get the button that opens the fullymodal
-	var btn = document.getElementById("fmyBtn");
-	// When the user clicks the button, open the fullymodal 
-	btn.onclick = function() {
-		initScoreDialogDiv();
-		fullymodal.style.display = "block";
-	}
-	*/
+	 * // Get the button that opens the fullymodal var btn =
+	 * document.getElementById("fmyBtn"); // When the user clicks the button,
+	 * open the fullymodal btn.onclick = function() { initScoreDialogDiv();
+	 * fullymodal.style.display = "block"; }
+	 */
 
 	// When the user clicks on <span> (x), close the fullymodal
 	span.onclick = function() {
@@ -2159,7 +2142,7 @@ function getCardBackBtn() {
 	 */
 	cardBtn.addEventListener("click", passCardSelected);
 	cardBtn.addEventListener("dblclick", passCardSelected);
-	//passWindow.document.getElementById("passDiv").appendChild(cardBtn);
+	// passWindow.document.getElementById("passDiv").appendChild(cardBtn);
 	return cardBtn;
 	
 }
@@ -2203,25 +2186,47 @@ function createNewPassCardButton(cardindex) {
 }
 
 /*
- * TODO: use or replace passCardSelected
- * unused!
- * passCardSelected - click on the card in the pass dialog
+ * TODO: use or replace passCardSelected unused! passCardSelected - click on the
+ * card in the pass dialog
  * 
- * No just unimplemented. Should return card to hand 
- * all local. sends no message.
- * Or is this done somewhere else?
+ * No just unimplemented. Should return card to hand all local. sends no
+ * message. Or is this done somewhere else?
+ */
+/*
+ * passCardSelected -- I'm a button on the pass dialog. I've been clicked,
+ * indicating user does NOT want to pass me. So... // pull myself off the
+ * passdialog // add button back to hand // reorg hand?
  */
 function passCardSelected(event) {
 	// return the card to the hand, delete from the dialog
 	// actually just make it not visible.
-	//
-	// clear out the passDiv so the next time it comes up
-	// there are no cards in it.
-	console.log("passCard:Click Seen in dialog. Return card...");
+	// zzz
+	var div=document.getElementById("passDiv");
+	// var buttonList = getDescendantElements(div);
+	var cardBtn=event.target;
+	div.removeChild(cardBtn);
+	// Was never actually removed from hand...
+	// if it is removed from hand, add it back here...
+	
+	// remove from the pass array
+	// decrement cards in the dialog
+	var i, j, nfound=0;
+	var temp=new Array(iPassSize);	// iPassSize
+	for (j=i=0; i<iCurrentFreeCardInPass; i++) {
+		// Great. found it. remove it by not copying it;
+		if (passCards[i] == cardBtn)
+			nfound++;	// multiple copies?
+		else 
+			temp[j++] = passCards[i];			
+		}
+	for (i=0; i<j; i++)	// copy back the non-found elements
+		passCards[i] = temp[i];
+	iCurrentFreeCardInPass -= nfound;
+	
+	console.log("passCard:Click Seen in dialog. Card (sort of) returned to hand...");
 }
 
 function passCardsFromButtonPress(event) {
-	// xxx in progress
 	// first, stop diverting selected cards
 	bPassingCardsInProgress = false;
 	console.log("passCardtoServer:Click Seen in dialog. Sending...");
@@ -2246,7 +2251,7 @@ function passCardsFromButtonPress(event) {
 
 	// hide/dismiss the dialog
 	// reset index to passCards
-	iCurrentFreeCardinPass = 0;
+	iCurrentFreeCardInPass = 0;
 	//
 	// this doesn't work for windows...
 	// passWindow.visibility = "hidden";
@@ -2263,12 +2268,13 @@ function passCardsFromButtonPress(event) {
  * 
  * This is the window (not div) version
  * 
- * Todo: expendable when you purge the window-creation versions of pass dialogs...
+ * Todo: expendable when you purge the window-creation versions of pass
+ * dialogs...
  */
 function addCardToPassDialogWindow(cardindex) {
 	var card = theDeck[cardindex];
 	// xxx get card from index...
-	var i = iCurrentFreeCardinPass;
+	var i = iCurrentFreeCardInPass;
 	// push cardPassWindow to top
 	passWindow.focus();
 	if (i >= iPassSize) {
@@ -2278,6 +2284,13 @@ function addCardToPassDialogWindow(cardindex) {
 		alert("Click on card to return it to hand. Can only pass " + iPassSize + " cards. i=" + i);
 		return;
 	}
+	//
+	// don't add if already there
+	for (var j=0; j<i; j++)
+		if (passCards[j].name == card.shortName) {
+			// It's a dup!
+			return;
+		}
 	passCards[i] = createNewPassCardButton(cardindex);
 	var cardBtn = passCards[i];
     // with images: don't set innerText
@@ -2296,10 +2309,11 @@ function addCardToPassDialogWindow(cardindex) {
 	 */
 	cardBtn.name = card.shortName;
 	cardBtn.style.visibility = "visible";
-	cardBtn.style.height = "250px";	// was "75px" "250px" by "180px" works but is big..
+	cardBtn.style.height = "250px";	// was "75px" "250px" by "180px" works but
+									// is big..
 	cardBtn.style.width = "180px";	// was "54px"
 
-	iCurrentFreeCardinPass++;
+	iCurrentFreeCardInPass++;
 	// iPassSize cards? enable the send button
 	if (i >= iPassSize - 1) {
 		var passBtn;
@@ -2311,9 +2325,9 @@ function addCardToPassDialogWindow(cardindex) {
 
 function addCardToPassDialogDiv(cardindex) {
 	var card = theDeck[cardindex];
-	var i = iCurrentFreeCardinPass;
+	var i = iCurrentFreeCardInPass;
 	// push cardPassWindow to top
-	//passWindow.focus();
+	// passWindow.focus();
 	if (i >= iPassSize) {
 		// Ooh. Bad User.
 		// trying to select more cards to pass than is legal
@@ -2330,32 +2344,44 @@ function addCardToPassDialogDiv(cardindex) {
 	 * Experiment with adding an image... ++
 	 */
 	// spadesCardImages
-	//console.log("Get ready...");
-	cardBtn.style.imagefile = spadesCardImages;
-	cardBtn.style.backgroundImage = spadesCardImages;
-	cardBtn.style.backgroundImage = "http://localhost:8080/Spades/Spades.jpg";
+	// console.log("Get ready...");
+	/*
+	 * No longer needed, right? cardBtn.style.imagefile = spadesCardImages;
+	 * cardBtn.style.backgroundImage = spadesCardImages;
+	 * cardBtn.style.backgroundImage =
+	 * "http://localhost:8080/Spades/Spades.jpg";
+	 */
 	/*
 	 * --
 	 */
 	cardBtn.name = card.shortName;
 	cardBtn.style.visibility = "visible";
-	cardBtn.style.height = "250px";	// was "75px" "250px" by "180px" works but is big..
+	cardBtn.style.height = "250px";	// was "75px" "250px" by "180px" works but
+									// is big..
 	cardBtn.style.width = "180px";	// was "54px"
 
-	iCurrentFreeCardinPass++;
+	/*
+	 * Allow card to be returned to hand here? No. Already done... See
+	 * passCardSelected
+	 */
+	// cardBtn.addEventListener("click", returnPassCardToHandButtonPress);
+
+	iCurrentFreeCardInPass++;
 	// iPassSize cards? enable the send button
 	if (i >= iPassSize - 1) {
 		var passBtn;
 		/*
-		passWindow.document.getElementById("passCardsButton").disabled = false;
-		passBtn = passWindow.document.getElementById("passCardsButton");
-		passBtn.addEventListener("click", passCardsFromButtonPress);
-		*/
+		 * passWindow.document.getElementById("passCardsButton").disabled =
+		 * false; passBtn =
+		 * passWindow.document.getElementById("passCardsButton");
+		 * passBtn.addEventListener("click", passCardsFromButtonPress);
+		 */
 		document.getElementById("passCardsButton").disabled = false;
 		passBtn = document.getElementById("passCardsButton");
 		passBtn.addEventListener("click", passCardsFromButtonPress);
 	}
 }
+
 
 /*
  * setReconnectDisabled - disable the reconnect button
@@ -2601,65 +2627,102 @@ function sortByCardOrder(a) {
 	}
 	return a;
 }
+/*
+ * sortby .. sort only the first len elements
+ */
+function sortByCardOrder(a, len) {
+	for (var i=0; i<len; i++) {
+		// highest card is in a[i]
+		for (var j=i+1; j<len; j++)
+			if (higherCard(a[j], a[i])) {
+				// swap
+				var t=a[i];				
+				a[i] = a[j];
+				a[j] = t;
+			}
+	}
+	return a;
+}
+
+/*
+ * reorgButtonsInDeiv - delete all the button-nodes, saving the visible ones in
+ * button list. Sorting them, and putting them back in sdiv.
+ * 
+ * Bug: sorting them doesn't seem to do anything. No idea why.
+ */
 var rowMaxButtons = 8;	// max of 8 cards in a row...
 function reorgButtonsInDiv(sdiv) {
 	if (bNeedToArrange)	// should work off bCardsAdded
 		arrangeCardsInDivs();
-	var buttonList=null; //= new Array();
+	var div=document.getElementById(sdiv);
+	var buttonList = getDescendantElements(div);
+	var i, j, nSkipped=0;
+	for (i=j=0; i<buttonList.length; i++) {
+		var cardBtn = buttonList[i];
+		div.removeChild(cardBtn);
+		if (cardBtn.style.visibility == "hidden") {
+			nSkipped++;
+		} else {
+			buttonList[j++] = cardBtn	// j is first free visible button
+			}
+	}
+	sortByCardOrder(buttonList, j);
+	for (i=0; i<j; i++) {
+		var cardBtn=buttonList[i];
+		div.appendChild(cardBtn);
+	}		
+// div.className = "buttonGrid";
+	div.className = "alignLeft";
+	// alignRight is another interesting option...
+	// except it doesn't work if there are more than 4 cards
+	// div.className = "alignRight";
+	console.log("Reorg consolidated " + nSkipped + " cards in" + sdiv);
+}
+
+function reorgButtonsInDivXXXSave(sdiv) {
+	if (bNeedToArrange)	// should work off bCardsAdded
+		arrangeCardsInDivs();
+	var buttonList=null; // = new Array();
 	var cardBtn=null;
 	// start with "ClubsInHandDiv"
 	var div=document.getElementById(sdiv);
-	//div.style.alignItems = "left";	// Ok...
+	// div.style.alignItems = "left"; // Ok...
 
 	buttonList = getDescendantElements(div);
-	buttonList = sortByCardOrder(buttonList);
+	// buttonList = sortByCardOrder(buttonList);
 	// remove the items add them back to the div
 	var i, j, nSkipped=0;
 	// div.style.left = "50px";
 	/*
-	 * remove all the cards from the div,
-	 *  and add back the visible ones
+	 * remove all the cards from the div, and add back the visible ones
 	 */
 	for (i=0; i<buttonList.length; i++) {
 		cardBtn = buttonList[i];
 		div.removeChild(cardBtn);
-		/* comment now invalid?... TODO: fix comment?
-		 * for now squirrel away a card that is not visible...
-		 *  i.e. take it out of the div
+		/*
+		 * comment now invalid?... TODO: fix comment? for now squirrel away a
+		 * card that is not visible... i.e. take it out of the div
 		 */
 	}
 	// minmargin no longer used? Delete??
 	// var minmargin = 0;
 	/*
-	 * Ok, so count the blank buttons in the array and then
-	 * pad the buttonlist from the left
-	 * So that it right justifies.
-	 * Can't figure out any other way to do this...
+	 * Ok, so count the blank buttons in the array and then pad the buttonlist
+	 * from the left So that it right justifies. Can't figure out any other way
+	 * to do this...
 	 */
 	/*
-	for (i=0; i<buttonList.length; i++) {
-		cardBtn=buttonList[i];
-		// don't add in cards that should be hidden
-		if (cardBtn.style.visibility == "hidden") {
-			nSkipped++;
-			if (blankBtn == null)
-				blankBtn = cardBtn;
-		}
-	}
-	*/
+	 * for (i=0; i<buttonList.length; i++) { cardBtn=buttonList[i]; // don't
+	 * add in cards that should be hidden if (cardBtn.style.visibility ==
+	 * "hidden") { nSkipped++; if (blankBtn == null) blankBtn = cardBtn; } }
+	 */
 	/*
 	 * No don't. Really.
-	 *
-	//var k=0;
-	// append nSkipped blanks to div
-	for (j=0; j<nSkipped; j++) {
-		if (blankBtn != null) {
-			div.appendChild(blankBtn);
-			k++;
-		}
-	}
-	*/
-	//console.log("Prepending " + k + " blanks to " + sdiv)
+	 * 
+	 * //var k=0; // append nSkipped blanks to div for (j=0; j<nSkipped; j++) {
+	 * if (blankBtn != null) { div.appendChild(blankBtn); k++; } }
+	 */
+	// console.log("Prepending " + k + " blanks to " + sdiv)
 	/*
 	 * now, append sorted (visible) cards to the div
 	 */
@@ -2670,12 +2733,12 @@ function reorgButtonsInDiv(sdiv) {
 			nSkipped++;
 		} else {
 			div.appendChild(cardBtn);
-			//minmargin += 140;
+			// minmargin += 140;
 			}
 	}
 	div.className = "buttonGrid";
 	// alignRight is another interesting option...
-	//div.className = "alignRight";
+	// div.className = "alignRight";
 	// TODO: perhaps need to make cards narrower, though.. perhaps float...
 	console.log("Reorg consolidated " + nSkipped + " cards in" + sdiv);
 }
@@ -2696,9 +2759,9 @@ function clearDivs() {
 		var sdiv=cardDivs[j];
 		var div=document.getElementById(sdiv);
 		var buttonList = getDescendantElements(div);
-		//buttonList = sortByCardOrder(buttonList);
+		// buttonList = sortByCardOrder(buttonList);
 		// remove the items add them back to the div
-		//var i, j, nSkipped=0;
+		// var i, j, nSkipped=0;
 		// div.style.left = "50px";
 		for (var i=0; i<buttonList.length; i++) {
 			var cardBtn = buttonList[i];
@@ -2738,11 +2801,11 @@ function arrangeCardsInDivs() {
 
 function reorgButtons() {
 	// put the hand-index over the top of the table-canvas
-	//.style.zIndex
+	// .style.zIndex
 	var handDiv = document.getElementById("handArea");
 	handDiv.style.zIndex = 2;
 	for (var i=0; i<cardDivs.length; i++)
-		reorgButtonsInDiv(cardDivs[i])
+		reorgButtonsInDiv(cardDivs[i]);
 }
 
 /*
@@ -2843,31 +2906,33 @@ function processLocalCommand(line) {
 			" endpoint=" + sEndPoint +
 			" user=" + sUser);
 	} else if (line.includes("clear")) {
-		clearCardTable(false)
+		clearCardTable(false);
 		fadeOutTrick(currentGestault);
 		// clearCardTable(true);
 		xstatusUpdate("Table Cleared and Reset.");
 	} else if (line.includes("close")) {
-		// command obsolete... has to do with window style dialogs (using div version)
-		//dismissScoreDialogWindow(null);
+		// command obsolete... has to do with window style dialogs (using div
+		// version)
+		// dismissScoreDialogWindow(null);
 		enableScoreCloseWindowButton();
 		xstatusUpdate("manually close score dialog window");
 	} else if (line.includes("score")) {
 		// shouldn't matter if you specify an = or not in this command
-		// because slice starts at six and format ignores the first character assuming protocol stuff
+		// because slice starts at six and format ignores the first character
+		// assuming protocol stuff
 		var score = line.slice(6);
 		var s="fjkasd$buzz=0.0$joe=93.95$laura=3.3$anne=0.26$bob=0.26$patti=0.26$";
-		//s =  "#S0gXpX#/default=0.0#$robot1=10.10#$robot2=13.13#$robot3=3.3#";
+		// s = "#S0gXpX#/default=0.0#$robot1=10.10#$robot2=13.13#$robot3=3.3#";
 		if (score == "")
 			score = s;
 		// experimentalFunction formats the score if sent...
-		//formatScore(score);
+		// formatScore(score);
 		// TODO: change this name!!!
 		// cf //score which actually gets the score and routes to format
 		experimentalFunction(score);
 		xstatusUpdate("score["+s+"]");
 	} else if (line.includes("reorg")) {
-		//Array of div names
+		// Array of div names
 		// foreach div name
 		// get buttons
 		// place into a temp array in reverse card-sorted order

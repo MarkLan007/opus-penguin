@@ -115,6 +115,8 @@ public class ProtocolMessage {
 		// code is only being run on the server...
 		//
 		int len=sComChars.length();
+		if (sMsg.length() < 2)
+			return false;
 		char cCom=sMsg.charAt(0);
 		for (i=0; i<len; i++) {
 			/*

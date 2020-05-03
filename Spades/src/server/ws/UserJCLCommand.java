@@ -23,6 +23,7 @@ public class UserJCLCommand {
 		JCLNew,		// create a new game
 		JCLStart,
 		JCLRejoin, JCLSuperUser, // SuperUser
+		JCLRefresh,
 		JCLResend, JCLReset,
 		JCLNewdeal, JCLMisdeal,
 		JCLShuffle,
@@ -120,6 +121,7 @@ public class UserJCLCommand {
 	String jclResume = "resume";
 	String jclSuperUser = "su";
 	String jclResend = "resend";
+	String jclRefresh = "refresh";
 	String jclReset = "reset";
 	String jclMisdeal = "misdeal";	//synonyms...
 	String jclNewdeal = "newdeal";
@@ -143,6 +145,7 @@ public class UserJCLCommand {
 	Pattern jclPokeRegex = Pattern.compile(jclPoke);
 	Pattern jclPeekRegex = Pattern.compile(jclPeek);
 	Pattern jclResendRegex = Pattern.compile(jclResend);
+	Pattern jclRefreshRegex = Pattern.compile(jclRefresh);
 	Pattern jclResetRegex = Pattern.compile(jclReset);
 	Pattern jclMisdealRegex = Pattern.compile(jclMisdeal);
 	Pattern jclNewdealRegex = Pattern.compile(jclNewdeal);
@@ -367,6 +370,24 @@ public class UserJCLCommand {
 			}
 			return; // "//+resend game(" + sName + ")";
 		}
+
+		m = jclRefreshRegex.matcher(commandString);
+		if (m.find()) { // i.e. look for 'setname' then an identifier
+			type = JCLType.JCLRefresh;
+			String sName = "player0"; // default name string
+			Matcher identifier = jclIdentierRegex.matcher(commandString);
+			for (int i = 0; identifier.find(); i++) {
+				switch (i) {
+				case 0:
+					continue; // the command itself
+				case 1:
+					sName = identifier.group();
+					break;
+				}
+			}
+			return; // "//+refresh player(" + sName + ")";
+		}
+
 		m = jclResetRegex.matcher(commandString);
 		if (m.find()) { // i.e. look for 'setname' then an identifier
 			type = JCLType.JCLReset;
