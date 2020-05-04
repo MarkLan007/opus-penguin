@@ -4,7 +4,17 @@ package server.ws;
 import java.nio.ByteBuffer;
 
 public class ProtocolMessage {
-	int sender; // -1 for server; player id [0-n] otherwise
+	/*
+	 * the meaning of the sender field has evolved.
+	 * it's used to indicate useful information within the message
+	 *  current_card - who played it
+	 *  welcome - who you are
+	 *  other meanings aren't as well documented (here) as they could be...
+	 */
+	int sender; // 1-character player id [0-n] (pid elsewhere)
+	/*
+	 * Encoded by one character
+	 */
 	ProtocolMessageTypes type;
 	Boolean bMessageWellFormed = true; 
 	Subdeck subdeck=null;

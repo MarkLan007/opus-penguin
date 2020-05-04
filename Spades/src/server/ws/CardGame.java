@@ -9,9 +9,10 @@ public class CardGame implements GameInterface {
 	int nPlayers = 4;
 	private int nCurrentTurn = -1; // index of player with current turn or -1 if undefined
 	Trick[] trickArray = new Trick[(52 / nPlayers) + 1];
-	Trick currentTrick;
+	Trick currentTrick = null;
+	Trick previousTrick = null;
 	final int LAST_TRICK = (52 / nPlayers);
-	MailBoxExchange.PassType currentPass = MailBoxExchange.last();
+	MailBoxExchange.PassType currentPass = MailBoxExchange.first();
 	MailBoxExchange mbx = null;
 	private int nTrickId = 0;
 
@@ -425,8 +426,11 @@ public class CardGame implements GameInterface {
 	 */
 	private boolean bPassingCardsInProgress=false;
 	void initiatePass(MailBoxExchange.PassType pt) {
-		if (pt == MailBoxExchange.PassType.PassHold)
+		if (pt == MailBoxExchange.PassType.PassHold) {
+			bPassingCardsInProgress = false;
+			go();
 			return;
+		}
 		bPassingCardsInProgress = true;
 		// number of players, number of cards to pass for error checking
 		mbx = new MailBoxExchange(pt, nPlayers, 3);
@@ -437,6 +441,10 @@ public class CardGame implements GameInterface {
 		ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PASS_CARD,
 				3 + "Pass 3 cards to the " + currentPass);
 		broadcastUpdate(pm);
+		/*
+		 * we are now in pass state, until players
+		 * pass in cards. (when mbx full go() is called.)
+		 */
 	}
 
 	/*
@@ -470,6 +478,28 @@ public class CardGame implements GameInterface {
 			p.sendToClient(pmsg);
 			if (j >= nPlayers)
 				j = 0;
+		}
+
+	}
+	
+	void broadcast(String msg) {
+		ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR, msg);
+		broadcastUpdate(pm);
+	}
+	void broadcast(boolean humansOnly, String msg) {
+		ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR, msg);
+		/*
+		 * avoid infinite recursion...
+		 *  robots are humble. when they make mistakes
+		 *  they declare misdeal, which causes a broadcast...
+		 *  so if error sent to robot, it will call 
+		 *  misdeal, which will call us again
+		 */
+		//broadcastUpdate(pm);
+		for (int i = 0; i < nPlayers; i++) {
+			Player p = playerArray[i];
+			if (humansOnly && !p.isRobot())
+				p.sendToClient(pm);
 		}
 
 	}
@@ -679,21 +709,21 @@ public class CardGame implements GameInterface {
 			bmsg.trick = currentTrick;
 			broadcastUpdate(bmsg);
 
-			Trick lastTrick = currentTrick;
-			gameErrorLog("TrickCleared:" + nTrickId + " Leader:" + currentTrick.leader + "Winner:" + lastTrick.winner
+			previousTrick = currentTrick;
+			gameErrorLog("TrickCleared:" + nTrickId + " Leader:" + currentTrick.leader + "Winner:" + previousTrick.winner
 					+ "<" + currentTrick.subdeck.encode() + ">");
 			/*
 			 * prepare for the next trick..
 			 */
 			currentTrick = new Trick(nTrickId);
-			if (lastTrick.heartsBroken())
+			if (previousTrick.heartsBroken())
 				currentTrick.breakHearts();
-			currentTrick.leader = lastTrick.winner; // the leader is the player who won the last trick...
+			currentTrick.leader = previousTrick.winner; // the leader is the player who won the last trick...
 			trickArray[nTrickId] = currentTrick;
 			/*
 			 * the person who plays next is the current trick winner!
 			 */
-			updateTurn(lastTrick.winner);
+			updateTurn(previousTrick.winner);
 			if (nTrickId >= LAST_TRICK) {
 				// Game is over; total score and reset
 				totalScores();
@@ -787,9 +817,20 @@ public class CardGame implements GameInterface {
 				// didn't follow lead. Is that ok?
 				if (!p.subdeck.isVoid(leadSuit)) {
 					// Uh oh. Player could have followed suit but didn't. Error detected!
+					String errorText = "%MSG:Robot-Player " + p.pid 
+							+ " required to follow suit <"
+							+ leadSuit + "> but didn't.";
+					String errorString = "%MSG:Player" + p.pid 
+							+ " required to follow suit <" 
+							+ leadSuit + ">!%";
 					returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
-							"%MSG:Player" + p.pid + " required to follow suit <" + leadSuit + ">!%");
+							errorString);
 					p.sendToClient(returnMessage);
+					/* this is done in robot player
+					if (p.isRobot()) {
+						// robot shit the bed. declare a misdeal.
+						declareMisdeal(p.pid, errorText);
+					} */
 					return;
 				}
 				if (c.suit == Suit.HEARTS) {
@@ -854,6 +895,10 @@ public class CardGame implements GameInterface {
 		p.sendToClient(pm);
 	}
 
+	public void declareMisdeal(int pid, String es) {
+		broadcast(true, "" + "%I%" + pid + "%" + es);
+		broadcast(true, "" + "%I%" + "Game paused. Suggest misdeal.");
+	}
 	/*
 	 * passCards - detect if the sender can legally pass these cards; 
 	 * TODO: i.e. are
@@ -921,8 +966,40 @@ public class CardGame implements GameInterface {
 		}
 		// TODO:
 		// should also send where we are in the current trick...
-			
+		// right... see sendPreviousTrick
 	}
+	/*
+	 * previousTrick - send the previous trick to pid
+	 * zzz
+	 */
+	void sendTrick(Trick t, int pid) {
+		if (t == null)
+			return; // no previous trick
+		
+		int i = t.leader;
+		for (Card c : t.subdeck) {
+			ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.CURRENT_TRICK, c);
+			pm.setSender(i);
+			playerArray[i].sendToClient(pm);
+			i = (i + 1) % nPlayers;
+		}		
+	}
+	boolean sendPreviousTrick(int pid) {
+		Trick t=previousTrick;
+		if (t == null)
+			return false;
+		sendTrick(t,pid);
+		return true;
+	}
+	void sendCurrentTrick(int pid) {
+		Trick t=currentTrick;
+		sendTrick(t,pid);		
+	}
+	
+	/*
+	 * not used in hearts
+	 *  projected use in spades (and others...)
+	 */
 	public void bidTricks(int nsender, Subdeck cards) {
 		gameErrorLog("Can't happen: Game received unimplemented BID request. Bidding not yet implemented.");
 	}
@@ -1179,15 +1256,13 @@ public class CardGame implements GameInterface {
 		//
 		// Create a new pack of cards and shuffle them
 		//
-		Subdeck pack = new Subdeck(52);	// 52, t, seatid
-		// shuffle manipulated by subdeck...
-		//if (bShuffle)
-			pack.shuffle();
+		Subdeck pack = new Subdeck(52);	// 52 - standard pack
+		pack.shuffle();
 		//
 		// deal official copy of cards
 		//
 		/*
-		 * no need to set current turn here the two might get passed to someone else
+		 * note: can't set current turn yet, because the two might get passed to someone else
 		 */
 		i = 0;
 		for (Card c : pack) { // ; pack.size() > 0; i++) {
@@ -1200,9 +1275,8 @@ public class CardGame implements GameInterface {
 				if (playerArray[i].subdeck == null)
 					gameErrorLog("can't happen:null subdeck.");
 				//
-				// TODO: call ssAddCard
-				// is ssAddCard still a thing?
-				playerArray[i].subdeck.add(c);
+				// TODO: maybe use ssAddCard?
+				playerArray[i].ssAddCard(c);
 			}
 			i = (i + 1) % nPlayers;
 		}
@@ -1219,6 +1293,9 @@ public class CardGame implements GameInterface {
 	 * everyone then start... This is the first really asynch thing to be done...
 	 */
 
+	/*
+	 * deal, pass (if not hold), sendfirst move
+	 */
 	void initiatePlay() {
 		int i;
 		Player p;

@@ -311,6 +311,14 @@ public class WsServer {
 			if (us.cgk.isIdle())
 				us.cgk.resume();
 			break;
+		case JCLPrevious:
+			if (us.game == null)
+				write(us, "Not in a game...");
+			if (us.game.sendPreviousTrick(us.pid))
+				;
+			else
+				write(us, "No previous trick.");
+			break;
 		case JCLSetname:
 			String sName;
 			if (jcl.argc() > 1)
@@ -559,9 +567,12 @@ public class WsServer {
 			us.game.reset();
 			us.game.start();
 			write(us, "Reseting Hand:");
-
 			break;
 		case JCLNewdeal:
+			/*
+			 * just skip onto the next deal, as if the last
+			 * trick was played out
+			 */
 			if (us.game == null) {
 				write(us, "Can't redeal. You aren't in a game.");
 				break;

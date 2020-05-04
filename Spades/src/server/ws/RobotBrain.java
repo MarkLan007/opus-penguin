@@ -187,6 +187,8 @@ public class RobotBrain {
 		newTrick();
 	}
 
+	Card aceOfSpades = new Card(Rank.ACE, Suit.SPADES);
+	Card kingOfSpades = new Card(Rank.KING, Suit.SPADES);
 	Card queenOfSpades = new Card(Rank.QUEEN, Suit.SPADES);
 	Card deuceOfClubs = new Card(Rank.DEUCE, Suit.CLUBS);
 
@@ -273,6 +275,14 @@ public class RobotBrain {
 			for (Card c : sd.subdeck) {
 				suits[c.suit.ordinal()].add(c);
 			}
+			String type;
+			if (sd.size() == 13)
+				type = "dealt";
+			else if (sd.size() == 3)
+				type = "passed";
+			else
+				type = "huh?";
+			System.out.println("Brain:" + type + "[" + sd.encode() +"]");
 		} // populate
 
 		Card bestSlough() {
@@ -333,6 +343,14 @@ public class RobotBrain {
 		Card toxicCard() {
 			if (find(queenOfSpades))
 				return queenOfSpades;
+			// TODO:
+			// return AC or KC if don't have QC 
+			if (getspades().size() > 0) {
+				if (find(kingOfSpades))
+					return kingOfSpades;
+				if (find(aceOfSpades))
+					return kingOfSpades;
+			}
 			if (gethearts().size() > 0)
 				return gethearts().peek();
 			if (getclubs().size() > 0)

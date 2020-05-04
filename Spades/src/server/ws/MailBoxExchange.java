@@ -2,7 +2,7 @@ package server.ws;
 
 public class MailBoxExchange {
 	public enum PassType {
-		PassHold, PassLeft, PassRight, PassAcross;
+		PassLeft, PassRight, PassAcross, PassHold;
 		static PassType[] pts = PassType.values();
 		public PassType next() {
 			int index = ordinal();

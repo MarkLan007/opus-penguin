@@ -180,6 +180,10 @@ public class Player /*implements PlayerInterface */{
 
 	//@Override
 	public void sendToClient(ProtocolMessage pm) {
+		// this is intended as an abstract class...
+		// expected to be over-written by say,
+		// humanPlayer and robotPlayer
+		//
 		
 		/*
 		 * Human client; send remote message

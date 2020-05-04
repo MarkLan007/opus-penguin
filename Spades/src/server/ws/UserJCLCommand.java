@@ -32,7 +32,7 @@ public class UserJCLCommand {
 		JCLScore,
 		JCLPoke, JCLResume, 	// poke or resume the server
 		JCLWhoAmI, JCLWho,
-
+		JCLPrevious,
 	}
 
 	JCLType type = JCLType.JCLNotJCL;
@@ -119,6 +119,7 @@ public class UserJCLCommand {
 	String jclWhoPattern = "who";
 	String jclPoke = "poke";
 	String jclResume = "resume";
+	String jclPrevious = "previous";
 	String jclSuperUser = "su";
 	String jclResend = "resend";
 	String jclRefresh = "refresh";
@@ -142,6 +143,7 @@ public class UserJCLCommand {
 	Pattern jclWhoRegex = Pattern.compile(jclWhoPattern);
 	Pattern jclSuperUserRegex = Pattern.compile(jclSuperUser);
 	Pattern jclResumeRegex = Pattern.compile(jclResume);
+	Pattern jclPreviousRegex = Pattern.compile(jclPrevious);
 	Pattern jclPokeRegex = Pattern.compile(jclPoke);
 	Pattern jclPeekRegex = Pattern.compile(jclPeek);
 	Pattern jclResendRegex = Pattern.compile(jclResend);
@@ -490,6 +492,28 @@ public class UserJCLCommand {
 		m = jclResumeRegex.matcher(commandString);
 		if (m.find()) { // i.e. look for 'setname' then an identifier
 			type = JCLType.JCLResume;
+			// String sName = "root"; // default name string
+			// Matcher identifier = jclIdentierRegex.matcher(commandString);
+			Matcher identifier = jclIdentierRegex.matcher(commandString);
+			for (int i = 0; identifier.find(); i++) {
+				switch (i) {
+				case 0:
+					NameValuePair p0 = new NameValuePair(jclWhoAmIPattern, "");
+					argv.add(p0);
+					continue; // the command itself
+				case 1:
+					// args ignored for now...
+					// todo: Add some damn security!
+					// consider making the su add the time in hours +- 1...
+					// sName = identifier.group();
+					break;
+				}
+			}
+			return;
+		}
+		m = jclPreviousRegex.matcher(commandString);
+		if (m.find()) { // i.e. look for 'setname' then an identifier
+			type = JCLType.JCLPrevious;
 			// String sName = "root"; // default name string
 			// Matcher identifier = jclIdentierRegex.matcher(commandString);
 			Matcher identifier = jclIdentierRegex.matcher(commandString);

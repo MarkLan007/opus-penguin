@@ -59,6 +59,9 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		System.out.println(playerName + " has been a bad robot for illegal play.");
 		System.out.println("On " + nTrickId + "th Trick with <" + subdeck.size() + ">=[" + subdeck.encode() + "] has been carded for:");
 		System.out.println(pm.encode());
+		
+		cardGame.declareMisdeal(pid, playerName + ":" + pm.usertext);
+
 	}
 
 	@Override
@@ -132,8 +135,8 @@ public class RobotPlayer extends Player implements PlayerInterface {
 	}
 
 	/*
-	 * robotPlay -- play a card from subdeck -- Note: subdeck sd is ignored. Uses
-	 * hand and robotbrain... this is new.
+	 * robotPlay -- play a card from subdeck -- Note: param subdeck sd is ignored. Uses
+	 * hand and robotbrain... 
 	 */
 	void robotPlay(Subdeck sd) {
 		Card c;

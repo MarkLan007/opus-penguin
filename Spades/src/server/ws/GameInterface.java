@@ -22,5 +22,6 @@ public interface GameInterface {
 	void superuser(int fromPlayer, String msg);
 	void disconnect(int pid);	// disconnect from game;
 	int getCurrentTrickId();
+	void declareMisdeal(int pid, String string);
 }
 
