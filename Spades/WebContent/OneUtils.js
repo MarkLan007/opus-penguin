@@ -301,6 +301,13 @@ function addCardToHand(cardindex) {
 	card.handButton.style.visibility = "visible";
 	card.handButton.style.height = "150px";	// was 75px
 	card.handButton.style.width = "100px";	// was 54px xxx
+	//
+	// get the right div, and insert it.
+	//
+	var div = getSuitDiv(card);
+	div.appendChild(card.handButton);
+	// zzz
+
 	return true;
 	// card.cardBtn.style.visibility = "visible";
 }
@@ -2614,7 +2621,16 @@ function higherCard(c1CardButton, c2CardButton) {
 	var c2 = rankOrdinal(card2.shortName[0]);
 	return c1 >= c2;
 }
-function sortByCardOrder(a) {
+function lowerCard(c1CardButton, c2CardButton) {
+	var cardIndex1 = c1CardButton.name.match(/\d+/);
+	var cardIndex2 = c2CardButton.name.match(/\d+/);
+	var card1 = theDeck[cardIndex1];
+	var card2 = theDeck[cardIndex2];
+	var c1 = rankOrdinal(card1.shortName[0]);
+	var c2 = rankOrdinal(card2.shortName[0]);
+	return c1 <= c2;
+}
+function sortByDescendingCardOrder(a) {
 	for (var i=0; i<a.length; i++) {
 		// highest card is in a[i]
 		for (var j=i+1; j<a.length; j++)
@@ -2630,11 +2646,11 @@ function sortByCardOrder(a) {
 /*
  * sortby .. sort only the first len elements
  */
-function sortByCardOrder(a, len) {
+function sortByAscendingCardOrder(a, len) {
 	for (var i=0; i<len; i++) {
 		// highest card is in a[i]
 		for (var j=i+1; j<len; j++)
-			if (higherCard(a[j], a[i])) {
+			if (lowerCard(a[j], a[i])) {
 				// swap
 				var t=a[i];				
 				a[i] = a[j];
@@ -2650,29 +2666,48 @@ function sortByCardOrder(a, len) {
  * 
  * Bug: sorting them doesn't seem to do anything. No idea why.
  */
+function extractCardName(b) {
+	var index = b.name.match(/\d+/);
+	var card = theDeck[index];
+	var cname = card.shortName;
+	return cname;
+}
+
+function dumpButtonlist(name, buttonList, len) {
+	var s = "";
+	for (var i=0; i<len; i++)
+		s = s + extractCardName(buttonList[i]) + ",";
+	console.log(name + "=" + s + ".");
+ }
+
 var rowMaxButtons = 8;	// max of 8 cards in a row...
 function reorgButtonsInDiv(sdiv) {
 	if (bNeedToArrange)	// should work off bCardsAdded
-		arrangeCardsInDivs();
+		; // arrangeCardsInDivs();
 	var div=document.getElementById(sdiv);
 	var buttonList = getDescendantElements(div);
 	var i, j, nSkipped=0;
 	for (i=j=0; i<buttonList.length; i++) {
 		var cardBtn = buttonList[i];
-		div.removeChild(cardBtn);
+		if (div.removeChild(cardBtn) == null)
+			console.log("Can't happen: remove child failed.")
 		if (cardBtn.style.visibility == "hidden") {
 			nSkipped++;
 		} else {
-			buttonList[j++] = cardBtn	// j is first free visible button
+			buttonList[j++] = cardBtn;	// j is first free visible button
 			}
 	}
-	sortByCardOrder(buttonList, j);
+	dumpButtonlist(sdiv, buttonList, j);
+	sortByAscendingCardOrder(buttonList, j);
+	dumpButtonlist(sdiv, buttonList, j);
+	//var span=document.createElement("span");
 	for (i=0; i<j; i++) {
 		var cardBtn=buttonList[i];
-		div.appendChild(cardBtn);
+		div.prepend(cardBtn);
 	}		
-// div.className = "buttonGrid";
-	div.className = "alignLeft";
+	//div.prepend(span);
+	div.className = "buttonGrid";
+	//div.className = "alignLeft";
 	// alignRight is another interesting option...
 	// except it doesn't work if there are more than 4 cards
 	// div.className = "alignRight";
@@ -2698,7 +2733,8 @@ function reorgButtonsInDivXXXSave(sdiv) {
 	 */
 	for (i=0; i<buttonList.length; i++) {
 		cardBtn = buttonList[i];
-		div.removeChild(cardBtn);
+		if (div.removeChild(cardBtn) == null)
+			console.log("Can't really happen. removeChile Failed.");
 		/*
 		 * comment now invalid?... TODO: fix comment? for now squirrel away a
 		 * card that is not visible... i.e. take it out of the div
@@ -2743,12 +2779,31 @@ function reorgButtonsInDivXXXSave(sdiv) {
 	console.log("Reorg consolidated " + nSkipped + " cards in" + sdiv);
 }
 
+// Review:
+// this is two sort of good ideas that should just be one thing...
+
 var cardDivs=[
 	"ClubsInHandDiv",
 	"DiamondsInHandDiv",
 	"SpadesInHandDiv",
 	"HeartsInHandDiv",
 ];
+var stringArrayOfDivNames=new Array(4);
+stringArrayOfDivNames[CLUBS] = "ClubsInHandDiv";
+stringArrayOfDivNames[DIAMONDS] = "DiamondsInHandDiv";
+stringArrayOfDivNames[HEARTS] = "HeartsInHandDiv";
+stringArrayOfDivNames[SPADES] = "SpadesInHandDiv";
+
+/* for (var key in stringArrayOfDivNames) {
+	console.log(key + "->" + stringArrayOfDivNames[key]);
+} */
+
+// zzz
+function getSuitDiv(card) {
+	var sdiv = stringArrayOfDivNames[card.suit];
+	var div = document.getElementById(sdiv);
+	return div;
+}
 
 function getDescendantElements(parent) {
 	return [].slice.call(parent.getElementsByTagName('*'));
@@ -2765,12 +2820,17 @@ function clearDivs() {
 		// div.style.left = "50px";
 		for (var i=0; i<buttonList.length; i++) {
 			var cardBtn = buttonList[i];
-			div.removeChild(cardBtn);
+			if (div.removeChild(cardBtn) == null)
+				console.log("Can this happen? RemoveChild failed...");
 		}
 	}
 }
 
 function arrangeCardsInDivs() {
+		console.log("Uh oh. I shouldn't be called. Ever.");
+		var always=true;
+		if (always)
+			return;
 		clearDivs();
 		var controlDiv = document.getElementById("ClubsInHandDiv");
 		for (var i = 0; i < theDeck.length; i++) {
@@ -2938,6 +2998,7 @@ function processLocalCommand(line) {
 		// place into a temp array in reverse card-sorted order
 		// add back into div
 		reorgButtons();
+		bNeedToArrange = false;
 		xstatusUpdate("reorg of button divs complete.");
 	} else if (line.includes("repaint")) {
 		clearCardTable(false);
