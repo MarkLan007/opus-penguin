@@ -1048,6 +1048,9 @@ public class CardGame implements GameInterface {
 	 * call reset at the end if game goes on
 	 */
 	void handOver() {
+		// make sure handover called only once per hand
+		if (bHandOver)
+			return;
 		bHandOver = true;
 		bPlayInitiated = false;
 		boolean winnerDetermined = false;
