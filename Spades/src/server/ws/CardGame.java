@@ -107,15 +107,8 @@ public class CardGame implements GameInterface {
 
 	// create players list, a deck (without faces), and names
 	CardGame() {
-		// default constructor; everything hunky dory with default values.
-
-		// the name of the game is...
-		// gameName = "Hearts";
-
 		populatePlayers();
-		// xxx reset as part of creation?
 		resetGameScores();
-		reset();
 	}
 
 	public void setName(String s) {
@@ -141,13 +134,8 @@ public class CardGame implements GameInterface {
 			if (playerArray[i] == null) {
 				playerArray[i] = new RobotPlayer(i, this);
 			} else {
-				// player/robot player already exists, but since this is a
-				// reset/new game clear out existing hand
-				// xxx
 				Player p = playerArray[i];
 				System.out.println("Reset: Seat(" + i + ")" + p.getName() + p.getPID() + "(robot?" + p.isRobot() + ')');
-				// robot reset isn't working.
-				// just create a new one...
 				if (p.isRobot())
 					playerArray[i] = new RobotPlayer(i, this);
 				else
@@ -155,46 +143,7 @@ public class CardGame implements GameInterface {
 			}
 	}
 
-	/*
-	 * for (i=0; i<humanPlayerFree; i++) { //playerArray[i].isRobot = false; //
-	 * playerArray[i].humanInterface = humanPlayers[i]; HumanPlayer hp = new
-	 * HumanPlayer(i, humanPlayers[i], this); // // This setPID can only be done
-	 * here because it is game specific, although the NIO layer must remember it. //
-	 * TODO: bSuperUser should be set up here too. // (It's game specific. Some
-	 * games may not allow there to be superusers...) // not needed: //
-	 * hp.nioNetworkAccessMethods.setPID(i);
-	 * 
-	 * playerArray[i] = hp; // // Set the player-layer of value //
-	 * playerArray[i].setPID(i); playerArray[i].setIsRobot(false);
-	 * playerArray[i].setAsynch(true); }
-	 * 
-	 * }
-	 */
-// end delete nio routines...
 
-	/*
-	 * Player p joins the game. so... if playertype is robot player, then replace
-	 * with human player... -> See join(us,name) Note: robot players never join;
-	 * they are added by populatePlayers
-	 */
-	/*
-	 * This is obsolete and now wrong... boolean join(Player p) { int i; //
-	 * Obsolete... always called // xxx
-	 * //System.out.println("Obsolete function called:" + "join"); for (i = 0; i <
-	 * nPlayers; i++) { if (playerArray[i] == null) { // playerArray[i] = p; //
-	 * p.setPID(i); return true; } // // kick out first robot player I find and
-	 * replace, taking the subdeck, and move Player cp = playerArray[i]; if
-	 * (cp.isRobot()) { // escort player from game // todo: robot should send
-	 * departing words... copyPlayer(cp,p); // p.subdeck = cp.subdeck; // p.score =
-	 * cp.score; // p.setPID(cp.pid); playerArray[i] = p; return true; } } return
-	 * false; }
-	 */
-
-	/*
-	 * TODO: allow ability to add multiple humans Put human player into seat zero
-	 * always, if there is a current game for now ... he will be dealt in at reset
-	 * at any rate
-	 */
 	// No longer need NIOClientSessions since websockets are full duplex
 	// NIOClientSession[] humanPlayers=new NIOClientSession[10];
 	private int humanPlayerFree = 0;
@@ -217,14 +166,6 @@ public class CardGame implements GameInterface {
 	 * gameErrorLog("Received connection and creating humanplayer.");
 	 * humanPlayers[humanPlayerFree] = human; humanPlayerFree++; //Humans are here;
 	 * reset the game... reset(); return true; }
-	 */
-
-	/*
-	 * join(s) -- where s is "sessionid/friendlyName"
-	 */
-	/*
-	 * boolean join(String s) { Player p = new Player(s); // doesn't check to see if
-	 * already in the game... return join(p); }
 	 */
 
 	/*
@@ -251,8 +192,6 @@ public class CardGame implements GameInterface {
 	boolean join(UserSession us, String friendlyName) {
 		HumanPlayer hp = new HumanPlayer(us);
 		hp.setName(friendlyName);
-		// todo: multiple human players...
-		// find a robot player to displace
 		int i;
 		for (i = 0; i < nPlayers; i++) {
 			Player p = playerArray[i];
@@ -271,11 +210,11 @@ public class CardGame implements GameInterface {
 
 		}
 		return false;
-		// console.log("Cannot add player...")
 	}
 
 	/*
 	 * TODO: actually use getPlayer instead of pulling things out of PlayerArray
+	 *  -- not actually used anywhere --
 	 */
 	Player getPlayer(int index) {
 		if (index >= 0 && index < nPlayers)
@@ -291,17 +230,13 @@ public class CardGame implements GameInterface {
 		for (int i = 0; i < nPlayers; i++) {
 			Player p = playerArray[i];
 			if (p.userSession == us) {
-				// found it!
 				ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.ADD_CARDS, p.subdeck);
-				// make sure the recipient is correct...
-				// here, or a global problem? XXX
 				pm.setSender(i); // pid should work, too...
 				p.sendToClient(pm);
-				// also send current trick and whether your turn
+				// client needs to call refresh to get state of game
 				return;
 			}
 		}
-
 		System.out.println("Canot find player in game to resend to:" + us.username);
 	}
 
@@ -348,7 +283,7 @@ public class CardGame implements GameInterface {
 	}
 
 	/*
-	 * get the game's idea of what cards a player has
+	 * get the game's (official) idea of what cards a player has
 	 */
 	Subdeck getCards(int iplayer) {
 		Player p = playerArray[iplayer];
@@ -359,24 +294,12 @@ public class CardGame implements GameInterface {
 	}
 
 	/*
-	 * tell the (next or first) player to make a move by sending it YOUR_TURN. cf
-	 * updateTurn(); TODO: send the subdeck of the current trick.
+	 * tell the (next or first) player to make a move by sending it YOUR_TURN. 
+	 * cf updateTurn(); 
 	 * 
-	 * Ok, this seems like it's really wrong... This was an infinite that
-	 * continually sent YOUR_TURN to the same client... It should send it once, and
-	 * the response will come back either from human player or robot player thereby
-	 * moving the game along...
 	 */
-	void sendFirstMove() {
-		/*
-		 * figure out who has the two set 'your move' for that player call send next
-		 * move
-		 */
-	}
-
 	void sendNextMove() {
 
-		// while (nCurrentTurn != -1) {
 		if (nCurrentTurn == -1) {
 			// really just the hand is over, not the game...
 			// TODO:
@@ -411,7 +334,6 @@ public class CardGame implements GameInterface {
 			msg = "%Your turn.";
 		pm.setUsertext(msg);
 		p.sendToClient(pm);
-		// }
 		if (nCurrentTurn == -1) {
 			gameErrorLog("nCurrentTurn went to -1. Hand over...");
 			handOver();
@@ -419,7 +341,7 @@ public class CardGame implements GameInterface {
 	}
 
 	/*
-	 * initiatePass -- set up exchnage mail boxes, set routing, and send the pass
+	 * initiatePass -- set up exchange mail boxes, set routing, and send the pass
 	 * cards request
 	 * 
 	 * don't forget... At end of hand, set currentPass to the next passtype
@@ -448,18 +370,6 @@ public class CardGame implements GameInterface {
 	}
 
 	/*
-	 * one of these is enough void initiatePass() { MailBoxExchange.PassType pass;
-	 * 
-	 * pass = MailBoxExchange.PassType.PassHold; if (pass ==
-	 * MailBoxExchange.PassType.PassHold) return; // number of players, number of
-	 * cards to pass for error checking MailBoxExchange mbx = new
-	 * MailBoxExchange(currentPassType, nPlayers, 3); // Now send the pass messages,
-	 * telling the user what ProtocolMessage pm = new
-	 * ProtocolMessage(ProtocolMessageTypes.PASS_CARD, 3 + "Pass 3 cards to the " +
-	 * currentPassType); broadcastUpdate(pm); }
-	 */
-
-	/*
 	 * WTF version of broadcastUpdate...
 	 *
 	 */
@@ -479,7 +389,6 @@ public class CardGame implements GameInterface {
 			if (j >= nPlayers)
 				j = 0;
 		}
-
 	}
 	
 	void broadcast(String msg) {
@@ -501,7 +410,13 @@ public class CardGame implements GameInterface {
 			if (humansOnly && !p.isRobot())
 				p.sendToClient(pm);
 		}
-
+	}
+	
+	/*
+	 * so game (or robots) can send messages to humans
+	 */
+	public void snark(String s) {
+		broadcast(true, s);
 	}
 
 	boolean validPid(int pid) {
@@ -510,7 +425,7 @@ public class CardGame implements GameInterface {
 		return false;
 	}
 
-	// i.e. who
+	// i.e. jcl who command 
 	void sendFormattedPlayerInfo(int pid) {
 		if (!validPid(pid))
 			return;
@@ -557,7 +472,6 @@ public class CardGame implements GameInterface {
 		sTemp += '$';
 		sTemp += "#User#Session Id#IsRobot?#";
 		return sTemp;
-
 	}
 
 	String getFormattedPlayerHand() {
@@ -573,7 +487,6 @@ public class CardGame implements GameInterface {
 		sTemp += '$';
 		sTemp += "#User#Session Id#IsRobot?#";
 		return sTemp;
-
 	}
 
 	String getFormattedGameScore() {
@@ -679,7 +592,7 @@ public class CardGame implements GameInterface {
 			int i = 0;
 			Card leadingCard = null;
 			/*
-			 * everyone has played, determine who won the trick, and set it closed
+			 * determine who won the trick, and set it closed
 			 */
 			for (Card c : currentTrick.subdeck.subdeck) {
 				// the actual player who won the trick is n players away from the leader or the
@@ -748,11 +661,9 @@ public class CardGame implements GameInterface {
 	public void playCard(int nsender, Card c) {
 		Player p = playerArray[nsender];
 		// review:
-		// bad idea to have a local copy pcards of p.subdeck
+		// bad idea to make a local copy pcards of p.subdeck
 		// when called through tail recursion the local copy
 		// still exists. So the cards never get deleted from player
-		// ???
-		//--Subdeck pcards = p.subdeck; // server side official representation of the player's hand
 		ProtocolMessage returnMessage = null;
 		ProtocolMessageTypes mtype = ProtocolMessageTypes.PLAY_CARD;
 
@@ -786,7 +697,7 @@ public class CardGame implements GameInterface {
 			}
 		}
 		// trickier restrictions on the first trick
-		// did the player lay a the qs?
+		// did the player lay a qs?
 		// did the player lay a heart (and had non-hearts)
 		if (nTrickId == 0) {
 			if (c.suit == Suit.HEARTS) {
@@ -882,8 +793,6 @@ public class CardGame implements GameInterface {
 		// break;
 	}
 
-	// * xxx new (but unimplemented) gameInterface methods here...
-
 	/*
 	 * send client an error message sError with string s in the message format that
 	 * the client can display, and log it
@@ -903,6 +812,9 @@ public class CardGame implements GameInterface {
 	 * passCards - detect if the sender can legally pass these cards; 
 	 * TODO: i.e. are
 	 * we in a pass? emit error message if not if legal, add to the mailbox
+	 * 
+	 * passCards - collect passed cards from players and robots
+	 *  when mbx is full, exchange them, and call go()
 	 */
 	public void passCards(int nsender, Subdeck sd) {
 		int recipient = mbx.lookupRecipient(nsender);
@@ -912,7 +824,7 @@ public class CardGame implements GameInterface {
 			return; // waiting for more players to pass their cards
 		//
 		// Mailbox is full! time to route cards to players, deleting old cards
-		// and start play!
+		// and start play.
 		// foreach mailbox, delete cards in from and add cards to to;
 		for (int i = 0; i < mbx.size(); i++) {
 			MailBoxExchange.MailBox mb = mbx.itemAt(i);
@@ -924,16 +836,15 @@ public class CardGame implements GameInterface {
 			 * Actually delete the cards to the player's hand internally for (c: sd.subdeck)
 			 * { }
 			 */
-			// delete the card from the player's (server-side representation) of
 			// the hand i.e. subdeck. (ss routines)
-			// i.e. the game has to know the actual state of the player's hand
+			// 
+			// delete the card from the player's (server-side representation) of
 			for (var c : sd.subdeck)
 				p.ssDeleteCard(c);
 			ProtocolMessage pmFrom = new ProtocolMessage(ProtocolMessageTypes.DELETE_CARDS, sd);
-			// is iterator destructive? Seems to be. Recreate subdeck...
 			p.sendToClient(pmFrom);
 			sd = mb.contents;
-			// actually add the card to the player subdeck
+			// add the card to the player subdeck
 			p = playerArray[to];
 			for (var c : sd.subdeck)
 				p.ssAddCard(c);
@@ -941,7 +852,7 @@ public class CardGame implements GameInterface {
 			p.sendToClient(pmTo);
 		}
 		// yea! Pass successfully completed
-		// buckle-up...
+		// buckle-up and go!...
 		bPassingCardsInProgress = false;
 		go();
 	}
@@ -964,13 +875,9 @@ public class CardGame implements GameInterface {
 			pm = new ProtocolMessage(ProtocolMessageTypes.YOUR_TURN);
 			p.sendToClient(pm);
 		}
-		// TODO:
-		// should also send where we are in the current trick...
-		// right... see sendPreviousTrick
 	}
 	/*
 	 * previousTrick - send the previous trick to pid
-	 * zzz
 	 */
 	void sendTrick(Trick t, int pid) {
 		if (t == null)
@@ -984,6 +891,7 @@ public class CardGame implements GameInterface {
 			i = (i + 1) % nPlayers;
 		}		
 	}
+
 	boolean sendPreviousTrick(int pid) {
 		Trick t=previousTrick;
 		if (t == null)
@@ -997,7 +905,7 @@ public class CardGame implements GameInterface {
 	}
 	
 	/*
-	 * not used in hearts
+	 * gneralized gameInterface (projected) not used in hearts
 	 *  projected use in spades (and others...)
 	 */
 	public void bidTricks(int nsender, Subdeck cards) {
@@ -1019,6 +927,7 @@ public class CardGame implements GameInterface {
 	 * .. call serverErroLog(string) to log errors
 	 */
 	boolean bMessageDebug = true;
+	// Review: does this state (bPlayInitiated) add value?
 	private boolean bPlayInitiated = false;
 
 	void process(ProtocolMessage m) {
@@ -1095,7 +1004,6 @@ public class CardGame implements GameInterface {
 	}
 
 	void sendScore(int playerId) {
-		// xxx
 		Player p = playerArray[playerId];
 		String sTemp = getFormattedGameScore();
 		ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PLAYER_SCORES, sTemp);
@@ -1107,13 +1015,28 @@ public class CardGame implements GameInterface {
 		return bGameAborted;
 	}
 
+	void logWinner() {}
+	
 	void gameOver() {
 		bGameInProgress = false;
+		// todo
+		// log Winner in the database
+		logWinner();
+		// total game scores and report winner
+		// done when the hand ended...
+		for (int i=0; i<nPlayers; i++)
+			playerArray[i].totalScore = 0;
+		resetHand();
+		// ready for start..
 	}
 
 	/*
-	 * handOver - normal successful completion display scores and determine if game
+	 * handOver - normal successful completion 
+	 * display scores and determine if game
 	 * is over
+	 * advance pass type (only plass that's done.)
+	 * 
+	 * call reset at the end if game goes on
 	 */
 	void handOver() {
 		bHandOver = true;
@@ -1136,7 +1059,10 @@ public class CardGame implements GameInterface {
 
 		/*
 		 * the only way to advance the current pass is to successfully complete a hand.
+		 * in reset...
 		 */
+		// current pass now advanced here
+		// the only place currentPass is changed
 		currentPass = currentPass.next();
 		System.out.println("Next pass:" + currentPass);
 		// indicate game over or reset the hand
@@ -1157,28 +1083,44 @@ public class CardGame implements GameInterface {
 	 * resetHand... //misdeal and //newdeal
 	 */
 	/*
-	 * Current Thinking on reset... reset resets the hand to reset the game create a
-	 * new one i.e. jcl: //new
 	 * 
-	 * TODO: Attempting to start a terminated game could work... just do a gameReset
+	 JCL: //reset resets hand; does NOT advance pass
+	 * does NOT total scores
+	 * ready for start
+	 * cf handOver();
 	 */
 	public void reset() {
+		bPlayInitiated = false;
 		resetHand();
-	}
-
-	public void reset(Boolean shuffle) {
-		//bShuffle = shuffle;
-		reset();
 	}
 
 	// jcl: //start
 	public boolean start() {
-		// shuffle? Not here. Cards already assigned.
 		if (bPlayInitiated) {
 			return false;
-		} else {
-			initiatePlay();
 		}
+		snark("Let's start! Hand " + nHands++ + ". Pass:" + currentPass);
+		bGameAborted = false;
+		bHandOver = false;
+		nCurrentTurn = -1;
+		for (int i = 0; i < nPlayers; i++) {
+			Player p = playerArray[i];
+			p.reset(); // send welcome; clear hand
+			// Welcome msg: gives player key to get back in the game
+			// if connection is dropped... for use in join
+			ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PLAYER_WELCOME, p.getName());
+			p.sendToClient(pm);
+		}
+
+		deal();
+		if (currentPass == MailBoxExchange.PassType.PassHold)
+			go();
+		else
+			initiatePass(currentPass);
+		// once pass cards messages are collected, 
+		// passcards() will call go();
+
+		bPlayInitiated = true;
 		return true;
 	}
 
@@ -1220,23 +1162,12 @@ public class CardGame implements GameInterface {
 
 	/*
 	 * resetHand - shuffle and deal jcl //misdeal and //newdeal
+	 *  shuffle and deal part of start...
+	 *  Now: just reset scores; 
 	 */
 	public void resetHand() {
+		bPlayInitiated = false;
 		resetHandScores();
-		bGameAborted = false;
-		bHandOver = false;
-		nCurrentTurn = -1;
-
-		/*
-		 * Knock out cards from client and reset robot players note humanPlayer.reset
-		 * calls super.reset()...
-		 */
-		for (int i = 0; i < nPlayers; i++) {
-			Player p = playerArray[i];
-				p.reset();
-			
-		}
-		deal();
 	}
 
 	private void resetHandScores() {
@@ -1280,6 +1211,19 @@ public class CardGame implements GameInterface {
 			}
 			i = (i + 1) % nPlayers;
 		}
+		// Now deal them to the players
+		// Now send the protocol message to add all the cards to the players' hands
+		for (i = 0; i < nPlayers; i++) {
+			p = playerArray[i];
+			ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.ADD_CARDS, p.subdeck);
+			p.sendToClient(pm);
+		}
+
+		// Log the hands for later post-mortem diagnostics
+		for (i = 0; i < nPlayers; i++) {
+			Subdeck sd = playerArray[i].subdeck;
+			gameErrorLog("Housekeeping: subdeck size(" + sd.size() + "){" + sd.encode() + "}");
+		}
 
 	}
 	/*
@@ -1295,8 +1239,10 @@ public class CardGame implements GameInterface {
 
 	/*
 	 * deal, pass (if not hold), sendfirst move
+	 * no longer used.
+	 * duties split between start(reset players) and deal(shuffl)
 	 */
-	void initiatePlay() {
+	void initiatePlayXXX() {
 		int i;
 		Player p;
 		/*
@@ -1351,15 +1297,17 @@ public class CardGame implements GameInterface {
 	}
 
 	/*
-	 * go - Pass is complete. Start play
+	 * go - Cards dealt, Pass is complete. Start play
 	 */
+	int nHands = 0;
 	void go() {
 		setFirstMove();
 		sendNextMove();
 	}
 
 	private void resetGameScores() {
-		currentPass = MailBoxExchange.PassType.PassHold;
+
+		nHands = 0;
 		for (int i = 0; i < nPlayers; i++) {
 			Player p = playerArray[i];
 			p.totalScore = 0;

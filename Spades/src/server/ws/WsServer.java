@@ -556,6 +556,10 @@ public class WsServer {
 			//write(us, "" + jcl.type + "(" + playerId + "): under construction");
 			break;
 		case JCLMisdeal:
+			/*
+			 * just deal again.
+			 *  -- don't show score, don't advance pass type
+			 */
 			if (us.game == null) {
 				write(us, "Can't declare a misdeal. You aren't in a game.");
 				break;
@@ -565,13 +569,15 @@ public class WsServer {
 				System.out.println("Player(" + us.getpid() +") declares misdeal.");				
 			}
 			us.game.reset();
-			us.game.start();
-			write(us, "Reseting Hand:");
+			// does not advance passtype!
+			//us.game.start();
+			write(us, "Reseting Hand: passtype unchaged");
 			break;
 		case JCLNewdeal:
 			/*
-			 * just skip onto the next deal, as if the last
+			 * just skip to the next deal, as if the last
 			 * trick was played out
+			 *  -- show score, advance pass type
 			 */
 			if (us.game == null) {
 				write(us, "Can't redeal. You aren't in a game.");
@@ -582,6 +588,8 @@ public class WsServer {
 				System.out.println("Player(" + us.getpid() +") declares misdeal.");				
 			}
 			us.game.handOver();
+			write(us, "newdeal: passtype advanced.");
+			// only way to advance passtype!
 			break;
 		case JCLShuffle:
 			// set shuffle game-wide

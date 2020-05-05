@@ -265,7 +265,7 @@ public class UserJCLCommand {
 		// scan for Misdeal
 		m = jclMisdealRegex.matcher(commandString);
 		if (m.find()) { // i.e. look for 'setname' then an identifier
-			type = JCLType.JCLNewdeal;
+			type = JCLType.JCLMisdeal;
 			/*
 			 * param is left, right, across, hold
 			 */
