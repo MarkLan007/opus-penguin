@@ -245,7 +245,7 @@ public class CardGame implements GameInterface {
 	}
 
 	/*
-	 * TODO: getGameStatus compare score totaling with other routine totalScores()
+	 * TODO: getGameStatus compare score totaling with other routine totalHandScores()
 	 * and consolodate
 	 */
 	String getGameStatus() {
@@ -451,12 +451,19 @@ public class CardGame implements GameInterface {
 
 	String peek(int pid) {
 		String cardString = "Invalid Pid";
+		String handString = "";
+		int length=0;
 		if (pid >= 0 && pid < nPlayers) {
 			Player p = playerArray[pid];
 			Subdeck sd = p.subdeck;
+			length = sd.size();
 			cardString = sd.encode();
+			if (p.isRobot()) {
+				RobotPlayer rp=(RobotPlayer)p;
+				handString = rp.handPeek();
+			}
 		}
-		return cardString;
+		return "(" + length + ")" + cardString + handString;
 	}
 
 	String getFormattedPlayerInfo() {
@@ -515,10 +522,10 @@ public class CardGame implements GameInterface {
 	}
 
 	/*
-	 * totalScores - total the scores for the hand checks for moonshooting and
+	 * totalHandScores - total the scores for the hand checks for moonshooting and
 	 * game-end
 	 */
-	void totalScores() {
+	void totalHandScores() {
 		int i, iTrickTotal;
 		for (i = 0; i < nTrickId; i++) {
 			Trick t = trickArray[i];
@@ -639,8 +646,9 @@ public class CardGame implements GameInterface {
 			updateTurn(previousTrick.winner);
 			if (nTrickId >= LAST_TRICK) {
 				// Game is over; total score and reset
-				totalScores();
-				resetTurn();	
+				// ZZZ totalHandScores();
+				/// ZZZ resetTurn();	
+				handOver();
 				// no next turn till after a new deal
 				// Don't resetHand here... it clobbers the scores
 				// before anyone sees them...
@@ -1044,7 +1052,9 @@ public class CardGame implements GameInterface {
 		boolean winnerDetermined = false;
 		gameErrorLog("Hand completed.");
 
-		// Total the score
+		// total the hand scores...
+		totalHandScores();
+		// Total the game score
 		for (int i = 0; i < nPlayers; i++) {
 			playerArray[i].totalScore += playerArray[i].handScore;
 			if (playerArray[i].totalScore >= 100)

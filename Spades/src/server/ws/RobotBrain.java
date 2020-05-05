@@ -32,8 +32,8 @@ public class RobotBrain {
 	void brainDump(boolean bNow) {
 		if (!bNow)
 			brainDump(); // just make this robot chatty...
-		System.out.println("Bad Subdecks?:" + this.currentTrickId() + "c:{" + hand.getclubs() + "}d:{"
-				+ hand.getdiamonds() + "}h:{" + hand.gethearts() + "}s:{" + hand.getspades());
+		System.out.println("Bad Subdecks?:" + this.currentTrickId() + "c:{" + hand.getclubs().encode() + "}d:{"
+				+ hand.getdiamonds().encode() + "}h:{" + hand.gethearts().encode() + "}s:{" + hand.getspades().encode());
 		System.out.println("Trick:" + this.currentTrickId() + "c:{" + hand.getclubs().encode() + "}d:{"
 				+ hand.getdiamonds().encode() + "}h:{" + hand.gethearts().encode() + "}s:{" + hand.getspades().encode()
 				+ "}");

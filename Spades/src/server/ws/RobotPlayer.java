@@ -55,6 +55,19 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		processLocalMessage(pm);
 	}
 
+	public String handPeek() {
+		String s=")->";
+		int length=robotBrain.hand.getclubs().size()
+				+ robotBrain.hand.getspades().size()
+				+ robotBrain.hand.getdiamonds().size()
+				+ robotBrain.hand.gethearts().size();
+		
+		s += robotBrain.hand.getclubs().encode() + ",";
+		s += robotBrain.hand.getdiamonds().encode() + ",";
+		s += robotBrain.hand.gethearts().encode() + ",";
+		s += robotBrain.hand.getspades().encode() + ".";
+		return "(" + length + s;
+	}
 	private void badRobot(String playerName, int nTrickId, int pid, Subdeck subdeck, ProtocolMessage pm) {
 		System.out.println(playerName + " has been a bad robot for illegal play.");
 		System.out.println("On " + nTrickId + "th Trick with <" + subdeck.size() + ">=[" + subdeck.encode() + "] has been carded for:");
@@ -187,7 +200,7 @@ public class RobotPlayer extends Player implements PlayerInterface {
 
 	/*
 	 * Implement the PlayerInterface methods here these get called from cardgame as
-	 * player.addCards(), etc. xxx
+	 * player.addCards(), etc. 
 	 */
 	// called from the server
 	// TODO: these should be sendAddCards, sendDeleteCards, shouldn't they?

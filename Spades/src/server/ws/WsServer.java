@@ -367,7 +367,7 @@ public class WsServer {
 			}
 			//us.game.sendFormattedPlayerInfo(playerId);		
 			String cards=us.game.peek(nparam);
-			s = "Peek(" + nparam + ")=[" + cards.length()/2 + "]<" + cards + ">";
+			s = "Peek(" + nparam + ")=" + /* cards.length()/2 + */ "<" + cards + ">";
 			write(us, s);
 			break;
 		case JCLWhoAmI:			
