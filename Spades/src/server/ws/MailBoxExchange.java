@@ -2,7 +2,7 @@ package server.ws;
 
 public class MailBoxExchange {
 	public enum PassType {
-		PassLeft, PassRight, PassAcross, PassHold;
+		Left, Right, Across, Hold;
 		static PassType[] pts = PassType.values();
 		public PassType next() {
 			int index = ordinal();
@@ -17,8 +17,8 @@ public class MailBoxExchange {
 			return pts[--index];
 		}
 	}
-	static public PassType first() { return PassType.PassLeft; }
-	static public PassType last() { return PassType.PassHold; }
+	static public PassType first() { return PassType.Left; }
+	static public PassType last() { return PassType.Hold; }
 	
 	public class MailBox {
 		int from, to;	// to is redundant; stored by place
@@ -61,10 +61,10 @@ public class MailBoxExchange {
 		int i;
 		MailBox mb;
 		switch (passType) {
-		case PassHold:
+		case Hold:
 			System.out.println("MailBox:setRouting: Routine shouldn't be set for a hold-hand.");			
 			break;
-		case PassLeft:
+		case Left:
 			int right;
 			for (i=0, right=exchangeSize-1; i<exchangeSize; i++) {
 				mb = exchange[i];
@@ -73,7 +73,7 @@ public class MailBoxExchange {
 				right = (right + 1) % exchangeSize;
 			}
 			break;
-		case PassRight:
+		case Right:
 			int left;
 			for (i=0,left=exchangeSize-1; i<exchangeSize; i++) {
 				mb = exchange[i];
@@ -82,7 +82,7 @@ public class MailBoxExchange {
 				left = (left + 1) % exchangeSize;
 			}
 			break;
-		case PassAcross:
+		case Across:
 			int across;
 			for (i=0, across=exchangeSize/2; i <exchangeSize; i++) {
 				mb = exchange[i];

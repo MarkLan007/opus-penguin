@@ -68,6 +68,8 @@ public class RobotBrain {
 				// I have the lead on the first trick without the 2c
 				System.out.println("Can't happen: void in clubs and I have the lead on the first trick.");
 				c = hand.randomCard();
+				if (c == null)
+					c = playAnything();
 				return c;
 			}
 			// Play a spade if I have one
@@ -79,6 +81,8 @@ public class RobotBrain {
 			if (bThinkingOutLoud) {
 				System.out.println("Robot: About to play..." + c.encode());
 			}
+			if (c == null)
+				c = playAnything();
 			return c;
 
 		}

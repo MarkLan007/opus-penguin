@@ -8,7 +8,8 @@ package server.ws;
 public class CardGame implements GameInterface {
 	int nPlayers = 4;
 	private int nCurrentTurn = -1; // index of player with current turn or -1 if undefined
-	Trick[] trickArray = new Trick[(52 / nPlayers) + 1];
+	int nTricksPerHand = 52 / nPlayers;
+	Trick[] trickArray = new Trick[(nTricksPerHand) + 1];
 	Trick currentTrick = null;
 	Trick previousTrick = null;
 	final int LAST_TRICK = (52 / nPlayers);
@@ -270,7 +271,7 @@ public class CardGame implements GameInterface {
 		/*
 		 * Current turn is set for the first turn at deal (2c)
 		 */
-		if (nCurrentTurn == -1)
+		if (nCurrentTurn == -1 || bHandOver)
 			return;
 
 		nCurrentTurn++;
@@ -300,7 +301,7 @@ public class CardGame implements GameInterface {
 	 */
 	void sendNextMove() {
 
-		if (nCurrentTurn == -1) {
+		if (nCurrentTurn == -1 || nTrickId >= nTricksPerHand) {
 			// really just the hand is over, not the game...
 			// TODO:
 			// so should rotate the pass order pt=nextPassType();
@@ -348,7 +349,7 @@ public class CardGame implements GameInterface {
 	 */
 	private boolean bPassingCardsInProgress=false;
 	void initiatePass(MailBoxExchange.PassType pt) {
-		if (pt == MailBoxExchange.PassType.PassHold) {
+		if (pt == MailBoxExchange.PassType.Hold) {
 			bPassingCardsInProgress = false;
 			go();
 			return;
@@ -1124,7 +1125,7 @@ public class CardGame implements GameInterface {
 		}
 
 		deal();
-		if (currentPass == MailBoxExchange.PassType.PassHold)
+		if (currentPass == MailBoxExchange.PassType.Hold)
 			go();
 		else
 			initiatePass(currentPass);
@@ -1297,7 +1298,7 @@ public class CardGame implements GameInterface {
 		//
 		// Send the message to the first player to start...
 		//
-		if (currentPass != MailBoxExchange.PassType.PassHold) {
+		if (currentPass != MailBoxExchange.PassType.Hold) {
 			initiatePass(currentPass);
 			// once pass cards messages are complete, the exchange will call go();
 		} else {

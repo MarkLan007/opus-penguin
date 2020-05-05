@@ -1722,8 +1722,8 @@ function processCardString(cardString) {
 			// actual number
 			// just know 3 for now...
 			//console.log("Pass message.. working on it...");
-			parseDialogStringMessage(cardstring);
-			wsPassDialog(nCardsToPass, passDialogString);
+			parseDialogStringMessage(cardString);
+			wsPassDialog();
 			break;
 		default:
 			console.log("unimplemented protocol msg:"
@@ -1973,8 +1973,8 @@ function initModal() {
  * from a button on index page should just delegate and call wsPassDialog(2) cf:
  * wsPassDialog -- the new div version
  */
-function passDialogDivBtnCall(nCards, sMsg) {
-	wsPassDialog(nCards,sMsg);
+function passDialogDivBtnCall(n, sMsg) {
+	wsPassDialog();
 }
 
 function showPassDialogDiv() {
@@ -1990,6 +1990,7 @@ function hidePassDialogDiv() {
 var defaultPassMsg="Pass 3 cards to the left/right/across";
 var passDialogString = defaultPassMsg;
 var nCardsToPass=3;
+// msg is of form ~03STring...
 // "~03String...
 function parseDialogStringMessage(s) {
 	nCardsToPass = parseInt(s.charAt(2));
@@ -2007,9 +2008,8 @@ function initPassDialogDiv(nCards, sMsg) {
 
 	var msgDiv=document.getElementById("passMsgText");
 	if (sMsg == "")
-		msgDiv.innerText = defaultPassMsg;
+		msgDiv.innerText = passDialogString;
 	else {
-		// msg is of form ~03STring...
 		msgDiv.innerText = sMsg;
 	}
 	
@@ -2129,11 +2129,20 @@ formatScore(sMsg);	// harmless in window version... the div is still there...
 
 /*
  * wsPassDialog - call either the window or div version of the routines
+ *  -- note args here are obsolete. See wsPassDialog() function
  */
 function wsPassDialog(nCards, sMsg) {
 	console.log("Modal div for passing cards" + sMsg);
 	initPassDialogDiv(nCards, sMsg);
 	showPassDialogDiv();
+}
+/*
+ * this is the current way to do this...
+ *  call parseDialogStringMessage first
+ */
+function wsPassDialog() {
+	initPassDialogDiv(nCardsToPass, passDialogString);
+	showPassDialogDiv();	
 }
 
 // get a button card that is the cardback
@@ -2358,7 +2367,7 @@ function addCardToPassDialogDiv(cardindex) {
 		// Ooh. Bad User. Can't add one more card.
 		// trying to select more cards to pass than is legal
 		// alert("Warning: Can only pass " + iPassSize + " cards. i=" + i);
-		alert("Click on card to return it to hand. Can only pass " + iPassSize + " cards. i=" + i);
+		// alert("Click on card to return it to hand. Can only pass " + iPassSize + " cards. i=" + i);
 		setPassDialogErrorString("Can only pass " + iPassSize + " cards.")
 		return;
 	}
@@ -2368,7 +2377,8 @@ function addCardToPassDialogDiv(cardindex) {
 		// is it a dup?
 		btn = passCards[j];
 		if (btn.name == card.shortName) {
-			setPassDialogErrorString("Duplicate card selected");
+			//setPassDialogErrorString("Duplicate card selected");
+			setPassDialogErrorString("Card must be unique.");
 			return;
 		}		
 	}
