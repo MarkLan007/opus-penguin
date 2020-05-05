@@ -1109,6 +1109,7 @@ public class CardGame implements GameInterface {
 		if (bPlayInitiated) {
 			return false;
 		}
+		bPlayInitiated = true;
 		snark("Let's start! Hand " + nHands++ + ". Pass:" + currentPass);
 		bGameAborted = false;
 		bHandOver = false;
@@ -1130,7 +1131,6 @@ public class CardGame implements GameInterface {
 		// once pass cards messages are collected, 
 		// passcards() will call go();
 
-		bPlayInitiated = true;
 		return true;
 	}
 

@@ -306,7 +306,6 @@ function addCardToHand(cardindex) {
 	//
 	var div = getSuitDiv(card);
 	div.appendChild(card.handButton);
-	// zzz
 
 	return true;
 	// card.cardBtn.style.visibility = "visible";
@@ -1721,9 +1720,10 @@ function processCardString(cardString) {
 		case '~':
 			// cardString of the form 'NCards to pass left' where N is the
 			// actual number
-			// just 'know' 3 for now...
-			console.log("Pass message.. working on it...");
-			wsPassDialog(3, cardString);
+			// just know 3 for now...
+			//console.log("Pass message.. working on it...");
+			parseDialogStringMessage(cardstring);
+			wsPassDialog(nCardsToPass, passDialogString);
 			break;
 		default:
 			console.log("unimplemented protocol msg:"
@@ -1971,7 +1971,7 @@ function initModal() {
 /*
  * passDialogDivBtnCall - exercise the pass cards dialog done with a div called
  * from a button on index page should just delegate and call wsPassDialog(2) cf:
- * wsPassDialog -- the new window version
+ * wsPassDialog -- the new div version
  */
 function passDialogDivBtnCall(nCards, sMsg) {
 	wsPassDialog(nCards,sMsg);
@@ -1988,6 +1988,13 @@ function hidePassDialogDiv() {
 	}
 
 var defaultPassMsg="Pass 3 cards to the left/right/across";
+var passDialogString = defaultPassMsg;
+var nCardsToPass=3;
+// "~03String...
+function parseDialogStringMessage(s) {
+	nCardsToPass = parseInt(s.charAt(2));
+	passDialogString = s.substring(3);
+}
 function initPassDialogDiv(nCards, sMsg) {
 	var modalDiv = document.getElementById("passMsgDiv");
 
@@ -2001,8 +2008,10 @@ function initPassDialogDiv(nCards, sMsg) {
 	var msgDiv=document.getElementById("passMsgText");
 	if (sMsg == "")
 		msgDiv.innerText = defaultPassMsg;
-	else
+	else {
+		// msg is of form ~03STring...
 		msgDiv.innerText = sMsg;
+	}
 	
 	// When the user clicks the button, open the modalDiv
 	btn.onclick = function() {
@@ -2043,10 +2052,6 @@ function initPassDialogDiv(nCards, sMsg) {
 
 /*
  * wsScoreDialogDiv - pass the score fully modal score over the play field
- */
-// wsScoreDialogDiv
-/*
- * wsScoreDialog - call either the window or div style score dialog
  */
 function wsScoreDialog(sMsg) {
 	wsScoreDialogDiv(sMsg);
@@ -2207,7 +2212,6 @@ function createNewPassCardButton(cardindex) {
 function passCardSelected(event) {
 	// return the card to the hand, delete from the dialog
 	// actually just make it not visible.
-	// zzz
 	var div=document.getElementById("passDiv");
 	// var buttonList = getDescendantElements(div);
 	var cardBtn=event.target;
@@ -2278,6 +2282,7 @@ function passCardsFromButtonPress(event) {
  * Todo: expendable when you purge the window-creation versions of pass
  * dialogs...
  */
+
 function addCardToPassDialogWindow(cardindex) {
 	var card = theDeck[cardindex];
 	// xxx get card from index...
@@ -2289,6 +2294,7 @@ function addCardToPassDialogWindow(cardindex) {
 		// trying to select more cards to pass than is legal
 		// alert("Warning: Can only pass " + iPassSize + " cards. i=" + i);
 		alert("Click on card to return it to hand. Can only pass " + iPassSize + " cards. i=" + i);
+		//setPassDialogErrorString("Can only pass " + iPassSize + " cards.")
 		return;
 	}
 	//
@@ -2330,17 +2336,41 @@ function addCardToPassDialogWindow(cardindex) {
 	}
 }
 
+function resetPassDialogErrorString() {
+	var p=document.getElementById("passDialogErrorString");
+	p.innerText = "Select Cards from Hand";
+}
+
+function setPassDialogErrorString(s) {
+	//alert(s);
+	var p=document.getElementById("passDialogErrorString");
+	p.innerText = s;
+}
 function addCardToPassDialogDiv(cardindex) {
 	var card = theDeck[cardindex];
 	var i = iCurrentFreeCardInPass;
+	resetPassDialogErrorString();
+
 	// push cardPassWindow to top
 	// passWindow.focus();
+	// Bad user checks...
 	if (i >= iPassSize) {
-		// Ooh. Bad User.
+		// Ooh. Bad User. Can't add one more card.
 		// trying to select more cards to pass than is legal
 		// alert("Warning: Can only pass " + iPassSize + " cards. i=" + i);
 		alert("Click on card to return it to hand. Can only pass " + iPassSize + " cards. i=" + i);
+		setPassDialogErrorString("Can only pass " + iPassSize + " cards.")
 		return;
+	}
+	//
+	// Make sure card isn't already there...
+	for (var j=0; j< i; j++) {
+		// is it a dup?
+		btn = passCards[j];
+		if (btn.name == card.shortName) {
+			setPassDialogErrorString("Duplicate card selected");
+			return;
+		}		
 	}
 	passCards[i] = createNewPassCardButton(cardindex);
 	var cardBtn = passCards[i];

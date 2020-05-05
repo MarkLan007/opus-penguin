@@ -102,7 +102,28 @@ body {
 	text-align:left;
 	margin-left:1px;
 }
-	
+
+.splitscreen {
+    display:flex;
+}
+.splitscreen .left {
+    flex: 1;
+}
+.splitscreen .right {
+	text-align:center;
+    flex: 1;
+}
+/*
+<div class="splitscreen">    
+	<div class="left">
+        <!-- content -->
+    </div>
+
+    <div class="right">
+        <!-- content -->
+    </div>
+</div>
+*/
 .column1 {
 	width: 55%;
 	float: left;
@@ -200,8 +221,8 @@ body {
   /*
    * cover the play felt
    */
-  width: 422px; /* partial width */
-  height: 56%; /* partial height */
+  width: 450px; /* partial width */
+  height: 63%; /* partial height */
   /* width: 590px; */
   /* height: 270px; */
   overflow: auto; /* Enable scroll if needed */
@@ -213,6 +234,7 @@ body {
 .semi-modal-content {
   background-color: #fefefe;
   width: 410px;
+  height: 400px;
   margin: auto;
   padding: 5px;
   border: 1px solid #888;
@@ -479,8 +501,11 @@ insert modal stuff here ->
 		 <!-- Monkeying with the fixed vs % h and w -->
 	</div>
 	<br>
-	<input id="passCardsButton" onclick="passCardsToServer();"
+	<span class="splitscreen">
+	<input class="left" id="passCardsButton" onclick="passCardsToServer();"
 		value="Pass Cards" type="button" disabled>
+	<p class="right" id="passDialogErrorString"> </p>
+	</span>
 </div>
 </div>
 
