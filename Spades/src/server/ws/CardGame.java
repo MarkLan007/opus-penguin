@@ -1274,14 +1274,6 @@ public class CardGame implements GameInterface {
 			p.sendToClient(pm);
 		}
 		//
-		// send clear-hand =* message before adding the dealt cards?
-		/*
-		 * Need to modify the robots to understand this ProtocolMessage deleteAll = new
-		 * ProtocolMessage(ProtocolMessageTypes.DELETE_CARDS); deleteAll.usertext = "*";
-		 * broadcastUpdate(deleteAll);
-		 */
-		// no. not here... resetGameScores();
-		//
 		// Now send the protocol message to add cards to the players hand
 		for (i = 0; i < nPlayers; i++) {
 			p = playerArray[i];

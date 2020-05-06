@@ -212,6 +212,9 @@ public class Subdeck implements Iterable<Card> {
 		delete(c.rank, c.suit);
 		}
 	
+	void clear() {
+		subdeck.clear();
+	}
 
 	public Card peek() {
 		if (subdeck.size() > 0)

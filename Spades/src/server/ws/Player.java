@@ -143,6 +143,10 @@ public class Player /*implements PlayerInterface */{
 		return subdeck.find(c);
 		}
 	
+	boolean confirmPlayerHasCard(Card c) {
+		return subdeck.find(c);
+	}
+	
 	/*
 	 * delete this card from server-side representation (i.e. find it in the hand and delete the first one of the same value...)
 	 */

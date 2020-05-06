@@ -20,17 +20,29 @@ public class RobotPlayer extends Player implements PlayerInterface {
 	// ref.canIplay()
 	// or for godlike play
 	// ref.doesAnyoneElseHave(Suit)
+	// 
+	// Yes. Progress towards this. confirmCardInHand
+	//  ... maybe confirmCardWithRef confirmPlayerHasCard
 	//
 	// TODO: hand should be private to robotPlayer; (Afraid to do this right now...)
-	Subdeck hand = null; // new Subdeck(); // This is the robot player's copy of the cards; sent in via
+	/*
+	 * robotPlayer does not have a hand. RobotBrain does.
+	 * having hand here would be a THIRD copy of the robot's cards.
+	 * 1 on the server (p.subdeck) hand and robotplayer.hand
+	 *  ... this was the source of tricky and obscure bugs...
+	 */
+	// Subdeck xhand = null; // new Subdeck(); // This is the robot player's copy of the cards; sent in via
 							// ADD_CARD etc.
+	// xhand is obsolete and should probably be deleted...
 
 	/*
 	 * this is only a testing and debugging function for robotplayers
+	 *  --- not used, right? ---
+	 *  see handPeek();
 	 */
 	@Override
 	public Subdeck getRemoteHand() {
-		return hand;
+		return null;
 	}
 
 	int getGameTrickCount() {
@@ -139,7 +151,7 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		// super();
 		setAsynch(false); // { Because I am a robot, I can be called synchronously }
 		isRobotPlayer = true;
-		hand = new Subdeck();
+		//xhand = new Subdeck();
 		robotBrain = new RobotBrain();
 		robotBrain.setPID(pid);
 		setPID(pid);
@@ -155,29 +167,37 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		Card c;
 		/*
 		 * NoBrainer (literally): Always play the 2C if you have it
+		 *  Nope. Always use your brain.
+		 *  There are no no-brainers...
 		 */
-		if (hand.find(Rank.DEUCE, Suit.CLUBS)) {
+		/*
+		if (robotBrain.hand.find(Rank.DEUCE, Suit.CLUBS)) {
 			c = new Card(Rank.DEUCE, Suit.CLUBS);
 			cardGame.playCard(getPID(), c); // yyy
-			/*
-			 * outmsg = new ProtocolMessage(getPID(), ProtocolMessageTypes.PLAY_CARD, c);
-			 * playerErrorLog("RobotPlayer" + getPID() + ": Playing 2C.<" + c.encode() +
-			 * ">"); sendToServer(outmsg);
-			 */
 			return;
-		}
+		}*/
 
 		/*
 		 * Otherwise use robotBrain to determine what to play...
 		 */
-		c = robotBrain.playCard(getGameTrickCount());
+		c = robotBrain.determineBestCard(getGameTrickCount());
 		if (c == null) {
 			// Uh oh... brain failed
 			// note cardLead and currentTrick
-			System.out.println(getName() + ":Catastrophic Brain failure on lead:"); 
+			System.out.println(getName() + ": Catastrophic Brain failure on lead:"); 
 //					+ cardLead.toString() );
 			robotBrain.brainDump(true);
-			c = robotBrain.playAnything();
+			c = robotBrain.getSomething();
+		} else if (!confirmPlayerHasCard(c)) {
+			// catastrophic error.
+			// There is discrepency between hand and the
+			// Player subdeck holding the official cards.
+			// complain loudly.
+			System.out.println(getName() + 
+					": Catastrophic Error: Cannot confirm card in hand: "
+					+ c.encode());
+			System.out.println("Subdeck:<" + subdeck.size() + ">=" + subdeck.encode());
+			robotBrain.brainDump(true);
 		}
 		cardGame.playCard(getPID(), c); // yyy
 	}
@@ -187,13 +207,16 @@ public class RobotPlayer extends Player implements PlayerInterface {
 	}
 	
 	void addToHand(Card c) {
-		hand.add(c);
+		robotBrain.hand.addCard(c);
 	}
 
 	boolean deleteFromHand(Card c) {
-		if (hand.find(c)) {
-			hand.delete(c.rank, c.suit);
+		if (robotBrain.hand.find(c)) {
+			robotBrain.hand.deleteCard(c);
 			return true;
+		} else {
+			System.out.println("RobotBrain: trying to delete card " 
+					+ c.encode() + " I don't have.");
 		}
 		return false;
 	}
@@ -279,8 +302,6 @@ public class RobotPlayer extends Player implements PlayerInterface {
 	 * processLocalMessage -- make sure you don't modify the sublist.
 	 */
 	void processLocalMessage(ProtocolMessage m) {
-		int i, len;
-		String sTemp = "";
 		boolean bAbEnd = false;
 		Card c = null;
 		// TrickModifiers tm=null;
@@ -296,11 +317,11 @@ public class RobotPlayer extends Player implements PlayerInterface {
 			yourPass(3);
 			break;
 		case ADD_CARDS: // CARD*
-			addCards(m.subdeck);
+			// addCards(m.subdeck);
 			robotBrain.addCards(m.subdeck);
 			break;
 		case DELETE_CARDS: // CARD+
-			len = m.subdeck.size();
+			//len = m.subdeck.size();
 			/* clobbers the subdeck!!!
 			for (i = 0; i < len; i++) {
 				c = m.subdeck.pop();

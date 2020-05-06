@@ -32,30 +32,38 @@ public class RobotBrain {
 	void brainDump(boolean bNow) {
 		if (!bNow)
 			brainDump(); // just make this robot chatty...
-		System.out.println("Bad Subdecks?:" + this.currentTrickId() + "c:{" + hand.getclubs().encode() + "}d:{"
-				+ hand.getdiamonds().encode() + "}h:{" + hand.gethearts().encode() + "}s:{" + hand.getspades().encode());
+		
+		System.out.println("BrainContents:" + this.currentTrickId() + "c:{" + hand.getclubs().size() + "}d:{"
+				+ hand.getdiamonds().size() + "}h:{" + hand.size() + "}s:{" + hand.getspades().size()
+				+ "}");
 		System.out.println("Trick:" + this.currentTrickId() + "c:{" + hand.getclubs().encode() + "}d:{"
 				+ hand.getdiamonds().encode() + "}h:{" + hand.gethearts().encode() + "}s:{" + hand.getspades().encode()
 				+ "}");
 	}
 
-	Card playAnything() {
+	Card getSomething() {
+		Card c = hand.randomCard();
+		/*
 		Card c = null;
 		c = new Card(Rank.ACE, Suit.SPADES);
+		*/
+		if (c == null)
+			c = new Card(Rank.ACE, Suit.SPADES);
+
 		return c;
 	}
 
-	Card playCard(int actualTrickId) {
+	Card determineBestCard(int actualTrickId) {
 		Card c = null;
 		trickCount = actualTrickId;
 		if (trickCount == 0) {
 			// Make sure I have 13 cards in my hand
 			// or else declare a misdeal (or at least whine)
 			if (hand.size() != 13)
-				System.out.println("Robot(?) cards=" + hand.size());
-			if (hand.find(deuceOfClubs))
-				return deuceOfClubs;
+				System.out.println("*** Robot(?) cards=" + hand.size() + "***");
 		}
+		if (hand.find(deuceOfClubs))
+			return deuceOfClubs;
 		if (cardLead == null) {
 			/*
 			 * I have the lead...
@@ -68,8 +76,10 @@ public class RobotBrain {
 				// I have the lead on the first trick without the 2c
 				System.out.println("Can't happen: void in clubs and I have the lead on the first trick.");
 				c = hand.randomCard();
-				if (c == null)
-					c = playAnything();
+				if (c == null) {
+					c = getSomething();
+					System.out.println("Can't play anything... <AS> returned");
+				}
 				return c;
 			}
 			// Play a spade if I have one
@@ -82,12 +92,12 @@ public class RobotBrain {
 				System.out.println("Robot: About to play..." + c.encode());
 			}
 			if (c == null)
-				c = playAnything();
+				c = getSomething();
 			return c;
 
 		}
 		/*
-		 * must follow rule
+		 * apply the must-follow rule
 		 */
 		if (!hand.voidIn(cardLead.suit)) {
 			// actually check if the qs has been played
@@ -97,11 +107,6 @@ public class RobotBrain {
 			// void in the lead suit. Slough something
 			c = hand.bestSlough(actualTrickId);
 		}
-
-		/*
-		 * debugging condition... No longer relevant if (c.equals(Rank.TEN, Suit.CLUBS))
-		 * System.out.println("About to play 10c");
-		 */
 		return c;
 	}
 
@@ -143,7 +148,7 @@ public class RobotBrain {
 		if (!hand.find(c)) {
 			System.out.println("Holy Shit: *** Trying to delete a card I don't think I have! ***");
 		}
-		hand.delete(c);
+		hand.deleteCard(c);
 	}
 
 	/*
@@ -208,8 +213,8 @@ public class RobotBrain {
 		int size() {
 			int i = 0;
 			int ncards = 0;
-			Suit st;
-			for (st = Suit.first(); i < Suit.size(); st = st.next(), i++) {
+			//Suit st;
+			for (Suit st = Suit.first(); i < Suit.size(); st = st.next(), i++) {
 				ncards += suits[st.ordinal()].size();
 			}
 			return ncards;
@@ -218,7 +223,11 @@ public class RobotBrain {
 		void clear() {
 			int i = 0;
 			for (Suit s = Suit.first(); i < Suit.size(); i++) {
-				suits[s.ordinal()] = new Subdeck();
+				int j = s.ordinal();
+				if (suits[j] == null)
+					suits[j] = new Subdeck();
+				else
+					suits[j].clear();
 				s = s.next();
 			}
 		}
@@ -296,7 +305,7 @@ public class RobotBrain {
 				return gethearts().peek();
 			// TODO: Highest card in hand?
 			// ... guess
-			return hand.toxicCard();
+			return toxicCard();
 		}
 
 		/*
@@ -348,12 +357,13 @@ public class RobotBrain {
 			if (find(queenOfSpades))
 				return queenOfSpades;
 			// TODO:
-			// return AC or KC if don't have QC 
+			// return AC or KC only if don't have QC
+			// hmmm on the lead only...
 			if (getspades().size() > 0) {
-				if (find(kingOfSpades))
+				if (hand.find(kingOfSpades))
 					return kingOfSpades;
-				if (find(aceOfSpades))
-					return kingOfSpades;
+				if (hand.find(aceOfSpades))
+					return aceOfSpades;
 			}
 			if (gethearts().size() > 0)
 				return gethearts().peek();
@@ -443,7 +453,12 @@ public class RobotBrain {
 			return null;
 		}
 
-		void delete(Card c) {
+		void addCard(Card c) {
+			Subdeck sd = suits[c.suit.ordinal()];
+			sd.add(c);
+		}
+		
+		void deleteCard(Card c) {
 			Subdeck sd = suits[c.suit.ordinal()];
 			sd.delete(c);
 			/*
