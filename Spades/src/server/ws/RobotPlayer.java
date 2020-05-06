@@ -170,12 +170,6 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		 *  Nope. Always use your brain.
 		 *  There are no no-brainers...
 		 */
-		/*
-		if (robotBrain.hand.find(Rank.DEUCE, Suit.CLUBS)) {
-			c = new Card(Rank.DEUCE, Suit.CLUBS);
-			cardGame.playCard(getPID(), c); // yyy
-			return;
-		}*/
 
 		/*
 		 * Otherwise use robotBrain to determine what to play...
@@ -185,13 +179,12 @@ public class RobotPlayer extends Player implements PlayerInterface {
 			// Uh oh... brain failed
 			// note cardLead and currentTrick
 			System.out.println(getName() + ": Catastrophic Brain failure on lead:"); 
-//					+ cardLead.toString() );
 			robotBrain.brainDump(true);
 			c = robotBrain.getSomething();
-		} else if (!confirmPlayerHasCard(c)) {
+		} else if (!ssHasCard(c)) {
 			// catastrophic error.
 			// There is discrepency between hand and the
-			// Player subdeck holding the official cards.
+			// Player subdeck holds the official cards.
 			// complain loudly.
 			System.out.println(getName() + 
 					": Catastrophic Error: Cannot confirm card in hand: "
