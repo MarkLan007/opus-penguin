@@ -1,7 +1,10 @@
 package server.ws;
 
 //package cardGame;
-
+/*
+ * new development starting now... Post RC1 fixes to stuff before
+ * forking hearts game to hearts + spades, and mobile updates.
+ */
 class Card {
 	int cardindex;
 	Rank rank=Rank.ACE;		// Default Card AS
