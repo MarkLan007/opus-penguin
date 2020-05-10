@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Don't really need anything in here at this level
+<Host appBase="webapps" autoDeploy="true" name="localhost" unpackWARs="true">
+ -->
