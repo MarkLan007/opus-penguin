@@ -5,6 +5,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /*
+ * begin remodel and consolication of JCL. Currently 721 lines
+ *  should be about 1/3 that...
+ */
+/*
  * UserJCLCommand -- parse commands beginning with //
  * place into the structure with a type and name value pairs
  * for calls to getparam 
