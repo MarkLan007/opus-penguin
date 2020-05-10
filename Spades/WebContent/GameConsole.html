@@ -3,12 +3,6 @@
 <!-- touch here to cause rebuild v2b xyzzy 
 	*** Here is a change
 	*** identical to cgt.html ***
-<!-- touch here to cause rebuild v2a xxx 
-<!-- touch here to cause rebuild v2a xxx 
-<!-- touch here to cause rebuild v2a xxx 
-<!-- touch here to cause rebuild v2a xxx 
-<!-- touch here to cause rebuild v2a xxx 
-<!-- touch here to cause rebuild v2a xxx 
  * Use OneUtils.js for all utilities. 
  * Couldn't make modules with import/export work.
  * .mjs is a failed approach, at least now. Reverted back to .js
@@ -18,232 +12,654 @@
 <title>Spades Game Console</title>
 <!-- Define style for menu bar -->
 
-<!-- 
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
- -->
- 
+
+
 <style>
 body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
+	margin: 0;
+	font-family: Arial, Helvetica, sans-serif;
 }
 
 .topnav {
-  overflow: hidden;
-  background-color: #333;
+	overflow: hidden;
+	background-color: #333;
 }
 
 .topnav a {
-  float: left;
-  color: #f2f2f2;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
-  font-size: 17px;
+	float: left;
+	color: #f2f2f2;
+	text-align: center;
+	padding: 14px 16px;
+	text-decoration: none;
+	font-size: 17px;
 }
 
 .topnav a:hover {
-  background-color: #ddd;
-  color: black;
+	background-color: #ddd;
+	color: black;
 }
 
 .topnav a.active {
-  background-color: #4CAF50;
-  color: white;
+	background-color: #4CAF50;
+	color: white;
 }
 </style>
 <style>
 .dropbtn {
-  background-color: #3498DB;
-  color: white;
-  padding: 16px;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
+	background-color: #3498DB;
+	color: white;
+	padding: 16px;
+	font-size: 16px;
+	border: none;
+	cursor: pointer;
 }
 
 .dropbtn:hover, .dropbtn:focus {
-  background-color: #2980B9;
+	background-color: #2980B9;
 }
 
 .dropdown {
-  position: relative;
-  display: inline-block;
+	position: relative;
+	display: inline-block;
 }
 
 .dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #f1f1f1;
-  min-width: 160px;
-  overflow: auto;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
+	display: none;
+	position: absolute;
+	background-color: #f1f1f1;
+	min-width: 160px;
+	overflow: auto;
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+	z-index: 1;
 }
 
 .dropdown-content a {
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
+	color: black;
+	padding: 12px 16px;
+	text-decoration: none;
+	display: block;
 }
 
-.dropdown a:hover {background-color: #ddd;}
-.show {display: block;}
+.dropdown a:hover {
+	background-color: #ddd;
+}
 
+.show {
+	display: block;
+	}
 </style>
-</head> 
+<style>
+.alignRight {
+	float:none;
+	text-align:right;
+	margin-right:10px;
+	}
+	/* align left is new and untested... */
+.alignLeft {
+	float:none;
+	text-align:left;
+	margin-left:1px;
+}
+
+.splitscreen {
+    display:flex;
+}
+.splitscreen .left {
+    flex: 1;
+}
+.splitscreen .right {
+	text-align:center;
+    flex: 1;
+}
+/*
+<div class="splitscreen">    
+	<div class="left">
+        <!-- content -->
+    </div>
+
+    <div class="right">
+        <!-- content -->
+    </div>
+</div>
+*/
+.column1 {
+	width: 55%;
+	float: left;
+	}
+
+/*
+ * column2 is a container of rows
+ *  must think about column2 and buttonGrid very differently
+ * close but not quite...
+	display:	flex;
+	flex-direction:	row;
+	flex-wrap:	wrap;
+	justify-content:	start;
+
+	float: right;
+
+ */
+.column2 {
+	/*
+	 * the column aspect; i.e. relationship with rest of page
+	 *  i.e. cf with column1
+	 */
+	 z-index: 1;
+	 width: 45%;  
+	/* left: 550px; */
+	display: grid;
+	grid-template-rows: 80px 80px 80px auto;
+}
+
+/*
+ * buttonGrid is a container for a row of buttons
+ */
+ .buttonGrid {
+ 	display:grid;
+ 	grid-gap: 5px 20px;
+ 	grid-template-columns: repeat(21, 20px [col-end]);
+	align-items: end;
+ 	}
+ /* using flex didn't do what I wanted
+.buttonGrid {
+	display: flex;
+	flex-direction:	row;
+	flex-wrap: wrap;
+	justify-content: start;
+	align-items: baseline;
+}
+*/
+
+/* Clearfix (clear floats) */
+.row:after {
+	content: "";
+	clear: both;
+	display: table;
+	padding-left: 5px;
+}
+</style>
+<style>
+/* Styles for modal dialogs */
+
+/* The Modal (background) */
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+/* The Semi-Modal (background)
+ * mll 
+ */
+.semiModal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 2; /* Sit on top */
+  padding: 0px; /* 20px; Location of the box */
+  left: 0;
+  top: 0;
+  /*
+   * cover the play felt
+   */
+  width: 450px; /* partial width */
+  height: 63%; /* partial height */
+  /* width: 590px; */
+  /* height: 270px; */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.semi-modal-content {
+  background-color: #fefefe;
+  width: 410px;
+  height: 400px;
+  margin: auto;
+  padding: 5px;
+  border: 1px solid #888;
+  /*width: 80%;*/
+}
+
+/* The Close Button */
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
+<style>
+/* experiment with fully modal */
+body {font-family: Arial, Helvetica, sans-serif;}
+
+/* The FullyModal (background) */
+.fullymodal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* FullyModal Content */
+.fullymodal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+/* The fClose Button */
+.fclose {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.fclose:hover,
+.fclose:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+/* experimental fullyModal */
+</style>
+<style type="text/css">
+/* styles for the score table */
+#canvas1 {
+	border: dotted 3 px #c0c0c0;
+	background-color: lightblue
+}
+.scoreGrid {
+	display: flex;
+	justify-content:center;
+}
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+</style>
+
+</head>
+
 <body>
+	<div class="topnav">
+		<a class="active" href="#home" onclick="menuDropDown();">Home</a> <a
+			href="#view">View</a> <a href="#settings">Settings</a> <a
+			href="#about">About</a>
+	</div>
 
-
-<div class="topnav">
-  <a class="active" href="#home" onclick="menuDropDown();">Home</a>
-  <a href="#view">View</a>
-  <a href="#settings">Settings</a>
-  <a href="#about">About</a>
-</div> 
-
-<!-- 
+	<!-- 
   <button onclick="dropDown()" class="item1-menu"></button>
     <button onclick="menuDropDown()" class="tmpbutton">Foobar</button>
   
    -->
-<div class="MenubarItem1Dropdown"> 
-  <div id="item1-menu" class="dropdown-content" onclick="menuDropDown()" onmouseleave="mouseExitDropDownMenu(this)">
-    <a href="#home">File Open</a>
-    <a href="#about">Save</a>
-    <a href="#contact">Exit</a>
-    </div>
-  </div>
-  
-<h2>Clickable Dropdown</h2>
-<p>Click on the button to open the dropdown menu.</p>
+	<div class="MenubarItem1Dropdown">
+		<div id="item1-menu" class="dropdown-content" onclick="menuDropDown()"
+			onmouseleave="mouseExitDropDownMenu(this)">
+			<a href="#home">File Open</a> <a href="#about">Save</a> <a
+				href="#contact">Exit</a>
+		</div>
+	</div>
+	<!-- Add styles above, and div below... -->
 
-<div class="dropdown">
-  <button onclick="dropDown()" class="dropbtn">Dropdown</button>
-  <div id="myDropdown" class="dropdown-content" onmouseleave="mouseExitMenu(this)">
-    <a href="#home">Home</a>
-    <a href="#about">About</a>
-    <a href="#contact">Contact</a>
-  </div>
-</div>
+	<div class="row"></div>
+	<div class="column1" id="TextScrollDiv">
+		<canvas id="Canvas1" width=550>
+				Your browser sucks and does not support canvas.
+			</canvas>
+		<!--  card images here	-->
+		<img id="ClubsImage" src="Clubs.jpg" style="display: none;"
+			onload="setTimeout(function(){logCardImage();}, 300);"> 
+		<img id="DiamondsImage" src="Diamonds.jpg" style="display: none;"
+			onload="setTimeout(function(){logCardImage();}, 300);"> 
+		<img id="SpadesImage" src="Spades.jpg" style="display: none;"
+			onload="setTimeout(function(){logCardImage();}, 300);">
+		<img id="HeartsImage" src="Hearts.jpg" style="display: none;"
+			onload="setTimeout(function(){logCardImage();}, 300);"> 
+		<img id="buttonfaceimage" src="buttonfacetest.png" style="display: none;"
+			onload="setTimeout(function(){logCardImage();}, 300);"> 
+			
+		
+	</div>
 
+	<p id="gamestatusArea" class="alignRight"> Cards as buttons go here. </p>
+	<p id="trickArea" class="alignRight"> Previous Trick. </p>
 
-<div style="padding-left:16px">
-  <h2>Game Console Window</h2>
-  <p>Game will connect to server when you submit a command...</p>
-</div>
+	<div class="column2" id="handArea"
+		style="height: 415px; background-color: powderblue;">
+		<!--  
+		<div class="buttonGrid" id="CardsInHandDiv"></div>
+		-->
+		<span class="buttonGrid" id="ClubsInHandDiv"></span>
+		<span class="buttonGrid" id="DiamondsInHandDiv"></span>
+		<span class="buttonGrid" id="SpadesInHandDiv"></span>
+		<span class="buttonGrid" id="HeartsInHandDiv"></span>
+	</div>
+	<br>
 
-<script type="text/javascript" src="OneUtils.js">
-	// Key Point: Would prefer to use module and import/export (like this)
-	// But modules dont' actually work as of Chrome 79..
-	//	<script "module" src="SocketUtils.js">
-	'use strict'; 
-	/* x
-	 * I have no idea why these logging functinos don't produce visible output...
-	*/
-	console.log("Now in GameConsole.html back from loading OneUtils.js...");
-	alert("logging load...");
-	/*console.log(versionString1);
-	const consoleVersion="v0.01a";
-	console.log(versionString2);
-	console.log(versionString1 + consoleVersion + versionString2);
-	*/
-	// Dropdown Menu stuff
+	<div class="column1">
+		<var> Table Talk>> </var>
 
+		<!-- bug: I have no idea why adding autofocus doesn't seem to work here -->
+		<input id="msgText" type="text" onkeydown="keyFilter(event)">
+		<input title="Game will connect to server when you submit a command.."
+			onclick="wsSendMessage();" value="Submit" type="button"> <br />
+		<input onclick='wsPassDialog();' 
+			value="Pass Dialog"
+			type="button"> 
+		<input onclick='wsScoreDialog("fjkasd$Buzz=0.0$Joe=93.95$Laura=3.3$Anne=0.26$Bob=0.26$Patti=0.26$");' 
+			value="Score Dialog"
+			type="button"> 
+		<input onclick='experimentalFunction("");' value='Box-o-Chocolates'
+			type="button">
+		<input onclick="turnover1card();" value="Show 1 Card" 
+			type="button">
+		<input onclick="wsCloseConnection();" value="Disconnect" 
+			type="button" disabled> 
+		<input onclick="wsReconnect();" id="reconnectButton" value="Reconnect" 
+			type="button" disabled>
+		<br>
+		<!-- Move text area up (delete this...) 
+	<textarea id="echoText" rows="15" cols="60" readonly></textarea>
+	-->
+		<br />
+		<var>status...</var>
+		<div id="statusArea">Loading...</div>
+		<br />
+	</div>
+	<textarea id="echoText" rows="15" cols="40" readonly></textarea>
 
-/* Move to OneUtils...
- * 
- *When the user clicks on the button, 
- * toggle between hiding and showing the dropdown content 
- *...
-function dropDown() {
-	console.log("myDropdown..."); 
-	document.getElementById("myDropdown").classList.toggle("show");
-}
- */
+	<script id="scriptdiv" type="text/javascript" src="OneUtils.js">
+		// Key Point: Would prefer to use module and import/export (like this)
+		// But modules dont' actually work as of Chrome 79..
+		//	<script "module" src="SocketUtils.js">
+		'use strict';
+		/* x
+		 * I have no idea why these logging functinos don't produce visible output...
+		 */
+		console.log("Now in GameConsole.html back from loading OneUtils.js...");
+		alert("logging load...");
+		/*console.log(versionString1);
+		const consoleVersion="v0.01a";
+		console.log(versionString2);
+		console.log(versionString1 + consoleVersion + versionString2);
+		 */
+		// Dropdown Menu stuff
+		// Close the dropdown if the user clicks outside of it
+		window.onclick = function(event) {
+			console.log("onclick...");
 
-// Close the dropdown if the user clicks outside of it
-window.onclick = function(event) {
-	console.log("onclick...");
-
-  if (!event.target.matches('.dropbtn')) {
-	  console.log("Trying to close after select...")
-    var dropdowns = document.getElementsByClassName("dropdown-content");
-    var i;
-    for (i = 0; i < dropdowns.length; i++) {
-      var openDropdown = dropdowns[i];
-      if (openDropdown.classList.contains('show')) {
-        openDropdown.classList.remove('show');
-      }
-    }
-  }
-}
-	
-	/*
-	import {initSocketUtils, 
-			selectButtonPress } 
-		from "OneUtils.js"
-		// ie: import { export1 } from "module-name";
-		*/
-	console.log("init...");
-	alert("Init...");
-	initSocketUtils();
+			if (!event.target.matches('.dropbtn')) {
+				console.log("Trying to close after select...")
+				var dropdowns = document
+						.getElementsByClassName("dropdown-content");
+				var i;
+				for (i = 0; i < dropdowns.length; i++) {
+					var openDropdown = dropdowns[i];
+					if (openDropdown.classList.contains('show')) {
+						openDropdown.classList.remove('show');
+					}
+				}
+			}
+		}
 
 		openWebSocket();
-		var echoText = document.getElementById("echoText");
-		writeToTextAread("opening");
-		echoText.value = "";
+		document.addEventListener('keydown', keyFilter, true);
+		document.getElementById('testButton').addEventListener('click',
+				selectButtonPress);
+
+		//wsHandInit();
+	</script>
+	<script type="text/javascript">
+		//<script type="module" >
 		/*
-		var message = document.getElementById("message");
-		webSocket.onopen = function(message){ wsOpen(message);};
-		webSocket.onmessage = function(message){ wsGetMessage(message);};
-		webSocket.onclose = function(message){ wsClose(message);};
-		webSocket.onerror = function(message){ wsError(message);};
-		*/
-	document.addEventListener('keydown', keyFilter, true);
-	document.getElementById('testButton').addEventListener('click', selectButtonPress);
-	//addEventListener("click", function(event) {selectButtonPress(event);});
+		 * ok, so why does this make a difference?
+		 * putting the call to wsHandInit in its own script tag works,
+		 * whereas using it above does not. Why?
+		 */
+		wsHandInit();
+		wsFeltInit(); // auto-init felt canvas
+	</script>
+insert modal stuff here ->
+<!-- Trigger/Open The Modal -->
+<button id="myBtn">Open Modal</button>
 
-	//</script> <script type="module" >
-//src="OneUtils.js"
-//import selectButtonPress;
-//import { selectButtonPress } from "./SocketUtils.js";
-
-// selectButtonPress(null);
-
-</script>
- 
-
-<!-- 666
-Need:
-
-
-		<button id="send" onclick="wsSendMessage1();" value="Echo" type="button">
-		<input onclick="wsShowFelt();" value="ShowFelt" type="button" >
-		<input onclick="wsShowHand();" value="ShowHand" type="button">
-		<input onclick="turnover1card();" value="Show 1 Card" type="button">
-		<input onclick="wsCloseConnection();" value="Disconnect" type="button" disabled>
+<!-- The Modal Dialogs here -->
+<div id="myExperimentalModal" class="modal">
+<!-- Learning that class names are case sensitive the hard way...
  -->
+  <!-- Modal content -->
+  <div class="modal-content" >
+    <span class="close">&times;</span>
+    <p>Some vacuous text in the Modal..</p>
+    <p> bug: clicking outside the dialog doesn't close it..</p>
+  </div>
+</div>
+
+<!-- Generic Modal Here -->
+
+<div class="semiModal" id="passMsgDiv" >
+<div class="semi-modal-content" id="passMsgDiv1">
+	
+    <span id="closePassDialogDiv" class="close">&times;</span>
+	<p id="passMsgText" style="text-align: center">Pass [n] cards prior to
+		play.</p>
+	<div class="buttonGrid" id="passDiv"
+			style="align-items: center; width: 400px; height: 275px; background-color: powderblue;">
+	
 	<!-- 
-	<form>
-	 -->  
-		<input id="msgText" type="text" onkeydown="keyFilter(event)">
-		<input title="Game will connect to server when you submit a command.." 
-			onclick="wsSendMessage1();" value="Submit" type="button">
-		<br/>
-		<input onclick="wsShowFelt();" value="ShowFelt" type="button" >
-		<input onclick="wsShowHand();" value="ShowHand" type="button">
-		<input onclick="turnover1card();" value="Show 1 Card" type="button">
-		<input onclick="wsCloseConnection();" value="Disconnect" type="button" disabled>
-	<!-- 
-	</form>
-	 -->
+		style="align-items: center; width: 100%; height: 100%; background-color: powderblue;">
+		 -->
+		 <!-- Monkeying with the fixed vs % h and w -->
+	</div>
 	<br>
-	<textarea id="echoText" rows="15" cols="60" readonly></textarea>
-<br/>
-<var>status...</var>  <div id="statusArea">  Loading...  </div>
-<br/>
+	<span class="splitscreen">
+	<input class="left" id="passCardsButton" onclick="passCardsToServer();"
+		value="Pass Cards" type="button" disabled>
+	<p class="right" id="passDialogErrorString"> </p>
+	</span>
+</div>
+</div>
+
+
+<script>
+// Get the modal
+var modal = document.getElementById("myExperimentalModal");
+
+// Get the button that opens the modal
+var btn = document.getElementById("myBtn");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the modal 
+btn.onclick = function() {
+  modal.style.display = "inline-block";	// ?
+}
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+  modal.style.display = "none";
+}
+
+// I see... you need to set this every time it comes up..
+// hook the onshow event... unfortunately it's only supported in firefox
+// at the moment...
+// so last init wins!
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}
+</script>
 
 </body>
+<body>
+
+<h2>FullyModal Example</h2>
+xx
+<div id="myGenericModal" class="modal">
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span id="spanCloseXXX" class="close">&times;</span>
+    <p>Some text in the Modal..</p>
+    <p> Completely broken. Button doesn't close. "open fullymodal" does nothing. </p>
+    <p>Something's wrong. You shouldn't see this until you press the button...</p>
+        <p>fixed...</p>
+  </div>
+</div>
+
+xx
+<!-- Trigger/Open The FullyModal -->
+<button id="modelModalBtn">Open FullyModal</button>
+
+<!-- The FullyModal -->
+<div id="scoreDialogDiv" class="fullymodal">
+
+  <!-- FullyModal content -->
+  <div class="fullymodal-content">
+    <span class="fclose">&times;</span>
+    <!-- 
+    <p>Some text in the FullyModal..</p>
+     -->
+    	<p id="passMsg" style="text-align: center">Player Scores</p>
+	<div class="scoreGrid" id="passDiv"
+		style="align-items: center;  background-color: powderblue;">
+    
+<script>
+/*
+ * Note that code must be AFTER all the items that are referenced...
+ * for example this must follow the button that is created since 
+ * init is called on it...
+ */
+
+function initModelModalCode() {
+	// Get the fullymodal
+	var fullymodal = document.getElementById("myGenericModal");
+
+	// don't forget to hook the button to open the div
+	// it's modelModalBtn ... xxx
+	var btn = document.getElementById("modelModalBtn");
+		btn.onclick = function() {
+		fullymodal.style.display = "block";
+	}
+
+	// Get the <span> element that closes the fullymodal
+	// tricky because gets by type and assumes this if the first one...
+	// so make sure that the classname is unique
+	var span = document.getElementsByClassName("close")[0];
+
+	var span = document.getElementById("spanCloseXXX");
+	// When the user clicks on <span> (x), close the fullymodal
+	span.onclick = function() {
+		console.log("X click.");
+		fullymodal.style.display = "none";
+	}
+
+	// When the user clicks anywhere outside of the fullymodal, close it
+	window.onclick = function(event) {
+		if (event.target == fullymodal) {
+			fullymodal.style.display = "none";
+		}
+	}
+
+}
+
+initModelModalCode();
+
+</script>
+    
+<table id=formattedScoreTable>
+  <tr>
+    <th id="strC1">player</th>
+    <th id="strC2">points</th>
+    <th id="scrC3">total</th>
+  </tr>
+  <tr id="scoreTableRow0">
+    <td id="playerp0">Human Player 1</td>
+    <td id="p0s0">0</td>
+    <td id="p0s1">0</td>
+  </tr>
+  <tr id="scoreTableRow1">
+    <td id="playerp1">Robot Player 0</td>
+    <td id="p1s0">0</td>
+    <td id="p1s1">0</td>
+  </tr>
+  <tr id="scoreTableRow2">
+    <td id="playerp2">Robot Player 1</td>
+    <td id="p2s0">0</td>
+    <td id="p2s1">0</td>
+  </tr>
+  <tr id="scoreTableRow3">
+    <td id="playerp3">Robot Player 2</td>
+    <td id="p3s0">0</td>
+    <td id="p3s1">0</td>
+  </tr>
+  <tr id="scoreTableRow4">
+    <td id="playerp4">Robot Player 3</td>
+    <td id="p4s0">0</td>
+    <td id="p4s1">0</td>
+  </tr>
+  <tr id="scoreTableRow5">
+    <td id="playerp5">Robot Player 4</td>
+    <td id="p5s0">0</td>
+    <td id="p5s1">0</td>
+  </tr>
+</table>	
+    
+  </div>
+
+</div>
+</div>
+</body>
+
 </html>

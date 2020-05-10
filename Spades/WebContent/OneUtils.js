@@ -2,7 +2,7 @@
  * CardUtils - card data structures and utility functions
  */
 'use strict';
-/* xyzzy...
+/*
  * Naming: wsXXX - routines that involve web socket sending or receiving
  * messages ...DialogWindow -- dialog done the window way (TODO: move to retired
  * code) ...DialogDiv -- dialog done with divs (better.)
