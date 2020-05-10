@@ -208,11 +208,7 @@ function wsShowFelt() {
 	
 }
 
-/*
- * turnover 1 card game-state machine (for debugging) and
- * routines for table4 and table6 placement (and clear, eventually)
- */
-
+// turnover1card
 var fakeRandom=0;
 function jrandom(between0andXminus1) {
 	//return fakeRandom++;
@@ -238,176 +234,13 @@ function cardYoffset(card) {
 	return pixels;
 }
 
+/*
+ * turnover1card -- backup version; works for one card
+ */
 var pi=Math.PI;
-
-function getCardImageFile(card) {
-	var x=card.suit;
-	switch (card.suit) {
-	case CLUBS:
-		if (clubsCardImages == null)
-			clubsCardImages = feltWindow.document.getElementById("ClubsImage");
-		return clubsCardImages;
-	case DIAMONDS:
-		if (diamondsCardImages == null)
-			diamondsCardImages = feltWindow.document.getElementById("DiamondsImage");
-		return diamondsCardImages;
-	case HEARTS:
-		if (heartsCardImages == null)
-			heartsCardImages = feltWindow.document.getElementById("HeartsImage");
-		return heartsCardImages;
-	case SPADES:
-		if (spadesCardImages == null)
-			spadesCardImages = feltWindow.document.getElementById("SpadesImage");
-		return spadesCardImages;
-	default:
-		return suitcardImages;
-	}
-}
-/*
- * cardPos is 0, NORTH at top, clockwise to number of players
- * rotate through positions; state is currentCard
- * xxxx
- */
-/*
- * game state machine 
- */
 var currentCard=0; //badly named; should be cardSeat or something like that
 var nHands=4;
-var indexCheck=true;
-var nTableSize=4;
-
-function setTableSize(size) {
-	switch(size) {
-	case 4:
-	case 6:
-		nTableSize=size;
-		return true;
-	default:
-		console.log("Can't set table size to ", size);
-	}
-	return false;
-}
-
-function turnover1card() { 
-	var randomcard=jrandom(52);	// pick a card, any card.
-	var card=theDeck[randomcard];
-	if (indexCheck == true)
-		console.log("Card.index=", card.cardIndex, "for (suit,rank)=", card.suit, card.rank);
-	console.log("Card:" + card.cardIndex);
-	// Next, switch on the table size...
-	switch (nTableSize) {
-	case 4:
-		turnover1card4(card, currentCard);
-		break;
-	case 6:
-		console.log("6 - Not implemented yet");
-	default:
-		alert("Unknown table size"+nTableSize);
-		return;	// do not pass go, or change currentCard;
-	}
-
-	currentCard = (currentCard + 1) % nHands;
-}
-
-function turnover1card4(card, position) { // New rotation
-	var randomcard=jrandom(52);	// pick a card, any card.
-	var card=theDeck[randomcard];
-	if (indexCheck == true)
-		console.log("Card.index=", card.cardIndex, "for (suit,rank)=", card.suit, card.rank);
-	console.log("Card:" + card.cardIndex);
-	feltContext = feltCanvas.getContext("2d");
-	var lastx, lasty;
-	// All cards are packed into their files the same way, so 
-	// location is based (symmetrically) on the card's rank.
-	// Also note that Arrays are 0-based, and the offsets are 1-based
-	var firstx=cardXoffset(Rank[card.rank] - 1);
-	var firsty=cardYoffset(Rank[card.rank] - 1);
-
-	console.log("currentCard Seat=" + position);
-	console.log("xy-source["+firstx+", "+firsty+"]");
-	console.log("width-height["+cardwidth+", " + cardheight + "]");
-
-	if (card.cardImage == null) {
-		card.cardImage = getCardImageFile(card);
-	}
-	waitForImageLoad();
-	//
-	// Assume 4handed for now
-	var halfwidth=Math.floor(feltCanvas.width/2);
-	var halfheight=Math.floor(feltCanvas.height/2); 
-	var halfxmarginwidth=Math.floor(xmarginwidth/2);
-	var halfcardwidth=Math.floor(cardwidth/2)
-	//var halfymarginheight=Math.floor(xmarginheight/2);
-	var topy=0;
-	if (halfheight > cardheight)
-		topy = cardheight;
-	else
-		topy = halfheight;
-	var rotation=(90/180) * pi;	// rotation in radians for 90 degrees
-	switch (position) {
-	case 0:	// North-center
-		feltContext.drawImage(card.cardImage, 
-			firstx, firsty, cardwidth, cardheight, // source rectangle
-			halfwidth-halfcardwidth, 0 , cardwidth, cardheight		// destination rectangle
-			);
-		break;
-	case 1: // East half cardwith shifted left, half screen down
-		// genius use of 90-degree rotation
-		var upperLeftX=halfwidth+halfcardwidth+xmarginwidth;
-		var upperLeftY=topy;
-		feltContext.translate(halfwidth, halfheight);
-		feltContext.rotate(rotation);
-		feltContext.drawImage(card.cardImage, 
-				firstx, firsty, cardwidth, cardheight, // source rectangle
-				-cardwidth, -cardheight , // not 0 after rotation...
-					cardwidth, cardheight		// destination rectangle
-				);
-		// Undo rotation and translation for next seat
-		feltContext.rotate(-rotation);
-		feltContext.translate(-halfwidth, -halfheight);
-		break;
-	case 2:	// South rotated 180 upside down.
-		feltContext.drawImage(card.cardImage, 
-				firstx, firsty, cardwidth, cardheight, // source rectangle
-				halfwidth-halfcardwidth, halfheight, cardwidth, cardheight		// destination rectangle
-				);
-		break;
-	case 3:	// West
-		// genius use of 90-degree rotation
-		var upperLeftX=halfwidth+halfcardwidth+xmarginwidth;
-		var upperLeftY=topy;
-		feltContext.rotate(rotation);
-		feltContext.drawImage(card.cardImage, 
-				firstx, firsty, cardwidth, cardheight, // source rectangle
-				halfwidth-halfcardwidth, -cardheight , // not 0 after rotation...
-					cardwidth, cardheight		// destination rectangle
-				);
-		feltContext.rotate(-rotation);
-		break;
-		default:
-			console.log("Switch: can't happen.");
-	}
-	
-}
-
-var imageFilesLoaded=0;	// number of image files loaded
-function logCardImage() {
-	//alert("Image loaded?");
-	imageFilesLoaded++;
-	console.log("image files loaded=" + imageFilesLoaded);	
-}
-
-function waitForImageLoad() {
-	var sleeps=10;
-	var i;
-	for (i=0; i<sleeps; i++) {
-		if (imageFilesLoaded <4)
-			return;
-		sleep(100);
-		}
-}
-
-function turnover1cardOld() {
+function turnover1card() {
 	var randomcard=jrandom(52);	// pick a card, any card.
 	var card=theDeck[randomcard];
 	if (indexCheck == true)
@@ -452,6 +285,114 @@ function turnover1cardOld() {
 	case 1: // East half cardwith shifted left, half screen down
 		rotation = pi/2;
 		//feltContext.translate(halfwidth, halfheight);
+		feltContext.rotate(rotation);
+		feltContext.drawImage(card.cardImage, 
+				firstx, firsty, cardwidth, cardheight, // source rectangle
+				halfwidth+halfcardwidth+xmarginwidth, topy, cardwidth, cardheight		// destination rectangle
+				);
+		feltContext.rotate(-rotation);
+		//feltContext.translate(-halfwidth, -halfheight);
+		break;
+	case 2:	// South rotated 180 upside down.
+		feltContext.drawImage(card.cardImage, 
+				firstx, firsty, cardwidth, cardheight, // source rectangle
+				halfwidth-halfcardwidth, halfheight, cardwidth, cardheight		// destination rectangle
+				);
+		break;
+	case 3:	// West
+		rotation = (45/180)*pi;
+		feltContext.rotate(rotation);
+		feltContext.drawImage(card.cardImage, 
+				firstx, firsty, cardwidth, cardheight, // source rectangle
+				0, halfheight, cardwidth, cardheight		// destination rectangle
+				);
+		feltContext.rotate(-rotation);
+		break;
+		default:
+			console.log("Switch: can't happen.");
+	}
+	
+	currentCard = (currentCard + 1) % nHands;
+}
+
+/*
+ * turnover1card - rebuilt turnover1card using cards not just the face
+ * xxx
+ */
+var indexCheck=true;
+
+function getCardImageFile(card) {
+	var x=card.suit;
+	switch (card.suit) {	// xxx
+	case CLUBS:
+		if (clubsCardImages == null)
+			clubsCardImages = feltWindow.document.getElementById("ClubsImage");
+		return clubsCardImages;
+	case DIAMONDS:
+		if (diamondsCardImages == null)
+			diamondsCardImages = feltWindow.document.getElementById("DiamondsImage");
+		return diamondsCardImages;
+	case HEARTS:
+		if (heartsCardImages == null)
+			heartsCardImages = feltWindow.document.getElementById("HeartsImage");
+		return heartsCardImages;
+	case SPADES:
+		if (spadesCardImages == null)
+			spadesCardImages = feltWindow.document.getElementById("SpadesImage");
+		return spadesCardImages;
+	default:
+		return suitcardImages;
+	}
+}
+/*
+ * cardPos is 0, NORTH at top, clockwise to number of players
+ * xxx
+ */
+function turnover1cardOld() {
+	var randomcard=jrandom(52);	// pick a card, any card.
+	var card=theDeck[randomcard];
+	if (indexCheck == true)
+		console.log("Card.index=", card.cardIndex, "for (suit,rank)=", card.suit, card.rank);
+	console.log("Card:" + card.cardIndex);
+	feltContext = feltCanvas.getContext("2d");
+	var lastx, lasty;
+	// All cards are packed into their files the same way, so 
+	// location is based (symmetrically) on the card's rank.
+	// Also note that Arrays are 0-based, and the offsets are 1-based
+	var firstx=cardXoffset(Rank[card.rank] - 1);
+	var firsty=cardYoffset(Rank[card.rank] - 1);
+
+	console.log("currentCard Seat=" + currentCard);
+	console.log("xy-source["+firstx+", "+firsty+"]");
+	console.log("width-height["+cardwidth+", " + cardheight + "]");
+
+	if (card.cardImage == null) {
+		card.cardImage = getCardImageFile(card);
+	}
+	waitForImageLoad();
+	//
+	// Assume 4handed for now
+	var halfwidth=Math.floor(feltCanvas.width/2);
+	var halfheight=Math.floor(feltCanvas.height/2); 
+	var halfxmarginwidth=Math.floor(xmarginwidth/2);
+	var halfcardwidth=Math.floor(cardwidth/2)
+	//var halfymarginheight=Math.floor(xmarginheight/2);
+	var topy=0;
+	if (halfheight > cardheight)
+		topy = cardheight;
+	else
+		topy = halfheight;
+	var rotation=0;
+	switch (currentCard) {
+	case 0:	// North-center
+		feltContext.drawImage(card.cardImage, 
+			firstx, firsty, cardwidth, cardheight, // source rectangle
+			halfwidth-halfcardwidth, 0 , cardwidth, cardheight		// destination rectangle
+			);
+		break;
+	case 1: // East half cardwith shifted left, half screen down
+		//rotation = pi/2;
+		//feltContext.translate(halfwidth, halfheight);
 		//feltContext.rotate(rotation);
 		feltContext.drawImage(card.cardImage, 
 				firstx, firsty, cardwidth, cardheight, // source rectangle
@@ -467,11 +408,11 @@ function turnover1cardOld() {
 				);
 		break;
 	case 3:	// West
-		rotation = (45/180)*pi;
+		//rotation = (45/180)*pi;
 		//feltContext.rotate(rotation);
 		feltContext.drawImage(card.cardImage, 
 				firstx, firsty, cardwidth, cardheight, // source rectangle
-				0, topy, cardwidth, cardheight		// destination rectangle
+				0, halfheight, cardwidth, cardheight		// destination rectangle
 				);
 		//feltContext.rotate(-rotation);
 		break;
@@ -481,6 +422,24 @@ function turnover1cardOld() {
 	
 	currentCard = (currentCard + 1) % nHands;
 }
+
+var imageFilesLoaded=0;	// number of image files loaded
+function logCardImage() {
+	//alert("Image loaded?");
+	imageFilesLoaded++;
+	console.log("image files loaded=" + imageFilesLoaded);	
+}
+
+function waitForImageLoad() {
+	var sleeps=10;
+	var i;
+	for (i=0; i<sleeps; i++) {
+		if (imageFilesLoaded <4)
+			return;
+		sleep(100);
+		}
+}
+
 
 /**
  * 
@@ -618,56 +577,16 @@ function processSubmitAndClearMsgText() {
 		console.log("null msg box - ignored.");
 		return;
 		}
-	/*
-	 * Head off local commands
-	 */
-	if (processLocalCommand(line)) {	// i.e. a .table=, .clear, etc.
-		;
-	} else {	// otherwise send to the server
-		console.log("full-line:" + line);
-		// add to the scroll box...
-		appendTextToTextArea("local:" + line + '\n'); // temporary...
-		//
-		if (serverWrite(line) == false)
-			return;		// i.e. exit before clearing text box
-	}
+	console.log("full-line:" + line);
+	// add to the scroll box...
+	appendTextToTextArea("local:" + line + '\n'); // temporary...
 	//
-	// clear text box And set the focus to the text area... 
+	if (serverWrite(line) == false)
+		return;
 	document.getElementById("msgText").value = "";
+	//
+	// And set the focus to the text area... only necessary when button is pressed...
 	document.getElementById("msgText").focus();
-}
-
-/*
- * processLocalCommand - process a typed-in line locally 
- */
-function processLocalCommand(line) {
-	// var commandStatus=false;	// assume failure...
-	
-	 // pick off lines beginning with .
-	if (line.startsWith(".")) // as soon as you know .Something you will eat and process the line
-		 ;
-	else
-		return false;
-
-	if (line.includes("table=")) { // .table={4,6}
-		// extract number from string
-        var matches = line.match(/(\d+)/); // if a number at all...       
-        if (matches) { 
-        	var text = matches[0];
-        	// not yet... xstatusUpdate("Setting table param=" + n);
-        	// parseInt(text,10); not needed??
-        	var n=parseInt(text,10);
-        	if (setTableSize(n)) {
-            	xstatusUpdate("Setting table param=" + n);
-        	} else {
-        		xstatusUpdate("Invalid table parameter. ignored");   	
-        	}
-        }	
-	} else {
-		xstatusUpdate("Unrecognized command. ignored");   	
-	} 
-	
-	return true;	// if I've made it this far, it's at least .something
 }
 
 function appendTextToTextArea(newtext) {
