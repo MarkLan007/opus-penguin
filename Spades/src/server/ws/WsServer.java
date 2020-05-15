@@ -330,7 +330,7 @@ public class WsServer {
 			write(us, us.sessionId + us.getName());
 			System.out.println("name="+sName);
 			break;
-		case JCLSuperUser:
+		case JCLSu:		// was JCLSuperUser
 			us.setSuperUser(true);
 			write(us, "With great power comes great responsibility...");
 			break;

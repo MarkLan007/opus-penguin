@@ -14,7 +14,8 @@ public class UserJCLCommand {
 		JCLLs,
 		JCLNew,		// create a new game
 		JCLStart,
-		JCLRejoin, JCLSuperUser, // SuperUser
+		JCLRejoin, 
+		JCLSu, 		// SuperUser was JCLSuperUser...
 		JCLRefresh,
 		JCLResend, JCLReset,
 		JCLNewdeal, JCLMisdeal,

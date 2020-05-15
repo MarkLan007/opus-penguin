@@ -96,7 +96,34 @@ body {
 	text-align:right;
 	margin-right:10px;
 	}
-	
+	/* align left is new and untested... */
+.alignLeft {
+	float:none;
+	text-align:left;
+	margin-left:1px;
+}
+
+.splitscreen {
+    display:flex;
+}
+.splitscreen .left {
+    flex: 1;
+}
+.splitscreen .right {
+	text-align:center;
+    flex: 1;
+}
+/*
+<div class="splitscreen">    
+	<div class="left">
+        <!-- content -->
+    </div>
+
+    <div class="right">
+        <!-- content -->
+    </div>
+</div>
+*/
 .column1 {
 	width: 55%;
 	float: left;
@@ -194,8 +221,8 @@ body {
   /*
    * cover the play felt
    */
-  width: 422px; /* partial width */
-  height: 56%; /* partial height */
+  width: 450px; /* partial width */
+  height: 63%; /* partial height */
   /* width: 590px; */
   /* height: 270px; */
   overflow: auto; /* Enable scroll if needed */
@@ -207,6 +234,7 @@ body {
 .semi-modal-content {
   background-color: #fefefe;
   width: 410px;
+  height: 400px;
   margin: auto;
   padding: 5px;
   border: 1px solid #888;
@@ -350,10 +378,10 @@ tr:nth-child(even) {
 		<!--  
 		<div class="buttonGrid" id="CardsInHandDiv"></div>
 		-->
-		<div class="buttonGrid" id="ClubsInHandDiv"></div>
-		<div class="buttonGrid" id="DiamondsInHandDiv"></div>
-		<div class="buttonGrid" id="SpadesInHandDiv"></div>
-		<div class="buttonGrid" id="HeartsInHandDiv"></div>
+		<span class="buttonGrid" id="ClubsInHandDiv"></span>
+		<span class="buttonGrid" id="DiamondsInHandDiv"></span>
+		<span class="buttonGrid" id="SpadesInHandDiv"></span>
+		<span class="buttonGrid" id="HeartsInHandDiv"></span>
 	</div>
 	<br>
 
@@ -364,7 +392,7 @@ tr:nth-child(even) {
 		<input id="msgText" type="text" onkeydown="keyFilter(event)">
 		<input title="Game will connect to server when you submit a command.."
 			onclick="wsSendMessage();" value="Submit" type="button"> <br />
-		<input onclick='wsPassDialog(3, "Pass 3 Cards");' 
+		<input onclick='wsPassDialog();' 
 			value="Pass Dialog"
 			type="button"> 
 		<input onclick='wsScoreDialog("fjkasd$Buzz=0.0$Joe=93.95$Laura=3.3$Anne=0.26$Bob=0.26$Patti=0.26$");' 
@@ -473,8 +501,11 @@ insert modal stuff here ->
 		 <!-- Monkeying with the fixed vs % h and w -->
 	</div>
 	<br>
-	<input id="passCardsButton" onclick="passCardsToServer();"
+	<span class="splitscreen">
+	<input class="left" id="passCardsButton" onclick="passCardsToServer();"
 		value="Pass Cards" type="button" disabled>
+	<p class="right" id="passDialogErrorString"> </p>
+	</span>
 </div>
 </div>
 
