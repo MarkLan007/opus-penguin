@@ -225,9 +225,10 @@ public class RobotPlayer extends Player implements PlayerInterface {
 	 * TODO: neither deleteCard for addCards should be used
 	 * you should just delete or add them to robotbrain directly.
 	 * ... I don't believe either are actually used anymore...
+	 * ... Unfortunately they are part of player interface...
 	 * Buzz
 	 */
-	public void addCardsXXKillThisFunction(Subdeck sd) {
+	public void addCards(Subdeck sd) {
 		String sTemp = "";
 		playerErrorLog("RobotPlayer" + getPID() + ": adding " + sd.size() + " cards.");
 		// Subdeck sd = m.subdeck.subdeck;
@@ -238,7 +239,7 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		playerErrorLog("RobotPlayer" + getPID() + ": Dealt/passed " + sd.sdump() + " cards:" + sTemp);
 	}
 
-	public void deleteCardXXKillThisFunction(Card c) {
+	public void deleteCard(Card c) {
 		if (deleteFromHand(c)) {
 			playerErrorLog("RobotPlayer" + getPID() + ": successfully deleted: <" + c.rank + c.suit + ">.");
 		} else {
