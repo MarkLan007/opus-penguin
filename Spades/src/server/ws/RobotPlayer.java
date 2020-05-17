@@ -331,6 +331,8 @@ public class RobotPlayer extends Player implements PlayerInterface {
 				deleteCard(c);
 				robotBrain.deleteCard(c);
 			} */
+			if (m.subdeck == null || m.subdeck.subdeck == null)
+				break;
 			for (Card goner : m.subdeck.subdeck) {
 				// deleteCard(goner);
 				robotBrain.deleteCard(goner);
