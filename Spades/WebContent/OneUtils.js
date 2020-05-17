@@ -233,8 +233,12 @@ function cardSelected(event) {
 	var t = event.target;
 	/*
 	 * Mark the button as selected for the user by setting the opacity
+	 *  .. only do this if in a pass.
+	 *  .. the delete comes back quickly and unsetting this in case
+	 *  of an error is too complicated right now...
 	 */
-	t.style.opacity = 0.5;
+	if (bPassingCardsInProgress)
+		t.style.opacity = 0.5;
 	var buttonName = event.target.id;
 	//var uniqueId = t.type + t.id;
 	//var special = t.textContent;

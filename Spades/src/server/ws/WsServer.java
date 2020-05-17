@@ -305,11 +305,27 @@ public class WsServer {
 			broadcast(echoString);
 			break;
 		case JCLPoke:
-			us.cgk.resume();
+			write(us, "Poke not implemented now");
+			//us.cgk.resume();
 			break;
 		case JCLResume:
-			if (us.cgk.isIdle())
-				us.cgk.resume();
+			/*kernel disabled...
+			 * resume now resumes an idle game after humans left
+			 * if (us.cgk.isIdle())
+				us.cgk.resume(); */
+			sname="";
+			sparam="";
+			if (jcl.argc() > 1) {	// argc is always at least 1
+				sname=jcl.getName(1);
+				sparam=jcl.getValue(1);
+				}
+			g=lookupGameFromSession(sparam);
+			if (g == null)
+				g = getDefaultGame();
+			if (!g.start()) {
+				write(us, "Play Initiated. Can't start. User 'resume' or use 'misdeal', 'newdeal' or 'reset' to reset.");
+			}
+
 			break;
 		case JCLPrevious:
 			if (us.game == null)
@@ -387,7 +403,7 @@ public class WsServer {
 				sparam=jcl.getValue(1);
 				}
 			/*
-			 * sparam is in reality ignored for now
+			 * sparam for start is ignored
 			 */
 			g=lookupGameFromSession(sparam);
 			if (g == null)

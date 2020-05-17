@@ -319,7 +319,7 @@ public class CardGame implements GameInterface {
 		// This sends to client; fine;
 		// pause before processing any response when stepping
 		/*
-		 * This message should included the cards already played in the trick.. xxx ,,,
+		 * This message should included the cards already played in the trick.. 
 		 * No it shouldn't. But it should send a %msg text attachment if first move,
 		 * ?0%msg: lead the 2c if leading, ?0%msg: your lead else ?0%msg: your turn
 		 */
@@ -1108,6 +1108,23 @@ public class CardGame implements GameInterface {
 		resetHand();
 	}
 
+	// jcl: //resume
+	public boolean resume() {
+		if (!bPlayInitiated) {
+			return false;
+		}
+		if (bGameAborted)
+			return false;
+		if (bHandOver)
+			return false;
+		if (nCurrentTurn == -1)
+			return false;
+		if (bPassingCardsInProgress)
+			return true;
+		go();	// ?
+		return true;
+	}
+	
 	// jcl: //start
 	public boolean start() {
 		if (bPlayInitiated) {
@@ -1240,67 +1257,6 @@ public class CardGame implements GameInterface {
 		}
 
 	}
-	/*
-	 * send welcome message holding session information to get back into the game.
-	 * Then..
-	 * 
-	 * 1. Initiate a pass message to players ~ when pass is complete, game will
-	 * start 2. otherwise find the two commence play
-	 * 
-	 * Retrieve results Then start the game idea... Passing: waiting for... to
-	 * everyone then start... This is the first really asynch thing to be done...
-	 */
-
-	/*
-	 * deal, pass (if not hold), sendfirst move
-	 * no longer used.
-	 * duties split between start(reset players) and deal(shuffl)
-	 */
-	void initiatePlayXXX() {
-		int i;
-		Player p;
-		/*
-		 * Don't setup trick till after the (maybe) pass
-		 *
-		 */
-
-		//
-		// send (individual) welcome message
-		// shouldn't join do this? No because user might be waiting for multiple
-		// joins...
-		for (i = 0; i < nPlayers; i++) {
-			p = playerArray[i];
-			ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PLAYER_WELCOME, p.getName());
-			p.sendToClient(pm);
-		}
-		//
-		// Now send the protocol message to add cards to the players hand
-		for (i = 0; i < nPlayers; i++) {
-			p = playerArray[i];
-			ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.ADD_CARDS, p.subdeck);
-			p.sendToClient(pm);
-		}
-
-		// Log the hands for later post-mortem diagnostics
-		for (i = 0; i < nPlayers; i++) {
-			Subdeck sd = playerArray[i].subdeck;
-			gameErrorLog("Housekeeping: subdeck size(" + sd.size() + "){" + sd.encode() + "}");
-		}
-
-		// So do the pass, if a pass hand.
-		// when the pass is complete it will call send next move
-		// otherwise sendnextmove
-		//
-		// Send the message to the first player to start...
-		//
-		if (currentPass != MailBoxExchange.PassType.Hold) {
-			initiatePass(currentPass);
-			// once pass cards messages are complete, the exchange will call go();
-		} else {
-			go();
-		}
-		bPlayInitiated = true;
-	}
 
 	/*
 	 * go - Cards dealt, Pass is complete. Start play
@@ -1312,12 +1268,21 @@ public class CardGame implements GameInterface {
 	}
 
 	private void resetGameScores() {
-
 		nHands = 0;
 		for (int i = 0; i < nPlayers; i++) {
 			Player p = playerArray[i];
 			p.totalScore = 0;
 		}
+	}
+	
+	int humansInGame() {
+		int humans=0;
+		for (int i = 0; i < nPlayers; i++) {
+			Player p = playerArray[i];
+			if (!p.isRobot())
+				humans ++;
+		}
+		return humans;		
 	}
 
 	/*
@@ -1336,9 +1301,20 @@ public class CardGame implements GameInterface {
 		System.out.println("Disconnect: Seat(" + pid + ")" + p.getName());
 		copyPlayer(p, robot);
 		playerArray[pid] = robot;
+		/*
+		 * Check if there are ONLY robots in the game.
+		 * If so, pause...
+		 * i.e. go into the state where game is waiting for a 
+		 * start() to continue
+		 * xxx
+		 */
+		if (humansInGame() == 0) {
+			// wait for resume...
+			return;
+		}
 		if (nCurrentTurn == pid) {
 			ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.YOUR_TURN);
-			robot.process(pm);
+			robot.processLocalMessage(pm);
 		}
 	}
 
