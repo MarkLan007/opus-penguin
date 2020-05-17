@@ -15,11 +15,13 @@ public class RobotBrain {
 
 	void reset() {
 		trickCount = 0;
+		currentTrick = null;
+		// otherwise robot screwed up on first trick following
 		hand.clear();
 		//hand = new Hand();
 	}
 
-	boolean bThinkingOutLoud = false;
+	boolean bThinkingOutLoud = true;
 
 	void thinkOutLoud(boolean b) {
 		bThinkingOutLoud = b;
@@ -62,8 +64,10 @@ public class RobotBrain {
 			if (hand.size() != 13)
 				System.out.println("*** Robot(?) cards=" + hand.size() + "***");
 		}
-		if (hand.find(deuceOfClubs))
+		if (hand.find(deuceOfClubs)) {
+			System.out.println("Robot: I have the 2...");
 			return deuceOfClubs;
+			}
 		if (cardLead == null) {
 			/*
 			 * I have the lead...
@@ -99,11 +103,19 @@ public class RobotBrain {
 		/*
 		 * apply the must-follow rule
 		 */
+		if (bThinkingOutLoud) {
+			System.out.println("Robot: must follow " 
+					+ cardLead.suit 
+					+ " if possible...");
+		}
 		if (!hand.voidIn(cardLead.suit)) {
 			// actually check if the qs has been played
 			// if so, duck the lead (unless moonshooting...)
 			c = hand.highest(cardLead.suit);
 		} else { // Slough!
+			if (bThinkingOutLoud) {
+				System.out.println("Robot: can slough!");
+			}
 			// void in the lead suit. Slough something
 			c = hand.bestSlough(actualTrickId);
 		}

@@ -155,11 +155,13 @@ body {
 	position: fixed;
 	right: 0;
 	z-index: 0;	/* see comment on column1 */
-	width: 45%;
+	width: 50%;
 	/* left: 550px; */
 	float: left; /* ??? */
 	display: grid;
-	grid-template-rows: 80px 80px 80px 80px 80px 80px auto;
+	/* grid-template-rows: 80px 80px 80px 80px 80px 80px auto; */
+	/* grid-template-rows: 60px 60px 60px 60px 60px 60px auto; */
+	grid-template-rows: auto; 
 	/* transition: right 3s; */
 }
 
@@ -181,16 +183,110 @@ body {
 	display: grid;
 	height: 350px;
 	align-items: left;
+	
 	/*grid-template-rows: 30% 30% 30%;*/
 	grid-template-rows: 50px 50px 50px;
 }
 
 .buttonGrid {
-	display: grid; grid-gap : 5px 20px;
-	grid-template-columns: repeat(21, 20px [ col-end ]);
-	align-items: end;
-	grid-gap: 5px 20px;
+	display: grid; 
+	grid-template-columns: repeat(5, 1fr);
+	
+	/*grid-template-columns: repeat(21, 20px [ col-end ]); */
+	/* align-items: end; */
+	justify-content: start;
+	/* grid-gap: 5px 20px; */
+	grid-gap: 0px 0px;
+	
 }
+
+.hoverBtn{
+	cursor:pointer;
+	position:relative;
+	/* padding:10px 20px; */
+	background:white;
+	font-size:28px;
+	border-top-right-radius:10px;
+	border-bottom-left-radius:10px;
+	transition:all 1s;
+/*
+	&:after,&:before{
+		content:" ";
+		width:10px;
+		height:10px;
+		position:absolute;
+		border :0px solid #fff;
+		transition:all 1s;
+		}
+	&:after{
+		top:-1px;
+		left:-1px;
+		border-top:5px solid black;
+		border-left:5px solid black;
+	}
+	&:before{
+		bottom:-1px;
+		right:-1px;
+		border-bottom:5px solid black;
+		border-right:5px solid black;
+	}
+	&:hover{
+		border-top-right-radius:0px;
+	border-bottom-left-radius:0px;
+		// background:rgba(0,0,0,.5);
+		// color:white;
+		&:before,&:after{
+			
+			width:100%;
+			height:100%;
+			// border-color:white;
+		}
+	}
+	*/
+}
+
+.hoverBtn:after,.hoverBtn:before{
+		content:" ";
+		width:10px;
+		height:10px;
+		position:absolute;
+		border :0px solid #fff;
+		transition:all 1s;
+		}
+.hoverBtn:after{
+		top:-1px;
+		left:-1px;
+		border-top:5px solid black;
+		border-left:5px solid black;
+	}
+.hoverBtn:before{
+		bottom:-1px;
+		right:-1px;
+		border-bottom:5px solid black;
+		border-right:5px solid black;
+	}
+.hoverBtn:hover{
+	border-top-right-radius:0px;
+	border-bottom-left-radius:0px;
+		/* background:rgba(0,0,0,.5); */
+		/* color:white; */
+		/*
+		&:before,&:after{
+			
+			width:100%;
+			height:100%;
+			// border-color:white;
+		}
+		*/
+	}
+.hoverBtn:before,:after{			
+			width:100%;
+			height:100%;
+			border-color:white;
+		}
+
+
+
 /* using flex didn't do what I wanted
 .buttonGrid {
 	display: flex;
@@ -271,12 +367,12 @@ body {
   left: 0;
   top: 0;
   /*
-   * cover only a quarter of the play felt
+   * cover only a portion of the play felt
    */
-  width: 35%; /* partial width */
+  width: 40%; /* partial width */
   transition: width 3s;
   
-  height: 80%; /* partial height */
+  height: 70%; /* partial height */
   /* width: 590px; */
   /* height: 270px; */
   /* overflow: auto; /* Enable scroll if needed */

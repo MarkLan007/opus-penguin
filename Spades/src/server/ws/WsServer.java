@@ -530,12 +530,17 @@ public class WsServer {
 			*/
 			break;
 		case JCLResend:
-			// not to be confused with not-yet-implemented
+			// not to be confused with 
 			// ... JCLRefresh which sends the whole context
 			us.game.resend(us);
 			break;
 		case JCLRefresh:
-			us.game.refresh(us.pid);
+			playerId=us.getpid();
+			if (playerId == -1) {
+				write(us, "Not currently in a game; can't refresh");
+				break;
+			}
+			us.game.refresh(playerId);
 			break;
 		case JCLScore:
 			playerId=us.getpid();
