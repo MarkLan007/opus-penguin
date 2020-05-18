@@ -40,9 +40,31 @@ function detectConfig() {
 	return bIsMobile;
 }
 
+function setWide() {
+	var buttonGridArray = document.getElementsByClassName("buttonGrid");
+	for (var i=0; i<buttonGridArray.length; i++) {
+		// ordinarily... grid-template-columns: repeat(5, 1fr);
+		var bg=buttonGridArray[i];
+		bg.style.gridTemplateColumns = "repeat(5, 1fr)";
+	}
+	//buttonGrid.style.gridTemplateColumns = "repeat(4, 1fr)";
+}
+
+function setNarrow() {
+	var buttonGridArray = document.getElementsByClassName("buttonGrid");
+	for (var i=0; i<buttonGridArray.length; i++) {
+		// ordinarily... grid-template-columns: repeat(5, 1fr);
+		var bg=buttonGridArray[i];
+		bg.style.gridTemplateColumns = "repeat(4, 1fr)";
+	}
+	//buttonGrid.style.gridTemplateColumns = "repeat(4, 1fr)";
+}
+
 function narrowConfig() {
-	if (scrWidth < 400)
+	if (scrWidth < 400) {
+		setNarrow();
 		return true;
+	}
 	return false;
 }
 
@@ -1079,7 +1101,7 @@ function turnover1card4(card, position) { // New rotation
 	// animator();
 	// aaa
 	// check isbusy and start animator, if not?
-	// animateMaybe();
+	animateMaybe();
 	}
 
 
@@ -1476,6 +1498,8 @@ class SpecialEffect extends AnimationScene {
 // only one instance can be running at a time
 var bAnimatorIdle = true;
 // must be global for visibility to lambda function...
+var bDontStartAnimatorYet = false;
+
 var animationItemX;	// animation item
 var gStart = 0;
 var gLast = 0;
@@ -1483,6 +1507,8 @@ function animateMaybe() {
 	if (!bAnimatorIdle)
 		return;
 	if (qEmpty())
+		return;
+	if (bDontStartAnimatorYet)
 		return;
 	animator();
 }
@@ -1762,6 +1788,10 @@ function processCardString(cardString) {
 			card = decodeCard(cardString.charAt(i),
 				cardString.charAt(i + 1));
 			var user = parseInt(cardString.charAt(1), 10);
+			bDontStartAnimatorYet = false;
+			for (var j=0; j<cardString.length; j++)
+				if (cardString.charAt(j) == '.')
+					bDontStartAnimatorYet = true;
 			switch (nTableSize) {
 				case 4:
 					turnover1card4(card, user);
@@ -3065,6 +3095,20 @@ function processLocalCommand(line) {
 			xstatusUpdate("config=" + "mobile width/inner:" + scrWidth +  ":" + scrInnerWidth  + " height:" + scrHeight);
 		else
 			xstatusUpdate("config=" + "desktop width/inner:" + scrWidth + ":" + scrInnerWidth  +  " height:" + scrHeight);
+	} else if (line.includes("narrow")) {
+		var flag = detectConfig();
+		if (flag)
+			xstatusUpdate("config=" + "mobile width/inner:" + scrWidth +  ":" + scrInnerWidth  + " height:" + scrHeight);
+		else
+			xstatusUpdate("config=" + "desktop width/inner:" + scrWidth + ":" + scrInnerWidth  +  " height:" + scrHeight);
+		setNarrow();
+	} else if (line.includes("wide")) {
+		var flag = detectConfig();
+		if (flag)
+			xstatusUpdate("config=" + "mobile width/inner:" + scrWidth +  ":" + scrInnerWidth  + " height:" + scrHeight);
+		else
+			xstatusUpdate("config=" + "desktop width/inner:" + scrWidth + ":" + scrInnerWidth  +  " height:" + scrHeight);
+		setWide();
 	} else if (line.includes("grab=")) {
 		var matches = line.match(/(\d+)/); // if a number at all...
 		if (matches) {

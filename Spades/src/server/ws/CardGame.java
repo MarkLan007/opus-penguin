@@ -378,17 +378,35 @@ public class CardGame implements GameInterface {
 	 * broadcastUpdate - send the same message to all the players works even if
 	 * there is no current turn... i.e. during pass
 	 */
+	private Player nextp(int i) {
+		i = (i + 1) % nPlayers;
+		return playerArray[i];
+	}
+
 	void broadcastUpdate(ProtocolMessage pmsg) {
 		int i, j;
+		
+		/*
+		 * hack the message so that if the person who plays
+		 * after this card is a robot, tell the client 
+		 * 'don't start the animator' yet (i.e. collect the messages because
+		 * they will be coming quickly.)
+		 */
+		if (pmsg.type == ProtocolMessageTypes.CURRENT_TRICK ) {
+			int sender = pmsg.sender;
+			int nextplayer = (sender + 1) % nPlayers;
+			Player np = playerArray[nextplayer];
+			if (np.isRobot()) // next player after this is a robot
+				pmsg.setUsertext(".");
+		}
 		if (nCurrentTurn > -1)
 			j = nCurrentTurn;
 		else
 			j = 0;
 		for (i = 0; i < nPlayers; i++) {
-			Player p = playerArray[j++];
+			Player p = playerArray[j];
 			p.sendToClient(pmsg);
-			if (j >= nPlayers)
-				j = 0;
+			j = (j + 1) % nPlayers;
 		}
 	}
 	

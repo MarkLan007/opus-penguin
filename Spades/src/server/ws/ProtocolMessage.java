@@ -18,7 +18,7 @@ public class ProtocolMessage {
 	ProtocolMessageTypes type;
 	Boolean bMessageWellFormed = true; 
 	Subdeck subdeck=null;
-	String usertext;	// the rest of the story...  %[error text] %[trick modifiers] or $player scores
+	String usertext="";	// the rest of the story...  %[error text] %[trick modifiers] or $player scores
 	Trick trick=null;
 	//TrickModifiers trickModifiers=null;	// TODO: trickmodifiers should be eliminated, since I have trick
 	/*
@@ -142,9 +142,6 @@ public class ProtocolMessage {
 		return false;
 	}
 
-	//
-	// xxx
-	// setusertext
 	void setUsertext(String s) {
 		usertext = s;
 	}
@@ -251,16 +248,6 @@ public class ProtocolMessage {
 		else
 			sMsg = sMsg + (char) ((int)'0' + sender);
 		
-		//
-		// Append the encoded cards
-		/* No workee here. See subdeck.encode
-		 * Let him who is without sin...
-		int i;
-		for (i=0; i<subdeck.size(); i++) {
-			Card c=subdeck.get(i);
-			sMsg = sMsg + c.encode();
-			}
-			*/
 		String sCards="";
 		if (usertext == null)
 			usertext = "";
@@ -277,7 +264,7 @@ public class ProtocolMessage {
 		else {
 			sCards=subdeck.encode();
 			// TODO: review this code... It seems odd to me now, late at night...
-			sMsg = sMsg + sCards;
+			sMsg = sMsg + sCards + usertext;
 			if (sMsg.length() > 0)
 				return sMsg + "\n";
 			else

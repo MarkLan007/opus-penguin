@@ -92,13 +92,14 @@ public class RobotBrain {
 			} else {
 				c = hand.bestLead(); // get the best card to lead
 			}
+			if (c == null) {
+				c = getSomething();
+				System.out.println("Robot: Uh oh. desparate. About to play..." + c.encode());
+			}
 			if (bThinkingOutLoud) {
 				System.out.println("Robot: About to play..." + c.encode());
 			}
-			if (c == null)
-				c = getSomething();
 			return c;
-
 		}
 		/*
 		 * apply the must-follow rule

@@ -93,9 +93,10 @@ body {
 </style>
 <style>
 .alignRight {
-	float: none;
+	/*float: none;*/
 	text-align: right;
 	margin-right: 10px;
+	right: 10px;
 }
 /* align left is new and untested... */
 .alignLeft {
@@ -340,7 +341,7 @@ body {
 .modal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
-  z-index: 4; /* Sit on top */
+  z-index: 6; /* Sit on top */
   padding-top: 100px; /* Location of the box */
   left: 0;
   top: 0;
@@ -470,7 +471,7 @@ body {font-family: Arial, Helvetica, sans-serif;}
 .fullymodal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
-  z-index: 4; /* Sit on top */
+  z-index: 5; /* Sit on top */
   padding-top: 100px; /* Location of the box */
   left: 0;
   top: 0;
@@ -582,9 +583,11 @@ tr:nth-child(even) {
 		<div class="buttonGrid" id="CardsInHandDiv"></div>
 		-->
 		<div id="topright" 
-		  style="position: fixed; top: 0;">
-		<p id="gamestatusArea" class="alignRight">Cards as buttons go
-			here.</p>
+		  style="position: fixed; top: 0; right: 0px;">
+		<p id="gamestatusArea" class="alignRight"
+			style="position: fixed; top: 0; right: 0px;">
+			Cards as buttons go here.</p>
+			<br>
 		<p id="trickArea" class="alignRight">Previous Trick.</p>
 		</div>	
 		<span class="buttonGrid" id="ClubsInHandDiv"></span> <span
@@ -679,6 +682,7 @@ tr:nth-child(even) {
 		wsHandInit();
 		wsFeltInit(); // auto-init felt canvas
 	</script>
+<div class="column1">
 insert modal stuff here ->
 <!-- Trigger/Open The Modal -->
 <button id="myBtn">Open Modal</button>
@@ -723,6 +727,7 @@ insert modal stuff here ->
 	<br>
 </div>
 </div>
+</div>
 
 
 <script>
@@ -760,6 +765,7 @@ window.onclick = function(event) {
 </body>
 <body>
 
+<div class="column1"> 
 <h2>FullyModal Example</h2>
 xx
 <div id="myGenericModal" class="modal">
@@ -776,6 +782,7 @@ xx
 xx
 <!-- Trigger/Open The FullyModal -->
 <button id="modelModalBtn">Open FullyModal</button>
+</div>
 
 <!-- The FullyModal -->
 <div id="scoreDialogDiv" class="fullymodal">
