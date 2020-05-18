@@ -1197,6 +1197,7 @@ function gamestatusUpdate(sMsg) {
  */
 
 // old AnimationGestault and basic unit AnimatableCard
+var SerialCard=0;
 class AnimatableCard {
 	// compute the geometry of where the card goes
 	constructor(imagefile, rotation, trX, trY, x, y, w, h,
@@ -1213,7 +1214,7 @@ class AnimatableCard {
 		this.tgty = tgty;
 		this.tgtwidth = tgtwidth;
 		this.tgtheight = tgtheight;
-		this.friendlyName = "debugMe";
+		this.friendlyName = "debugMe" + SerialCard++;
 	}
 
 	// pc = new AnimatableCard(imagefile, 0, 0, 0, firstx, firsty, cardwidth,
@@ -1401,6 +1402,7 @@ class TrickAnimation extends AnimationScene {
 		this.leader = 0;	// should always be a valid seat
 		this.winner = 0;
 		this.bIsClosed = false;
+		this.friendlyName = "trick"
 	}
 	size() {
 		return this.list.length;
@@ -1512,6 +1514,10 @@ function animateMaybe() {
 		return;
 	animator();
 }
+/*
+ * animator - animate items using the theQueue and RAF
+ * sets idle when queue is empty.
+ */
 function animator() {
 	
 	if (!bAnimatorIdle) {
@@ -1525,15 +1531,14 @@ function animator() {
 		return;
 	}
 	console.log("Animating:" + animationItemX.friendlyName);
-	// while (animationItemX != null) {
 		animationItemX.init();
 
 		/*
 		 * keep drawing frames (and requesting a new animation frame) as long as
 		 * there are items in the queue
 		 */
-		// let promise = new Promise(function(resolve, reject) {
 		(function paintAnimationFrames(timestamp) {
+			// timestamp not really used
 			if (gStart == 0)
 				gStart = timestamp;
 			else
@@ -1549,12 +1554,11 @@ function animator() {
 				}
 			if (animationItemX != null)
 				requestAnimationFrame(paintAnimationFrames);
+			else
+				bAnimatorIdle = true;
 		})();
-		// });
-	// }
-	bAnimatorIdle = true;
-}
 
+}
 
 /*
  * (new) addCardToTrick using the new animation routines. stillborn.
@@ -1792,6 +1796,8 @@ function processCardString(cardString) {
 			for (var j=0; j<cardString.length; j++)
 				if (cardString.charAt(j) == '.')
 					bDontStartAnimatorYet = true;
+			//bDontStartAnimatorYet = false;
+
 			switch (nTableSize) {
 				case 4:
 					turnover1card4(card, user);
