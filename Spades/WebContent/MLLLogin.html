@@ -73,10 +73,7 @@
 
 	--grey1: #95a5a6; /* concrete */
 	--grey2: #7f8c8d; /* asbestos */
-        
 }
-
-
 /*
 	Site color choices:
 	#3AE196 // lighter green
@@ -256,8 +253,6 @@ input[type=text], input[type=password] {
   border: 1px solid #ccc;
   box-sizing: border-box;
 }
-
-
 </style>
 </head>
 <body>
@@ -303,30 +298,10 @@ input[type=text], input[type=password] {
   <div class="modal-content">
     <span class="close">&times;</span>
     Ok, fine.    
-    
-  </div>
-
+   </div>
 <p> The start of the cipher lock... </p>
 </div>
-
 <script>
-
-/*
-	// Get the modals
-	var modal = document.getElementById('id01');
-	var modal2 = document.getElementById('id02');
-
-	// When the user clicks anywhere outside of the modal, close it
-	window.onclick = function(event) {
-		if (event.target == modal) {
-			modal.style.display = "none";
-		}
-		if (event.target == modal2) {
-			modal2.style.display = "none";
-		}
-	}
-*/
-
 	function validateAndJump(event) {
 		console.log("Yea! Redirecting to /Spades");
 		var name = document.getElementById("uname").value;
@@ -336,7 +311,8 @@ input[type=text], input[type=password] {
 
 		// window.location = "/Spades"
 		// window.open("http://drafonreef.net:8080/Spades");
-		location.href = "http://dragonreef.net:8080/Spades";
+		//location.href = "http://dragonreef.net:8080/Spades";
+		location.href = "/Spades";
 	}
 
 	function showCipherLock() {
@@ -350,13 +326,6 @@ input[type=text], input[type=password] {
 		console.log("Showing id:" + idName);
 		var popupDiv = document.getElementById(idName);
 		popupDiv.style.display = "block";
-		/* don't do this...
-		 // child nodes don't necessarily have a style...
-		var children = popupDiv.childNodes;
-		for (var i=0; i<children.length; i++) {
-			var child=children[i];
-			child.style.display = "block";
-		} */
 	}
 </script>
 <body>
@@ -376,76 +345,40 @@ input[type=text], input[type=password] {
     
   </div>
 </div>
-
-
 XXX, Buzz Shepard, Staff Atty.
 <div class="btn-group">
 <button onclick="showDiv('termsAndConditions');" > T's and C's</button>
 </div>
-
-
 <script>
-/*
- * Note that code must be AFTER all the items that are referenced...
- * for example this must follow the button that is created since 
- * init is called on it...
- */
-
-function initModelModalCode() {
-	// Get the fullymodal
-	// Prepare to be deleted...
 	/*
-	var fullymodal = document.getElementById("myGenericModal");
-	// When the user clicks anywhere outside of the fullymodal, close it
-	window.onclick = function(event) {
-		if (event.target == fullymodal) {
-			fullymodal.style.display = "none";
-		}
-	} */
+	 * Note that code must be AFTER all the items that are referenced...
+	 * for example this must follow the button that is created since 
+	 * init is called on it...
+	 */
+	function initModelModalCode() {
 
-	var enclosingDivs = document.getElementsByClassName("modal");
-	for (var i=0; i<enclosingDivs.length; i++)
-		enclosingDivs[i].onclick = function (event) {
-		console.log("generic out-of-div click close...");
-		//event.target.style.display = "none";
-		if (event.target.className == "modal")
-			event.target.style.display = "none";
-		}
+		// clicking outside the dialog closes the dialog
+		var enclosingDivs = document.getElementsByClassName("modal");
+		for (var i = 0; i < enclosingDivs.length; i++)
+			enclosingDivs[i].onclick = function(event) {
+				console.log("generic out-of-div click close...");
+				// This event is triggered on the x close
+				// don't disappear unrelated stuff...
+				if (event.target.className == "modal")
+					event.target.style.display = "none";
+			}
 
-
-	// don't forget to hook the button to open the div
-	// it's tsAndCs
-	/*
-	var btn = document.getElementById("tsAndCs");
-		btn.onclick = function(event) {
-		event.target.ParentNode.style.display = "block";
+		//
+		// close x on rhs of window by class close
+		var closees = document.getElementsByClassName("close");
+		for (var i = 0; i < closees.length; i++)
+			closees[i].onclick = function(event) {
+				console.log("generic close...");
+				event.target.parentNode.parentNode.style.display = "none";
+			}
 	}
-*/
-	// Get the <span> element that closes the fullymodal
-	// close the enclosing (2nd level) div
-	// tricky because gets by type and assumes this if the first one...
-	// so make sure that the classname is unique
-	// generic close for all x-buttons in a "close" class
-	var closees = document.getElementsByClassName("close");
-	for (var i=0; i<closees.length; i++)
-		closees[i].onclick = function (event) {
-		console.log("generic close...");
-		event.target.parentNode.parentNode.style.display = "none";
-		}
-	}
-	//var span = document.getElementsByClassName("close")[0];
 
-	/* generic close should do this...
-	var span = document.getElementById("spanCloseXXX");
-	// When the user clicks on <span> (x), close the fullymodal
-	span.onclick = function() {
-		console.log("X click.");
-		span.style.display = "none";
-	}
-	*/
-
-initModelModalCode();
-
+	initModelModalCode();
 </script>
 </body>
 </html>
