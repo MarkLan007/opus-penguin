@@ -267,23 +267,19 @@ input[type=text], input[type=password] {
 <p> To enter the Mimitu Labs lounge, you must first login. Or enter through the cipher lock at the back door in the alley next to the dumpster... </p>
 <p> Mind yo hed. Always under construction... </p>
 
-
 <div class="btn-group">
   <button onclick="document.getElementById('id01').style.display='block'">Login</button>
-  <button onclick="showCipherLock();">Cipher Lock</button>
+  <button onclick="showDiv('id02');">Cipher Lock</button>
 </div>
 
-<div id="id01" class="modal">
-     
+<div id="id01" class="modal">     
   <form class="modal-content animate" 
-action="javascript:;" onsubmit="validateAndJump(this)"
->
-    <span id="spanCloseXXX" class="close">&times;</span>
-  
+	action="javascript:;" 
+	onsubmit="validateAndJump(this)">
+	<span id="spanCloseXXX" class="close">&times;</span>
     <div class="mllLogo">
        <h2>Mimitu Labs Ltd.</h2>
     </div>
-
     <div class="container">
       <label for="uname"><b>Username</b></label>
       <input type="text" placeholder="Enter Username" id="uname" required>
@@ -296,7 +292,6 @@ action="javascript:;" onsubmit="validateAndJump(this)"
         <input type="checkbox" checked="checked" name="remember"> Remember me
       </label>
     </div>
-
     <div class="container" style="background-color:#f1f1f1">
       <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
       <span class="psw">Forgot <a href="#">password?</a></span>
@@ -304,17 +299,33 @@ action="javascript:;" onsubmit="validateAndJump(this)"
   </form>
 </div>
 
+<div id='id02' class='modal'>
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    Ok, fine.    
+    
+  </div>
+
+<p> The start of the cipher lock... </p>
+</div>
+
 <script>
 
-	// Get the modal
+/*
+	// Get the modals
 	var modal = document.getElementById('id01');
+	var modal2 = document.getElementById('id02');
 
 	// When the user clicks anywhere outside of the modal, close it
 	window.onclick = function(event) {
 		if (event.target == modal) {
 			modal.style.display = "none";
 		}
+		if (event.target == modal2) {
+			modal2.style.display = "none";
+		}
 	}
+*/
 
 	function validateAndJump(event) {
 		console.log("Yea! Redirecting to /Spades");
@@ -329,14 +340,29 @@ action="javascript:;" onsubmit="validateAndJump(this)"
 	}
 
 	function showCipherLock() {
-		console.log("Show Cipher Lock...");
+		console.log("Showing Cipher Lock...");
+		var cipherLock = document.getElementById('id02')
+		cipherLock.style.display = "block";
+	}
+	// showDiv - open div by name
+	//  but they are closed by class who looks up the target and parent...
+	function showDiv(idName) {
+		console.log("Showing id:" + idName);
+		var popupDiv = document.getElementById(idName);
+		popupDiv.style.display = "block";
+		/* don't do this...
+		 // child nodes don't necessarily have a style...
+		var children = popupDiv.childNodes;
+		for (var i=0; i<children.length; i++) {
+			var child=children[i];
+			child.style.display = "block";
+		} */
 	}
 </script>
 <body>
 <p> The Mgmt. Mimitu Labs, Ltd. </p>
 
-<!-- Login dialog -->
-<div id="myGenericModal" class="modal">
+<div id="termsAndConditions" class="modal">
   <!-- Modal content -->
   <div class="modal-content">
     <span id="spanCloseXXX" class="close">&times;</span>
@@ -354,7 +380,7 @@ action="javascript:;" onsubmit="validateAndJump(this)"
 
 XXX, Buzz Shepard, Staff Atty.
 <div class="btn-group">
-<button id="modelModalBtn">T's and C's</button>
+<button onclick="showDiv('termsAndConditions');" > T's and C's</button>
 </div>
 
 
@@ -367,35 +393,56 @@ XXX, Buzz Shepard, Staff Atty.
 
 function initModelModalCode() {
 	// Get the fullymodal
+	// Prepare to be deleted...
+	/*
 	var fullymodal = document.getElementById("myGenericModal");
-
-	// don't forget to hook the button to open the div
-	// it's modelModalBtn ... xxx
-	var btn = document.getElementById("modelModalBtn");
-		btn.onclick = function() {
-		fullymodal.style.display = "block";
-	}
-
-	// Get the <span> element that closes the fullymodal
-	// tricky because gets by type and assumes this if the first one...
-	// so make sure that the classname is unique
-	var span = document.getElementsByClassName("close")[0];
-
-	var span = document.getElementById("spanCloseXXX");
-	// When the user clicks on <span> (x), close the fullymodal
-	span.onclick = function() {
-		console.log("X click.");
-		fullymodal.style.display = "none";
-	}
-
 	// When the user clicks anywhere outside of the fullymodal, close it
 	window.onclick = function(event) {
 		if (event.target == fullymodal) {
 			fullymodal.style.display = "none";
 		}
-	}
+	} */
 
-}
+	var enclosingDivs = document.getElementsByClassName("modal");
+	for (var i=0; i<enclosingDivs.length; i++)
+		enclosingDivs[i].onclick = function (event) {
+		console.log("generic out-of-div click close...");
+		//event.target.style.display = "none";
+		if (event.target.className == "modal")
+			event.target.style.display = "none";
+		}
+
+
+	// don't forget to hook the button to open the div
+	// it's tsAndCs
+	/*
+	var btn = document.getElementById("tsAndCs");
+		btn.onclick = function(event) {
+		event.target.ParentNode.style.display = "block";
+	}
+*/
+	// Get the <span> element that closes the fullymodal
+	// close the enclosing (2nd level) div
+	// tricky because gets by type and assumes this if the first one...
+	// so make sure that the classname is unique
+	// generic close for all x-buttons in a "close" class
+	var closees = document.getElementsByClassName("close");
+	for (var i=0; i<closees.length; i++)
+		closees[i].onclick = function (event) {
+		console.log("generic close...");
+		event.target.parentNode.parentNode.style.display = "none";
+		}
+	}
+	//var span = document.getElementsByClassName("close")[0];
+
+	/* generic close should do this...
+	var span = document.getElementById("spanCloseXXX");
+	// When the user clicks on <span> (x), close the fullymodal
+	span.onclick = function() {
+		console.log("X click.");
+		span.style.display = "none";
+	}
+	*/
 
 initModelModalCode();
 
