@@ -1,0 +1,72 @@
+<html>
+<head>
+</head>
+<style>
+ :root {
+    --mllGrey: #E5E8E8; 
+    --mllLightblue: #3ADAE1; 
+    --mllFeltGreen: #3AE15E;
+    
+    --teal1: #2ecc71;
+    --teal2: #16a085;
+    
+    --green1:#2ecc71; /* emerald */
+    --green2:#27ae60; /* nephritis */
+    }
+     
+.column1 {
+	z-index: 1;
+	position: relative;
+	width: 45%;
+	float: left;
+	overflow-y: scroll;
+
+}
+.column2 {
+	position: fixed;
+	right: 0;
+	z-index: 1;	
+	width: 50%;
+	float: left; 
+	display: grid;
+	grid-template-rows: auto; 
+
+}
+.wholeTamale {
+	width: 100%;
+	height: 800px;
+}
+button {
+  background-color: var(--green2);
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+button:hover {
+  opacity: 0.8;
+}
+
+</style>
+<script>
+function expandPage(event) {
+	console.log("Yea! Expanding and Redirecting Login Page");
+	location.href = "/Spades/MLLLogin.html";
+}
+</script>
+
+<body>
+<div class="column1">
+<p> Alan's stuff </p>
+</div>
+<div class="column2">
+<span>
+<p> Mimitu Labs, Ltd, hosted (although they don't know it) by dragonreef.net </p>
+<button onclick="expandPage();" style="width:auto; right:10px"> &lt; -- Expand to Full-Page Presentation -- &gt; </button>
+</span>
+<iframe class="wholeTamale" src="/Spades/MLLLogin.html" title="W3Schools Free Online Web Tutorials"> </iframe>
+</div>
+</body>
+</html>
