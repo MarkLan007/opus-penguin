@@ -164,6 +164,15 @@ span.psw {
   width: 80%;
 }
 
+.modal-content-cipher {
+  background-color: var(--grey1);
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 200px;
+}
+
 /* new-temp... */
 .btn { /* is this used??? */
    float:left;
@@ -253,6 +262,19 @@ input[type=text], input[type=password] {
   border: 1px solid #ccc;
   box-sizing: border-box;
 }
+
+.buttonGrid {
+	display: grid; 
+	grid-template-columns: repeat(3, 1fr);
+	
+	/*grid-template-columns: repeat(21, 20px [ col-end ]); */
+	/* align-items: end; */
+	justify-content: start;
+	/* grid-gap: 5px 20px; */
+	grid-gap: 0px 0px;
+	
+}
+
 </style>
 </head>
 <body>
@@ -295,11 +317,13 @@ input[type=text], input[type=password] {
 </div>
 
 <div id='id02' class='modal'>
-  <div class="modal-content">
+  <div class="modal-content-cipher">
     <span class="close">&times;</span>
-    Ok, fine.    
+    <p id="echoText"> Ok, fine. </p>    
+	<div class="buttonGrid" id="cipherLock">
    </div>
-<p> The start of the cipher lock... </p>
+</div>
+
 </div>
 <script>
 	function validateAndJump(event) {
@@ -376,6 +400,88 @@ XXX, Buzz Shepard, Staff Atty.
 				console.log("generic close...");
 				event.target.parentNode.parentNode.style.display = "none";
 			}
+		
+		var buttonDiv = document.getElementById("cipherLock");
+		for (var i=1; i<=12; i++) {
+			// create a new button, and add it to the cipher lock
+			var btn = document.createElement("Button");
+			btn.innerText = i;
+			btn.addEventListener("click", buttonPress);
+			buttonDiv.appendChild(btn);
+			switch (i) {
+			case 10:
+				btn.innerText = "*";
+				break;
+			case 11:
+				btn.innerText = "0";
+				break;
+			case 12:
+				btn.innerText = "#";
+				break;
+			default:
+					// do nothing
+				break;
+			}
+		}
+		
+	}
+	
+	var inputString="";
+	var bClearInput=true;	// true if the input marks a new line
+	var bCanEnter = false;
+	
+	var magicCookies=["6707","3141", "000", "6992", "3333", "6174"];
+	var magicEcho=["Hi Buzz", "I like Pi!", "Piss off!", "Fuck you, Bob!", "Ok, Joe...", "Hi Anne"];
+	var magicAction=[true, true, false, true, true, true];
+	
+	function getMatch(s) {
+	var i;
+	for (i=0; i<magicCookies.length; i++)
+		if (s == magicCookies[i]) {
+			bCanEnter = magicAction[i];
+			return magicEcho[i];
+			}
+	return null;
+	}
+
+	function inputChar(s) {
+		var echoArea = document.getElementById("echoText");
+		if (bCanEnter) {
+			validateAndJump();
+		}
+		if (s == "#") {
+			bClearInput = true;
+			return;
+		}
+		if (inputString.length >= 6) {
+			var msg = "Pathetic. Try again.";
+			echoArea.innerText = msg;
+			inputString = "";
+			bClearInput = true;
+			return;
+		}
+		else if (bClearInput) {
+			inputString = "";
+			bClearInput = false;
+		}
+		inputString += s;
+		var echoArea = document.getElementById("echoText");
+		echoArea.innerText = inputString;
+
+		var match = getMatch(inputString);
+		if (match != null) {
+			echoArea.innerText = match;
+			bClearInput = true;
+			bCanEnter = magicAction[i];
+		}
+
+	}
+
+	function buttonPress(event) {
+		// put up the text (if I do that)
+		// note the number pressed
+		console.log("Saw:" + event.target.innerText);
+		inputChar(event.target.innerText);
 	}
 
 	initModelModalCode();
