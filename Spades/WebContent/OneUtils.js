@@ -476,7 +476,7 @@ function wsFeltInit() {
 		feltCanvas.height = canvasHeight;
 		feltContext = feltCanvas.getContext("2d");
 		if (feltContext) {
-			feltContext.fillStyle = "ForestGreen";
+			feltContext.fillStyle = backgroundGreen;
 			feltContext.strokeStyle = "blue";
 			feltContext.lineWidth = 5;
 			feltContext.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -556,7 +556,7 @@ function wsShowFelt() {
 				feltCanvas.height = 600;
 				feltContext = feltCanvas.getContext("2d");
 				if (feltContext) {
-					feltContext.fillStyle = "ForestGreen";
+					feltContext.fillStyle = backgroundGreen;
 					feltContext.strokeStyle = "blue";
 					feltContext.lineWidth = 5;
 					// splat the playing felt
@@ -725,7 +725,7 @@ function clearCardTable(bResetTrick) {
 		feltCanvas.height = canvasHeight;
 		feltContext = feltCanvas.getContext("2d");
 		if (feltContext) {
-			feltContext.fillStyle = "ForestGreen";
+			feltContext.fillStyle = backgroundGreen;
 			feltContext.strokeStyle = "blue";
 			feltContext.lineWidth = 5;
 			feltContext.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -1244,6 +1244,8 @@ class AnimatableCard {
 	}
 }
 
+var backgroundGreen = "#27ae60";	// --var(green2) nephritis
+
 /*
  * old... Anything with gestault in the name is the old way scene is the new
  * way... frame is part of the actual system. (don't create routines with frame
@@ -1272,8 +1274,8 @@ class AnimationGestault {
 				ctx.translate(c.trX, c.trY);
 			if (c.rotation != 0)
 				ctx.rotate(c.rotation);
-			if (bBackground) {
-				ctx.fillStyle = "ForestGreen";
+			if (bBackground) {	// var(--green3);
+				ctx.fillStyle = backgroundGreen;
 				ctx.fillRect(c.tgtx, c.tgty, c.tgtwidth, c.tgtheight);
 			}
 			else {
@@ -3027,7 +3029,8 @@ function toggleHandArea() {
 }
 
 function arrangeCardsInDivs() {
-		console.log("Uh oh. I shouldn't be called. Ever.");
+		//console.log("Uh oh. I shouldn't be called. Ever.");
+		console.log("ArrangeCardsInDivs");
 		var always=true;
 		if (always)
 			return;
@@ -3276,7 +3279,7 @@ function wsSendMessage() {
 /*
  * menuDropdown
  */
-function menuDropDown() {
+function menuDropDown(event) {
 	console.log("menuDropDown...");
 	document.getElementById("item1-menu").classList.toggle("show");
 }

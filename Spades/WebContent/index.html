@@ -9,14 +9,99 @@
  -->
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Spades Game Console</title>
 <!-- Define style for menu bar -->
-
-
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-
 <style>
+/*  Flat color palette downloaded from
+ *  http://htmlcolorcodes.com/color-charts/
+ *
+ *  Check out our powerful color picker
+ *  http://htmlcolorcodes.com/color-picker/
+ *
+ *  Want to learn more about colors in CSS?
+ *  http://htmlcolorcodes.com/tutorials/
+ *
+ *  - - - - - - - - - - - - - - - - - - 
+ *  Credits:
+ *
+ *  Original color palette by
+ *  http://designmodo.github.io/Flat-UI/
+ *
+ *  - - - - - - - - - - - - - - - - - -
+ *  How to use:
+ *  
+ *  Include this file with your stylesheets
+ *  in the <head> of your HTML file:
+ *
+ *  <head>
+ *    ...
+ *    <link href="path/to/css/flat_colors.css" rel="stylesheet">
+ *    ...
+ *  </head>
+ *  
+ *  and in the <body> of your HTML you can style
+ *  any element using a class:
+ *	
+ *	<body>
+ *		...
+ *  	<h1 class="turquoise">Your Colored Title</h1>
+ *    ...
+ *  </body>
+ */
+
+ :root {
+    --mllGrey: #E5E8E8; 
+    --mllLightblue: #3ADAE1; 
+    --mllFeltGreen: #3AE15E;
+    
+    --teal1: #2ecc71;
+    --teal2: #16a085;
+    
+    --green1:#2ecc71; /* emerald */
+    --green2:#27ae60; /* nephritis */ 
+	--green3: #228B22;
+	
+	--yellow1: #f1c40f; /* sunflower */
+	--yellow2: #f39c12; /* orange */
+	
+	--orange1: #e67e22;	/* carrot */
+	--orange2:  #d35400;/* pumpkin */
+	
+	--red1: #e74c3c;	/* alizarin */
+	--red2: #c0392b;	/* pomegranate */
+	
+    --blue1:#3498db; /* peter-river */
+    --blue2:#2980b9; /* belize-hole */
+    
+    --purple1: #9b59b6; /* .amethyst { color: #9b59b6; } */
+    --purple2: #8e44ad /* wisteria */
+    
+    --black1: #34495e; /* wet-asphalt { color: #34495e; */
+    --black2: #2c3e50; /* midnight-blue */
+
+	--grey1: #95a5a6; /* concrete */
+	--grey2: #7f8c8d; /* asbestos */
+}
+/*
+	Site color choices:
+	#3AE196 // lighter green
+	#3AE15E	// felt light green
+	#3ADAE1 // light blue
+	#EAF2F8 // blue-gray
+	#EBEDEF // light-gray
+	#E5E8E8 // darker-gray
+	
+	Or...
+	#57B05A	// olive felt-green?
+	#6A5ACD	// blue
+	#800080	// purple
+	#3AE196 // green
+	#3AE15E	// light-green
+	#3ADAE1 // the light blue to use
+	#E5E8E8 // the gray
+ */
+
 body {
 	margin: 0;
 	font-family: Arial, Helvetica, sans-serif;
@@ -43,13 +128,13 @@ body {
 }
 
 .topnav a.active {
-	background-color: #4CAF50;
+	background-color: var(--green1);
 	color: white;
 }
 </style>
 <style>
 .dropbtn {
-	background-color: #3498DB;
+	background-color: bvar(--blue1);
 	color: white;
 	padding: 16px;
 	font-size: 16px;
@@ -58,7 +143,7 @@ body {
 }
 
 .dropbtn:hover, .dropbtn:focus {
-	background-color: #2980B9;
+	background-color: var(--blue1);
 }
 
 .dropdown {
@@ -73,7 +158,7 @@ body {
 	min-width: 160px;
 	overflow: auto;
 	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-	z-index: 1;
+	z-index: 6;
 }
 
 .dropdown-content a {
@@ -265,7 +350,7 @@ body {
 		top:-1px;
 		left:-1px;
 		*/
-		border: lightblue;
+		border: var(--blue1);
 		/*
 		border-top:5px solid black;
 		border-left:5px solid black;
@@ -276,7 +361,7 @@ body {
 		bottom:-1px;
 		right:-1px;
 		*/
-				border: lightblue;
+				border: var(--blue1);
 		/*
 		border-bottom:5px solid black;
 		border-right:5px solid black;
@@ -511,7 +596,7 @@ body {font-family: Arial, Helvetica, sans-serif;}
 /* styles for the score table */
 #canvas1 {
 	border: dotted 3 px #c0c0c0;
-	background-color: lightblue
+	background-color: var(--blue1);
 }
 .scoreGrid {
 	display: flex;
@@ -578,7 +663,7 @@ tr:nth-child(even) {
 	</div>
 
 	<div class="column2" id="handArea"
-		style="height: 500px; background-color: powderblue;">
+		style="height: 500px; background-color: var(--blue1);">
 		<!--  
 		<div class="buttonGrid" id="CardsInHandDiv"></div>
 		-->
@@ -717,7 +802,7 @@ insert modal stuff here ->
 		 -->
 	<div id="passDivTop"> </div>
 	<div class="verticalButtonGrid" id="passDiv"
-			style="background-color: powderblue;">
+			style="background-color:var(--blue1);">
 	
 	<!-- 
 		style="align-items: center; width: 100%; height: 100%; background-color: powderblue;">
@@ -795,7 +880,7 @@ xx
      -->
     	<p id="passMsg" style="text-align: center">Player Scores</p>
 	<div class="scoreGrid" id="passDiv"
-		style="align-items: center;  background-color: powderblue;">
+		style="align-items: center;  background-color: var(--blue1);">
     
 <script>
 /*
