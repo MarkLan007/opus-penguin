@@ -108,7 +108,7 @@ body {
 }
 
 .topnav {
-	width:48%;
+	width:50%;
 	overflow: hidden;
 	background-color: #333;
 }
@@ -133,6 +133,7 @@ body {
 }
 </style>
 <style>
+
 .dropbtn {
 	background-color: bvar(--blue1);
 	color: white;
@@ -151,6 +152,11 @@ body {
 	display: inline-block;
 }
 
+.MenubarItem1Dropdown {
+	position: relative;
+	display: inline-block;
+}
+
 .dropdown-content {
 	display: none;
 	position: absolute;
@@ -159,6 +165,11 @@ body {
 	overflow: auto;
 	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
 	z-index: 6;
+}
+
+/* added 5-22-20 */
+.dropdown-content :hover {
+	background-color: var(--blue1);
 }
 
 .dropdown-content a {
@@ -171,10 +182,17 @@ body {
 .dropdown a:hover {
 	background-color: #ddd;
 }
+/* ??? */
+
+.dropdown:hover .dropdown-content {display: block;}
+
+.dropdown:hover .dropbtn {background-color: #3e8e41;}
+/* ??? - */
 
 .show {
 	display: block;
 	}
+	
 </style>
 <style>
 .alignRight {
@@ -623,10 +641,16 @@ tr:nth-child(even) {
 
 <body>
 	<div class="topnav">
-		<a class="active" href="#home" onclick="menuDropDown();">
-			Home</a> 
-		<a 	href="#view">View</a> <a href="#settings">Settings</a> <a
-			href="#about">About</a>
+		<a class="hover" href="#home" onclick="menuDropDown('gamesMenu',this);">
+			Games</a> 
+		<a class="hover" href="#view" onclick="menuDropDown('actionsMenu',this);">
+			Show</a> 
+			<!-- 
+		<a href="#settings">
+			Settings</a> 
+		<a href="#about">
+			About</a>
+			 -->
 	</div>
 
 	<!-- 
@@ -635,12 +659,29 @@ tr:nth-child(even) {
   
    -->
 	<div class="MenubarItem1Dropdown">
-		<div id="item1-menu" class="dropdown-content" onclick="menuDropDown()"
+		<div id="gamesMenu" class="dropdown-content" 
+			onclick="menuDropDown('gamesMenu', this);"
 			onmouseleave="mouseExitDropDownMenu(this)">
-			<a href="#home">File Open</a> <a href="#about">Save</a> <a
-				href="#contact">Exit</a>
+			<a onclick="menuSelect(this)" href="#home">Reconnect</a> 
+			<a href="#about">Join...</a> 
+			<a href="#about">Start</a> 
+			<a href="#about">New</a> 
+			<a href="#about">Misdeal</a> 			
+			<a href="#contact">Exit</a>
 		</div>
 	</div>
+	<div class="MenubarItem1Dropdown">
+		<div id="actionsMenu" class="dropdown-content" 
+			onclick="menuDropDown('actionsMenu', this)"
+			onmouseleave="mouseExitDropDownMenu(this)">
+			<a href="#home">Last Play</a> 
+			<a href="#about">Scores</a> 
+			<a href="#about">Who</a> 
+			<a href="#about">Status</a> 
+			<a href="#about">About</a> 			
+		</div>
+	</div>
+
 	<!-- Add styles above, and div below... -->
 
 	<div class="row"></div>
@@ -672,7 +713,7 @@ tr:nth-child(even) {
 		  style="position: fixed; top: 0; right: 0px;">
 		<p id="gamestatusArea" class="alignRight"
 			style="position: fixed; top: 0; right: 0px;">
-			Cards as buttons go here.</p>
+			...</p>
 			<br>
 		<p id="trickArea" class="alignRight">Previous Trick.</p>
 		</div>	
@@ -718,45 +759,57 @@ tr:nth-child(even) {
 		<textarea id="echoText" rows="15" cols="40" readonly></textarea>
 	</div>
 	<script id="scriptdiv" type="text/javascript" src="OneUtils.js">
-		// Key Point: Would prefer to use module and import/export (like this)
-		// But modules dont' actually work as of Chrome 79..
-		//	<script "module" src="SocketUtils.js">
-		'use strict';
-		/* x
-		 * I have no idea why these logging functinos don't produce visible output...
-		 */
-		console.log("Now in GameConsole.html back from loading OneUtils.js...");
-		alert("logging load...");
-		/*console.log(versionString1);
-		const consoleVersion="v0.01a";
-		console.log(versionString2);
-		console.log(versionString1 + consoleVersion + versionString2);
-		 */
-		// Dropdown Menu stuff
-		// Close the dropdown if the user clicks outside of it
-		window.onclick = function(event) {
-			console.log("onclick...");
+	
+	</script>
+	<script type="text/javascript">
+	// this code can probably be deleted... Maybe...
+	'use strict';
+	/* x
+	 * I have no idea why these logging functinos don't produce visible output...
+	 */
+	console.log("Now in long abandoned module in ... GameConsole.html back from loading OneUtils.js...");
+	// alert("logging load...");
+	/*console.log(versionString1);
+	const consoleVersion="v0.01a";
+	console.log(versionString2);
+	console.log(versionString1 + consoleVersion + versionString2);
+	 */
+	// Dropdown Menu stuff
+	// Close the dropdown if the user clicks outside of it
+	window.addEventListener("onclick", menuClicker);
+	 
+	/* window.onclick = function(event) { */
+		// This code is highly suspect...
+		// Buzz
+	function menuSelect(event) {
+		console.log("Welcome to the depths of Mordor...")
+	}
+	function menuClicker(event) {
+		console.log("onclick...");
 
-			if (!event.target.matches('.dropbtn')) {
-				console.log("Trying to close after select...")
-				var dropdowns = document
-						.getElementsByClassName("dropdown-content");
-				var i;
-				for (i = 0; i < dropdowns.length; i++) {
-					var openDropdown = dropdowns[i];
-					if (openDropdown.classList.contains('show')) {
-						openDropdown.classList.remove('show');
-					}
+		if (!event.target.matches('.dropbtn')) {
+			console.log("Trying to close after select...")
+			var dropdowns = document
+					.getElementsByClassName("dropdown-content");
+			var i;
+			for (i = 0; i < dropdowns.length; i++) {
+				var openDropdown = dropdowns[i];
+				if (openDropdown.classList.contains('show')) {
+					openDropdown.classList.remove('show');
 				}
 			}
 		}
+	}
 
-		openWebSocket();
-		document.addEventListener('keydown', keyFilter, true);
-		document.getElementById('testButton').addEventListener('click',
-				selectButtonPress);
+	//openWebSocket();
+	document.addEventListener('keydown', keyFilter, true);
+	/*
+	document.getElementById('testButton').addEventListener('click',
+			selectButtonPress);
+	*/
 
-		//wsHandInit();
+	//wsHandInit();
+
 	</script>
 	<script type="text/javascript">
 		//<script type="module" >

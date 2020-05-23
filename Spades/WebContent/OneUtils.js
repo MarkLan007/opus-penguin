@@ -3279,14 +3279,19 @@ function wsSendMessage() {
 /*
  * menuDropdown
  */
-function menuDropDown(event) {
+function menuDropDown(sMenuName, event) {
 	console.log("menuDropDown...");
-	document.getElementById("item1-menu").classList.toggle("show");
+	var menu=document.getElementById(sMenuName);
+	if (menu == null)
+		menu=document.getElementById('gamesMenu');
+	menu.classList.toggle("show");
 }
 function mouseExitDropDownMenu(event) {
 	console.log("exit mouseExitDropDownMenu.../Do nothing right now...");
 	console.log("arg=" + event);
-	menuDropDown();	// toggle show value...
+	var what=event.id;
+	console.log("Exiting:" + what);
+	menuDropDown(what);	// toggle show value...
 }
 /*
  * dropDown - When the user clicks on the button, toggle between hiding and
