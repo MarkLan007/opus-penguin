@@ -3280,18 +3280,28 @@ function wsSendMessage() {
  * menuDropdown
  */
 function menuDropDown(sMenuName, event) {
+	var menu=document.getElementById(sMenuName);
+	menu.style = "display:block;";
+	return;
+/*
 	console.log("menuDropDown...");
 	var menu=document.getElementById(sMenuName);
 	if (menu == null)
 		menu=document.getElementById('gamesMenu');
 	menu.classList.toggle("show");
+	*/
 }
-function mouseExitDropDownMenu(event) {
-	console.log("exit mouseExitDropDownMenu.../Do nothing right now...");
+function mouseExitDropDownMenu(sMenuName, event) {
+	var menu=document.getElementById(sMenuName);
+	menu.style = "display:none;";
+	return;
+	/*
+	//console.log("exit mouseExitDropDownMenu.../Do nothing right now...");
 	console.log("arg=" + event);
 	var what=event.id;
 	console.log("Exiting:" + what);
-	menuDropDown(what);	// toggle show value...
+	menuDropDown(sMenuName, event);	// toggle show value...
+	*/
 }
 /*
  * dropDown - When the user clicks on the button, toggle between hiding and

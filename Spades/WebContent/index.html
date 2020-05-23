@@ -661,24 +661,24 @@ tr:nth-child(even) {
 	<div class="MenubarItem1Dropdown">
 		<div id="gamesMenu" class="dropdown-content" 
 			onclick="menuDropDown('gamesMenu', this);"
-			onmouseleave="mouseExitDropDownMenu(this)">
-			<a onclick="menuSelect(this)" href="#home">Reconnect</a> 
-			<a href="#about">Join...</a> 
-			<a href="#about">Start</a> 
-			<a href="#about">New</a> 
-			<a href="#about">Misdeal</a> 			
-			<a href="#contact">Exit</a>
+			onmouseleave="mouseExitDropDownMenu('gamesMenu', this)">
+			<a onclick="menuSelect('gamesMenu',this)" href="#reconnect">Reconnect</a> 
+			<a onclick="menuSelect('gamesMenu',this)" href="#join">Join...</a> 
+			<a onclick="menuSelect('gamesMenu',this)" href="#start">Start</a> 
+			<a onclick="menuSelect('gamesMenu',this)" href="#new">New</a> 
+			<a onclick="menuSelect('gamesMenu',this)" href="#misdeal">Misdeal</a> 			
+			<a onclick="menuSelect('gamesMenu',this)" href="#exit">Exit</a>
 		</div>
 	</div>
 	<div class="MenubarItem1Dropdown">
 		<div id="actionsMenu" class="dropdown-content" 
 			onclick="menuDropDown('actionsMenu', this)"
-			onmouseleave="mouseExitDropDownMenu(this)">
-			<a href="#home">Last Play</a> 
-			<a href="#about">Scores</a> 
-			<a href="#about">Who</a> 
-			<a href="#about">Status</a> 
-			<a href="#about">About</a> 			
+			onmouseleave="mouseExitDropDownMenu('actionsMenu', this)">
+			<a onclick="menuSelect('actionsMenu',this)" href="#refresh">Last Play</a> 
+			<a onclick="menuSelect('actionsMenu',this)" href="#scores">Scores</a> 
+			<a onclick="menuSelect('actionsMenu',this)" href="#who">Who</a> 
+			<a onclick="menuSelect('actionsMenu',this)" href="#status">Status</a> 
+			<a onclick="menuSelect('actionsMenu',this)" href="#about">About</a> 			
 		</div>
 	</div>
 
@@ -781,8 +781,11 @@ tr:nth-child(even) {
 	/* window.onclick = function(event) { */
 		// This code is highly suspect...
 		// Buzz
-	function menuSelect(event) {
+	function menuSelect(sMenu, event) {
 		console.log("Welcome to the depths of Mordor...")
+		console.log("Act on:" + event.hash);
+		var menu=document.getElementById(sMenu);
+		menu.style.display = "none";
 	}
 	function menuClicker(event) {
 		console.log("onclick...");
