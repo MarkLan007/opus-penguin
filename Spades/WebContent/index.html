@@ -134,61 +134,6 @@ body {
 </style>
 <style>
 
-.dropbtn {
-	background-color: bvar(--blue1);
-	color: white;
-	padding: 16px;
-	font-size: 16px;
-	border: none;
-	cursor: pointer;
-}
-
-.dropbtn:hover, .dropbtn:focus {
-	background-color: var(--blue1);
-}
-
-.dropdown {
-	position: relative;
-	display: inline-block;
-}
-
-.MenubarItem1Dropdown {
-	position: relative;
-	display: inline-block;
-}
-
-.dropdown-content {
-	display: none;
-	position: absolute;
-	background-color: #f1f1f1;
-	min-width: 160px;
-	overflow: auto;
-	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-	z-index: 6;
-}
-
-/* added 5-22-20 */
-.dropdown-content :hover {
-	background-color: var(--blue1);
-}
-
-.dropdown-content a {
-	color: black;
-	padding: 12px 16px;
-	text-decoration: none;
-	display: block;
-}
-
-.dropdown a:hover {
-	background-color: #ddd;
-}
-/* ??? */
-
-.dropdown:hover .dropdown-content {display: block;}
-
-.dropdown:hover .dropbtn {background-color: #3e8e41;}
-/* ??? - */
-
 .show {
 	display: block;
 	}
@@ -635,31 +580,117 @@ td, th {
 tr:nth-child(even) {
   background-color: #dddddd;
 }
+/* new navbar implementation */
+/* Navbar container */
+.navbar {
+  overflow: hidden;
+  background-color: #333;
+}
+
+.navbar a {
+  float: left;
+  font-size: 16px;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.dropdown {
+  float: left;
+  overflow: hidden;
+}
+
+.dropdown .dropbtn {
+  font-size: 16px;  
+  border: none;
+  outline: none;
+  color: white;
+  padding: 14px 16px;
+  background-color: inherit;
+  font-family: inherit;
+  margin: 0;
+}
+
+.navbar a:hover, .dropdown:hover .dropbtn {
+  background-color: green;
+  cursor:grab;  
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 6;
+}
+
+.dropdown-content a {
+  float: none;
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
+.dropdown:hover .dropdown-content {
+  display: block;
+}
 </style>
 
 </head>
 
 <body>
+<div class="navbar">
+  <div class="dropdown">
+    <button class="dropbtn"
+		onclick="pinDropDown('gamesMenu', this)"
+		onmouseenter="pinDropDown('gamesMenu', this);">
+		Game
+    </button>
+    <div class="dropdown-content" id='gamesMenu'
+			onmouseenter="pinDropDown('gamesMenu', this);"
+			onmouseleave="unpinDropDown('gamesMenu', this);">
+			<a onclick="pinmenuSelect('gamesMenu',this)" href="#reconnect">Reconnect</a> 
+			<a onclick="pinmenuSelect('gamesMenu',this)" href="#join">Join...</a> 
+			<a onclick="pinmenuSelect('gamesMenu',this)" href="#start">Start</a> 
+			<a onclick="pinmenuSelect('gamesMenu',this)" href="#new">New</a> 
+			<a onclick="pinmenuSelect('gamesMenu',this)" href="#misdeal">Misdeal</a> 			
+			<a onclick="pinmenuSelect('gamesMenu',this)" href="#exit">Exit</a>
+    </div>
+  </div>
+  <div class="dropdown">
+    <button class="dropbtn"
+			onclick="pinDropDown('actionsMenu', this)"
+			onmouseenter="pinDropDown('actionsMenu', this);">
+			 Show
+    </button>
+    <div class="dropdown-content" id='actionsMenu'
+			onmouseenter="pinDropDown('actionsMenu', this);"
+			onmouseleave="unpinDropDown('actionsMenu', this);">
+			<a onclick="pinmenuSelect('actionsMenu',this)" href="#refresh">Last Play</a> 
+			<a onclick="pinmenuSelect('actionsMenu',this)" href="#scores">Scores</a> 
+			<a onclick="pinmenuSelect('actionsMenu',this)" href="#who">Who</a> 
+			<a onclick="pinmenuSelect('actionsMenu',this)" href="#status">Status</a> 
+			<a onclick="pinmenuSelect('actionsMenu',this)" href="#about">About</a> 			
+    </div>
+  </div>
+</div>
+<!-- 
 	<div class="topnav">
 		<a class="hover" href="#home" onclick="menuDropDown('gamesMenu',this);">
 			Games</a> 
 		<a class="hover" href="#view" onclick="menuDropDown('actionsMenu',this);">
 			Show</a> 
-			<!-- 
-		<a href="#settings">
-			Settings</a> 
-		<a href="#about">
-			About</a>
-			 -->
 	</div>
-
-	<!-- 
-  <button onclick="dropDown()" class="item1-menu"></button>
-    <button onclick="menuDropDown()" class="tmpbutton">Foobar</button>
-  
-   -->
 	<div class="MenubarItem1Dropdown">
-		<div id="gamesMenu" class="dropdown-content" 
+		<div id="gamesMenu" class="dropdown-content"
+			style="left:0;" 
 			onclick="menuDropDown('gamesMenu', this);"
 			onmouseleave="mouseExitDropDownMenu('gamesMenu', this)">
 			<a onclick="menuSelect('gamesMenu',this)" href="#reconnect">Reconnect</a> 
@@ -681,7 +712,8 @@ tr:nth-child(even) {
 			<a onclick="menuSelect('actionsMenu',this)" href="#about">About</a> 			
 		</div>
 	</div>
-
+ -->
+ 
 	<!-- Add styles above, and div below... -->
 
 	<div class="row"></div>
@@ -776,20 +808,17 @@ tr:nth-child(even) {
 	 */
 	// Dropdown Menu stuff
 	// Close the dropdown if the user clicks outside of it
+	// suspect...
 	window.addEventListener("onclick", menuClicker);
 	 
 	/* window.onclick = function(event) { */
 		// This code is highly suspect...
 		// Buzz
-	function menuSelect(sMenu, event) {
-		console.log("Welcome to the depths of Mordor...")
-		console.log("Act on:" + event.hash);
-		var menu=document.getElementById(sMenu);
-		menu.style.display = "none";
-	}
 	function menuClicker(event) {
 		console.log("onclick...");
-
+		var bDoNothing=true;
+		if (bDoNothing) return;
+		
 		if (!event.target.matches('.dropbtn')) {
 			console.log("Trying to close after select...")
 			var dropdowns = document

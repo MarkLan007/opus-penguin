@@ -3279,9 +3279,45 @@ function wsSendMessage() {
 /*
  * menuDropdown
  */
+
+function deactivateMenu(menu) {
+	menu.style = "display:none;";
+	return;
+}
+
+var activeDropdown=null;
+function pinDropDown(sMenuName, event) {
+	var menu=document.getElementById(sMenuName);
+	if (activeDropdown != null && menu != activeDropdown)
+		deactivateMenu(activeDropdown);
+	menu.style = "display:block;";
+	activeDropdown = menu;
+	return;
+}
+
+function unpinDropDown(sMenuName, event) {
+	var menu=document.getElementById(sMenuName);
+	if (activeDropdown == menu)
+		activeDropdown = null;
+	deactivateMenu(menu);
+}
+
+function pinmenuSelect(sMenu, event) {
+	console.log("Welcome to the darkest depths of Mordor...")
+	// ToDo: perform action...
+	console.log("Act on:" + event.hash);
+	// i.e. close menu when item is selected...
+	unpinDropDown(sMenu,event);
+	// var menu=document.getElementById(sMenu);
+/*		menu.style.display = "none"; */
+}
+
+var bDoNothing=false;
 function menuDropDown(sMenuName, event) {
+	if (bDoNothing) return;
 	var menu=document.getElementById(sMenuName);
 	menu.style = "display:block;";
+	
 	return;
 /*
 	console.log("menuDropDown...");
@@ -3292,6 +3328,8 @@ function menuDropDown(sMenuName, event) {
 	*/
 }
 function mouseExitDropDownMenu(sMenuName, event) {
+	if (bDoNothing) return;
+
 	var menu=document.getElementById(sMenuName);
 	menu.style = "display:none;";
 	return;
@@ -3307,15 +3345,26 @@ function mouseExitDropDownMenu(sMenuName, event) {
  * dropDown - When the user clicks on the button, toggle between hiding and
  * showing the dropdown content
  */
-function dropDown() {
-	console.log("myDropdown...");
+function dropDown() {	// Unused???
+	console.log("myDropdown...");	// no such thing as...
 	document.getElementById("myDropdown").classList.toggle("show");
 }
+
+function menuSelect(sMenu, event) {
+	console.log("Welcome to the depths of Mordor...")
+	// ToDo: perform action...
+	console.log("Act on:" + event.hash);
+	// i.e. close menu when item is selected...
+	mouseExitDropDownMenu(sMenu,event);
+	// var menu=document.getElementById(sMenu);
+/*		menu.style.display = "none"; */
+}
+
 
 function mouseExitMenu(event) {
 	console.log("exit myDropdown.../Do nothing right now...");
 	console.log("arg=" + event);
-	dropDown();	// toggle show value...
+	//dropDown();	// toggle show value...
 
 }
 
