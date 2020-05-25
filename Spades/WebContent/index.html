@@ -661,14 +661,16 @@ tr:nth-child(even) {
 			<a onclick="pinmenuSelect('gamesMenu',this)" href="#start">Start</a> 
 			<a onclick="pinmenuSelect('gamesMenu',this)" href="#new">New</a> 
 			<a onclick="pinmenuSelect('gamesMenu',this)" href="#misdeal">Misdeal</a> 			
+			<a onclick="pinmenuSelect('gamesMenu',this)" href="#resetGame">Reset Game</a> 			
 			<a onclick="pinmenuSelect('gamesMenu',this)" href="#exit">Exit</a>
     </div>
   </div>
   <div class="dropdown">
     <button class="dropbtn"
 			onclick="pinDropDown('actionsMenu', this)"
-			onmouseenter="pinDropDown('actionsMenu', this);">
-			 Show
+			onmouseenter="pinDropDown('actionsMenu', this);"
+			onmouseleave="unpinDropDown('actionsMenu', this);">
+			Show
     </button>
     <div class="dropdown-content" id='actionsMenu'
 			onmouseenter="pinDropDown('actionsMenu', this);"
@@ -682,36 +684,6 @@ tr:nth-child(even) {
   </div>
 </div>
 <!-- 
-	<div class="topnav">
-		<a class="hover" href="#home" onclick="menuDropDown('gamesMenu',this);">
-			Games</a> 
-		<a class="hover" href="#view" onclick="menuDropDown('actionsMenu',this);">
-			Show</a> 
-	</div>
-	<div class="MenubarItem1Dropdown">
-		<div id="gamesMenu" class="dropdown-content"
-			style="left:0;" 
-			onclick="menuDropDown('gamesMenu', this);"
-			onmouseleave="mouseExitDropDownMenu('gamesMenu', this)">
-			<a onclick="menuSelect('gamesMenu',this)" href="#reconnect">Reconnect</a> 
-			<a onclick="menuSelect('gamesMenu',this)" href="#join">Join...</a> 
-			<a onclick="menuSelect('gamesMenu',this)" href="#start">Start</a> 
-			<a onclick="menuSelect('gamesMenu',this)" href="#new">New</a> 
-			<a onclick="menuSelect('gamesMenu',this)" href="#misdeal">Misdeal</a> 			
-			<a onclick="menuSelect('gamesMenu',this)" href="#exit">Exit</a>
-		</div>
-	</div>
-	<div class="MenubarItem1Dropdown">
-		<div id="actionsMenu" class="dropdown-content" 
-			onclick="menuDropDown('actionsMenu', this)"
-			onmouseleave="mouseExitDropDownMenu('actionsMenu', this)">
-			<a onclick="menuSelect('actionsMenu',this)" href="#refresh">Last Play</a> 
-			<a onclick="menuSelect('actionsMenu',this)" href="#scores">Scores</a> 
-			<a onclick="menuSelect('actionsMenu',this)" href="#who">Who</a> 
-			<a onclick="menuSelect('actionsMenu',this)" href="#status">Status</a> 
-			<a onclick="menuSelect('actionsMenu',this)" href="#about">About</a> 			
-		</div>
-	</div>
  -->
  
 	<!-- Add styles above, and div below... -->
@@ -731,9 +703,7 @@ tr:nth-child(even) {
 		<img id="HeartsImage" src="Hearts.jpg" style="display: none;"
 			onload="setTimeout(function(){logCardImage();}, 300);"> 
 		<img id="buttonfaceimage" src="buttonfacetest.png" style="display: none;"
-			onload="setTimeout(function(){logCardImage();}, 300);"> 
-			
-		
+			onload="setTimeout(function(){logCardImage();}, 300);"> 		
 	</div>
 
 	<div class="column2" id="handArea"
@@ -755,7 +725,6 @@ tr:nth-child(even) {
 			class="buttonGrid" id="HeartsInHandDiv"></span>
 	</div>
 	<br>
-
 
 	<div class="column1">
 		<var> Table Talk>> </var>

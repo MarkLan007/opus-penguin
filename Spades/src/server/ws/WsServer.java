@@ -526,25 +526,6 @@ public class WsServer {
 			// 
 			// can also (implement) capture a seat here...
 			break;
-		case JCLReset:
-			/*
-			 * Lookup game by session and reset...
-			 */
-			if (us.game != null)
-				g = us.game;
-			else
-				g = getDefaultGame();
-			write(us, "Game reset ordered.");
-			System.out.println("Reset game ordered...");
-			g.reset();
-			/*
-			if (us.game == null) {
-				System.out.println("No game to reset.");
-				break;
-			}
-			us.game.reset();
-			*/
-			break;
 		case JCLResend:
 			// not to be confused with 
 			// ... JCLRefresh which sends the whole context
@@ -589,6 +570,7 @@ public class WsServer {
 				write(us, "Misdeal declared:");
 				System.out.println("Player(" + us.getpid() +") declares misdeal.");				
 			}
+			// reset the hand
 			us.game.reset();
 			// does not advance passtype!
 			//us.game.start();
@@ -611,6 +593,18 @@ public class WsServer {
 			us.game.handOver();
 			write(us, "newdeal: passtype advanced.");
 			// only way to advance passtype!
+			break;
+		case JCLReset:
+			/*
+			 * Lookup game by session and reset...
+			 */
+			if (us.game != null)
+				g = us.game;
+			else
+				g = getDefaultGame();
+			write(us, "Game reset ordered. Everyone must 'join again");
+			System.out.println("Reset game ordered...");
+			g.resetGame();
 			break;
 		case JCLShuffle:
 			// set shuffle game-wide

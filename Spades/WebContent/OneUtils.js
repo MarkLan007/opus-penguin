@@ -47,7 +47,7 @@ function setWide() {
 		var bg=buttonGridArray[i];
 		bg.style.gridTemplateColumns = "repeat(5, 1fr)";
 	}
-	//buttonGrid.style.gridTemplateColumns = "repeat(4, 1fr)";
+	// buttonGrid.style.gridTemplateColumns = "repeat(4, 1fr)";
 }
 
 function setNarrow() {
@@ -57,7 +57,7 @@ function setNarrow() {
 		var bg=buttonGridArray[i];
 		bg.style.gridTemplateColumns = "repeat(4, 1fr)";
 	}
-	//buttonGrid.style.gridTemplateColumns = "repeat(4, 1fr)";
+	// buttonGrid.style.gridTemplateColumns = "repeat(4, 1fr)";
 }
 
 function narrowConfig() {
@@ -254,16 +254,15 @@ const maxCardsInHand = 52;
 function cardSelected(event) {
 	var t = event.target;
 	/*
-	 * Mark the button as selected for the user by setting the opacity
-	 *  .. only do this if in a pass.
-	 *  .. the delete comes back quickly and unsetting this in case
-	 *  of an error is too complicated right now...
+	 * Mark the button as selected for the user by setting the opacity .. only
+	 * do this if in a pass. .. the delete comes back quickly and unsetting this
+	 * in case of an error is too complicated right now...
 	 */
 	if (bPassingCardsInProgress)
 		t.style.opacity = 0.5;
 	var buttonName = event.target.id;
-	//var uniqueId = t.type + t.id;
-	//var special = t.textContent;
+	// var uniqueId = t.type + t.id;
+	// var special = t.textContent;
 	// console.log("Whoa!" + uniqueId+ "->" + t.textContent);
 	// alert("Whoa Nellie! in called with" + t.id + special);
 	// var digitString = buttonName.replace(/\D/g, "");
@@ -1517,8 +1516,8 @@ function animateMaybe() {
 	animator();
 }
 /*
- * animator - animate items using the theQueue and RAF
- * sets idle when queue is empty.
+ * animator - animate items using the theQueue and RAF sets idle when queue is
+ * empty.
  */
 function animator() {
 	
@@ -1798,7 +1797,7 @@ function processCardString(cardString) {
 			for (var j=0; j<cardString.length; j++)
 				if (cardString.charAt(j) == '.')
 					bDontStartAnimatorYet = true;
-			//bDontStartAnimatorYet = false;
+			// bDontStartAnimatorYet = false;
 
 			switch (nTableSize) {
 				case 4:
@@ -3029,7 +3028,7 @@ function toggleHandArea() {
 }
 
 function arrangeCardsInDivs() {
-		//console.log("Uh oh. I shouldn't be called. Ever.");
+		// console.log("Uh oh. I shouldn't be called. Ever.");
 		console.log("ArrangeCardsInDivs");
 		var always=true;
 		if (always)
@@ -3307,65 +3306,29 @@ function pinmenuSelect(sMenu, event) {
 	// ToDo: perform action...
 	console.log("Act on:" + event.hash);
 	// i.e. close menu when item is selected...
+	switch (event.hash) {
+	case "#join":
+		serverWrite("//join");
+		break;
+	case "#start":
+		serverWrite("//start");
+		break;	
+	case "#new":
+		serverWrite("//new");
+		break;
+	case "#misdeal":
+		serverWrite("//misdeal");
+		break;
+	case "#resetGame":
+		serverWrite("//reset");
+		break;
+	default:
+		xstatusUpdate("Command:" + event.hash + "Not yet implemented.");
+	}
 	unpinDropDown(sMenu,event);
 	// var menu=document.getElementById(sMenu);
-/*		menu.style.display = "none"; */
+/* menu.style.display = "none"; */
 }
 
-var bDoNothing=false;
-function menuDropDown(sMenuName, event) {
-	if (bDoNothing) return;
-	var menu=document.getElementById(sMenuName);
-	menu.style = "display:block;";
-	
-	return;
-/*
-	console.log("menuDropDown...");
-	var menu=document.getElementById(sMenuName);
-	if (menu == null)
-		menu=document.getElementById('gamesMenu');
-	menu.classList.toggle("show");
-	*/
-}
-function mouseExitDropDownMenu(sMenuName, event) {
-	if (bDoNothing) return;
-
-	var menu=document.getElementById(sMenuName);
-	menu.style = "display:none;";
-	return;
-	/*
-	//console.log("exit mouseExitDropDownMenu.../Do nothing right now...");
-	console.log("arg=" + event);
-	var what=event.id;
-	console.log("Exiting:" + what);
-	menuDropDown(sMenuName, event);	// toggle show value...
-	*/
-}
-/*
- * dropDown - When the user clicks on the button, toggle between hiding and
- * showing the dropdown content
- */
-function dropDown() {	// Unused???
-	console.log("myDropdown...");	// no such thing as...
-	document.getElementById("myDropdown").classList.toggle("show");
-}
-
-function menuSelect(sMenu, event) {
-	console.log("Welcome to the depths of Mordor...")
-	// ToDo: perform action...
-	console.log("Act on:" + event.hash);
-	// i.e. close menu when item is selected...
-	mouseExitDropDownMenu(sMenu,event);
-	// var menu=document.getElementById(sMenu);
-/*		menu.style.display = "none"; */
-}
-
-
-function mouseExitMenu(event) {
-	console.log("exit myDropdown.../Do nothing right now...");
-	console.log("arg=" + event);
-	//dropDown();	// toggle show value...
-
-}
 
 console.log("OneUtils loaded [done].");

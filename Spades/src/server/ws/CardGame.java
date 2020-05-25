@@ -1120,10 +1120,28 @@ public class CardGame implements GameInterface {
 	 * does NOT total scores
 	 * ready for start
 	 * cf handOver();
+	 * cf resetGame();
 	 */
 	public void reset() {
 		bPlayInitiated = false;
 		resetHand();
+	}
+	
+	/*
+	 * resetGame -- something bad has happened, possibly?
+	 * essentially new game;
+	 */
+	public void resetGame() {
+		abort();
+		// indicate a new game is starting...
+		bGameInProgress = true;
+		populatePlayers();
+		resetGameScores();
+		reset();
+
+		// xxx
+		// broadcast "game reseting..."
+		// reset
 	}
 
 	// jcl: //resume
