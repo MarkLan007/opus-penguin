@@ -430,9 +430,20 @@ XXX, Buzz Shepard, Staff Atty.
 	var bClearInput=true;	// true if the input marks a new line
 	var bCanEnter = false;
 	
-	var magicCookies=["6707","3141", "000", "6992", "3333", "6174"];
-	var magicEcho=["Hi Buzz", "I like Pi!", "Piss off!", "Fuck you, Bob!", "Ok, Joe...", "Hi Anne"];
-	var magicAction=[true, true, false, true, true, true];
+	var magicCookies=["6707","3141", "000", "6992", 
+		"3333", "6174", "1250"];
+	var magicEcho=["Hi Buzz", "I like Pi!", "Piss off!", "Fuck you, Bob!", "Ok, Joe...", "Hi Anne", "Stealing rolls, again?"];
+	var magicAction=[true, true, false, true, true, true, true];
+	
+	function getAction(s) {
+		var i;
+		for (i=0; i<magicCookies.length; i++)
+			if (s == magicCookies[i]) {
+				bCanEnter = magicAction[i];
+				return magicEcho[i];
+				}
+		return false;
+	}
 	
 	function getMatch(s) {
 	var i;
@@ -468,11 +479,11 @@ XXX, Buzz Shepard, Staff Atty.
 		var echoArea = document.getElementById("echoText");
 		echoArea.innerText = inputString;
 
+		bCanEnter = false;	// getmatch sets as side effect
 		var match = getMatch(inputString);
 		if (match != null) {
 			echoArea.innerText = match;
 			bClearInput = true;
-			bCanEnter = magicAction[i];
 		}
 
 	}

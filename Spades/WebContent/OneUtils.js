@@ -3301,12 +3301,18 @@ function unpinDropDown(sMenuName, event) {
 	deactivateMenu(menu);
 }
 
+function pinmenuSelect2(sMenu, event) {
+	console.log("not quiteto the darkest depths of Mordor...")
+	console.log("party on:" + event.hash);
+}
+
 function pinmenuSelect(sMenu, event) {
 	console.log("Welcome to the darkest depths of Mordor...")
 	// ToDo: perform action...
 	console.log("Act on:" + event.hash);
 	// i.e. close menu when item is selected...
 	switch (event.hash) {
+	// Game Menu
 	case "#join":
 		serverWrite("//join");
 		break;
@@ -3322,6 +3328,14 @@ function pinmenuSelect(sMenu, event) {
 	case "#resetGame":
 		serverWrite("//reset");
 		break;
+	// Action Menu
+	case "#refresh":
+		serverWrite("//refresh");
+		break;
+	case "#scores":
+	case "#who":
+	case "#status":
+	case "#about":
 	default:
 		xstatusUpdate("Command:" + event.hash + "Not yet implemented.");
 	}

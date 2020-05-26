@@ -656,13 +656,13 @@ tr:nth-child(even) {
     <div class="dropdown-content" id='gamesMenu'
 			onmouseenter="pinDropDown('gamesMenu', this);"
 			onmouseleave="unpinDropDown('gamesMenu', this);">
-			<a onclick="pinmenuSelect('gamesMenu',this)" href="#reconnect">Reconnect</a> 
-			<a onclick="pinmenuSelect('gamesMenu',this)" href="#join">Join...</a> 
-			<a onclick="pinmenuSelect('gamesMenu',this)" href="#start">Start</a> 
-			<a onclick="pinmenuSelect('gamesMenu',this)" href="#new">New</a> 
-			<a onclick="pinmenuSelect('gamesMenu',this)" href="#misdeal">Misdeal</a> 			
-			<a onclick="pinmenuSelect('gamesMenu',this)" href="#resetGame">Reset Game</a> 			
-			<a onclick="pinmenuSelect('gamesMenu',this)" href="#exit">Exit</a>
+			<a onmousedown="pinmenuSelect('gamesMenu',this)" href="#reconnect">Reconnect</a> 
+			<a onmousedown="pinmenuSelect('gamesMenu',this)" href="#join">Join...</a> 
+			<a onmousedown="pinmenuSelect('gamesMenu',this)" href="#start">Start</a> 
+			<a onmousedown="pinmenuSelect('gamesMenu',this)" href="#new">New</a> 
+			<a onmousedown="pinmenuSelect('gamesMenu',this)" href="#misdeal">Misdeal</a> 			
+			<a onmousedown="pinmenuSelect('gamesMenu',this)" href="#resetGame">Reset Game</a> 			
+			<a onmousedown="pinmenuSelect('gamesMenu',this)" href="#exit">Exit</a>
     </div>
   </div>
   <div class="dropdown">
@@ -675,11 +675,11 @@ tr:nth-child(even) {
     <div class="dropdown-content" id='actionsMenu'
 			onmouseenter="pinDropDown('actionsMenu', this);"
 			onmouseleave="unpinDropDown('actionsMenu', this);">
-			<a onclick="pinmenuSelect('actionsMenu',this)" href="#refresh">Last Play</a> 
-			<a onclick="pinmenuSelect('actionsMenu',this)" href="#scores">Scores</a> 
-			<a onclick="pinmenuSelect('actionsMenu',this)" href="#who">Who</a> 
-			<a onclick="pinmenuSelect('actionsMenu',this)" href="#status">Status</a> 
-			<a onclick="pinmenuSelect('actionsMenu',this)" href="#about">About</a> 			
+			<a onmousedown="pinmenuSelect('actionsMenu',this)" href="#refresh">Last Play</a> 
+			<a onmousedown="pinmenuSelect('actionsMenu',this)" href="#scores">Scores</a> 
+			<a onmousedown="pinmenuSelect('actionsMenu',this)" href="#who">Who</a> 
+			<a onmousedown="pinmenuSelect('actionsMenu',this)" href="#status">Status</a> 
+			<a onmousedown="pinmenuSelect('actionsMenu',this)" href="#about">About</a> 			
     </div>
   </div>
 </div>
