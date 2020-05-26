@@ -3313,6 +3313,9 @@ function pinmenuSelect(sMenu, event) {
 	// i.e. close menu when item is selected...
 	switch (event.hash) {
 	// Game Menu
+	case "#reconnect":
+		serverWrite("Hello world!");
+		break;
 	case "#join":
 		serverWrite("//join");
 		break;
