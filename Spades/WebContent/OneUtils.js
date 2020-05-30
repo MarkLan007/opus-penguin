@@ -1823,6 +1823,8 @@ function processCardString(cardString) {
 		case '%':
 			// console.log("%error:" + cardString);
 			// report user error
+			var msg=cardString.slice(7);
+			gAlert(msg);
 			gamestatusUpdate("error:" + cardString);
 			break;
 		case 'Q':
@@ -2175,6 +2177,8 @@ function wsScoreDialog(sMsg) {
 	// wsScoreDialogWindow(sMsg);
 }
 
+//
+// Review: TODO: Delete this code...
 function initScoreDialogDiv() {
 	// Get the fullymodal
 	var fullymodal = document.getElementById("scoreDialogDiv");
@@ -2207,7 +2211,8 @@ function initScoreDialogDiv() {
 }
 
 function wsScoreDialogDiv(score) {
-	initScoreDialogDiv();
+	// initscore no longer needed...
+	// initScoreDialogDiv();
 	
 	var fullymodal = document.getElementById("scoreDialogDiv");
 	// both block and inline-block seem to work
@@ -3263,6 +3268,10 @@ function processLocalCommand(line) {
 	} else if (line.includes("last")) {
 		repaint(saveGestault);
 		xstatusUpdate("Last trick...");
+	} else if (line.includes("galert")) {
+		var param = line.slice(8);	// HTML string for inner html...
+		gAlert(param);
+		xstatusUpdate("galert...");
 	} else {
 		xstatusUpdate("*** Unrecognized command. ignored ***");
 	}

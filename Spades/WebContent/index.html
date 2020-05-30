@@ -226,18 +226,10 @@ body {
   z-index: 3;
 }
 
-/*
- * buttonGrid is a container for a row of buttons
-  	grid-gap: 5px 20px;
-	height: 150px;
-	width: 100;
- 
- */
 .verticalButtonGrid {
 	display: grid;
 	height: 350px;
 	align-items: left;
-	
 	/*grid-template-rows: 30% 30% 30%;*/
 	grid-template-rows: 50px 50px 50px;
 }
@@ -519,7 +511,7 @@ body {
 </style>
 <style>
 /* experiment with fully modal */
-body {font-family: Arial, Helvetica, sans-serif;}
+/* 2nd (dubious) boyd tag... */
 
 /* The FullyModal (background) */
 .fullymodal {
@@ -771,7 +763,7 @@ tr:nth-child(even) {
 	/* x
 	 * I have no idea why these logging functinos don't produce visible output...
 	 */
-	console.log("Now in long abandoned module in ... GameConsole.html back from loading OneUtils.js...");
+	// console.log("Now in long abandoned module in ... GameConsole.html back from loading OneUtils.js...");
 	// alert("logging load...");
 	/*console.log(versionString1);
 	const consoleVersion="v0.01a";
@@ -830,19 +822,18 @@ insert modal stuff here ->
 <!-- Trigger/Open The Modal -->
 <button id="myBtn">Open Modal</button>
 
-<!-- The Modal Dialogs here -->
-<div id="myExperimentalModal" class="modal">
-<!-- Learning that class names are case sensitive the hard way...
- -->
-  <!-- Modal content -->
-  <div class="modal-content" >
-    <span class="close">&times;</span>
-    <p>Some vacuous text in the Modal..</p>
-    <p> bug: clicking outside the dialog doesn't close it..</p>
-  </div>
-</div>
+		<!-- The Modal Dialogs here -->
+		<!-- Standard modal and Modal content wrapper -->
+		<div id="myExperimentalModal" class="modal">
+			<div class="modal-content">
+				<span class="close">&times;</span>
+				<p>Some vacuous text in the Modal..</p>
+				<p>click outside the dialog to close it..</p>
+				<p>But shrinks under the rhs handDiv</p>
+				<p>At least until fully modal invoked...</p>
+			</div>
+		</div>
 
-<!-- should this be class="modal" No... Too wide...??? was semiModalLeft -->
 <div class="semiModalLeft" id="passMsgDiv" >
 <div class="semi-modal-content" id="passMsgDiv1">
 	
@@ -880,17 +871,12 @@ var modal = document.getElementById("myExperimentalModal");
 // Get the button that opens the modal
 var btn = document.getElementById("myBtn");
 
-// Get the <span> element that closes the modal
-var span = document.getElementsByClassName("close")[0];
-
+	
 // When the user clicks the button, open the modal 
 btn.onclick = function() {
   modal.style.display = "inline-block";	// ?
-}
-
-// When the user clicks on <span> (x), close the modal
-span.onclick = function() {
-  modal.style.display = "none";
+  // And contract the hand area... See fully modal
+  contractHandArea();
 }
 
 // I see... you need to set this every time it comes up..
@@ -981,15 +967,24 @@ window.onclick = function(event) {
 <div class="column1"> 
 <h2>FullyModal Example</h2>
 xx
+<!--Modal / Modal content wrapper -->
 <div id="myGenericModal" class="modal">
-  <!-- Modal content -->
   <div class="modal-content">
     <span class="close">&times;</span>
-    <!-- id="spanCloseXXX"  -->
     <p>Some text in the Modal..</p>
     <p> Completely broken. Button doesn't close. "open fullymodal" does nothing. </p>
     <p>Something's wrong. You shouldn't see this until you press the button...</p>
         <p>fixed... At least until you bring up the score dialog... </p>
+  </div>
+</div>
+
+<div id="gAlertDiv" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div id="gAlertHTMLMessage">
+    <p> Generic Alert </p>
+    </div>
+    <button onclick="gAlertOK(event);"> Ok </button>
   </div>
 </div>
 
@@ -998,19 +993,56 @@ xx
 <button onclick="showModalGalert();" id="modelModalBtn">Open FullyModal</button>
 </div>
 
-<!-- The FullyModal -->
-<div id="scoreDialogDiv" class="fullymodal">
+	<!-- The FullyModal -->
+	<div id="scoreDialogDiv" class="fullymodal">
+		<!-- FullyModal content -->
+		<div class="fullymodal-content">
+			<span class="close">&times;</span>
+			<p id="passMsg" style="text-align: center">Player Scores</p>
+			<div class="scoreGrid" id="scoreDiv"
+				style="align-items: center; background-color: var(- -blue1);">
+		<table id=formattedScoreTable>
+			<tr>
+				<th id="strC1">player</th>
+				<th id="strC2">points</th>
+				<th id="scrC3">total</th>
+			</tr>
+			<tr id="scoreTableRow0">
+				<td id="playerp0">Human Player 1</td>
+				<td id="p0s0">0</td>
+				<td id="p0s1">0</td>
+			</tr>
+			<tr id="scoreTableRow1">
+				<td id="playerp1">Robot Player 0</td>
+				<td id="p1s0">0</td>
+				<td id="p1s1">0</td>
+			</tr>
+			<tr id="scoreTableRow2">
+				<td id="playerp2">Robot Player 1</td>
+				<td id="p2s0">0</td>
+				<td id="p2s1">0</td>
+			</tr>
+			<tr id="scoreTableRow3">
+				<td id="playerp3">Robot Player 2</td>
+				<td id="p3s0">0</td>
+				<td id="p3s1">0</td>
+			</tr>
+			<tr id="scoreTableRow4">
+				<td id="playerp4">Robot Player 3</td>
+				<td id="p4s0">0</td>
+				<td id="p4s1">0</td>
+			</tr>
+			<tr id="scoreTableRow5">
+				<td id="playerp5">Robot Player 4</td>
+				<td id="p5s0">0</td>
+				<td id="p5s1">0</td>
+			</tr>
+		</table>
+	</div>
 
-  <!-- FullyModal content -->
-  <div class="fullymodal-content">
-    <span class="close">&times;</span>
-    <!-- 
-    <p>Some text in the FullyModal..</p>
-     -->
-    	<p id="passMsg" style="text-align: center">Player Scores</p>
-	<div class="scoreGrid" id="passDiv"
-		style="align-items: center;  background-color: var(--blue1);">
-    
+	</div>
+	</div>
+</body>
 <script>
 /*
  * Note that code must be AFTER all the items that are referenced...
@@ -1033,112 +1065,89 @@ xx
 	  handArea.style = "width:50%; float: left;"
  }
  */
- function showModalGalert(event) {
-	 /*
-	  * Slide the handDiv to the right...
-	  */
-	  contractHandArea();
-	 var alertDialog = document.getElementById("myGenericModal");
-	 alertDialog.style.display = "block";
- }
- function closeModalGalert(event) {
-	 
- }
-function initModelModalCode() {
-	// Get the fullymodal
-	var fullymodal = document.getElementById("myGenericModal");
-
-	// don't forget to hook the button to open the div
-	// it's modelModalBtn ... xxx
-	/* stands in the way of progress
-	 * trying to use galert... don't set this here...
-	var btn = document.getElementById("modelModalBtn");
-		btn.onclick = function() {
-		fullymodal.style.display = "block";
+	function gAlertOK(event) {
+		closeModalGalert(event);
 	}
+	function gAlert(htmlMsg) {
+		console.log("galert: New code.")
+		contractHandArea();
+		var msg = document.getElementById("gAlertHTMLMessage");
+		msg.innerText = htmlMsg;
+
+		var alertDialog = document.getElementById("gAlertDiv");
+		alertDialog.style.display = "block";
+		//alertDialog.ParentNode.style.display = "block";
+	}
+
+	// deprecated... Not part of galert see id/name...
+	function showModalGalert(event) {
+		console.log("galert: New code.")
+		/*
+		 * Slide the handDiv to the right...
+		 */
+		contractHandArea();
+		var alertDialog = document.getElementById("myGenericModal");
+		alertDialog.style.display = "block";
+	}
+	function closeModalGalert(event) {
+		console.log("galert: close. just implemented...");
+		///xxx yyy 
+		event.target.parentNode.parentNode.style.display = "none";
+
+		/*
+		var alertDialog = document.getElementById("gAlertDiv");
+		alertDialog.parentNode.style.display = "none";
 		*/
 
-	// Get the <span> element that closes the fullymodal
-	// tricky because gets by type and assumes this if the first one...
-	// so make sure that the classname is unique
-	var span = document.getElementsByClassName("close")[0];
+	}
 
-	/*
-	var span = document.getElementById("spanCloseXXX");
-	// When the user clicks on <span> (x), close the fullymodal
-	span.onclick = function() {
-		console.log("X click.");
-		fullymodal.style.display = "none";
-		*/
+	function initModelModalCode() {
+		// Get the fullymodal
+		var fullymodalVariableNotUsed = document
+				.getElementById("myGenericModal");
+
+		// thing 2.
+		// ++ experiment with addevent listener
+		// genericmodal...
+		/* document.getElementById("myBtn").addEventListener("click", function(){
+		 document.getElementById("demo").innerHTML = "Hello World";
+		 }); */
+		// --
+		// ++ (re)imported from MLLLogin
+		var closees = document.getElementsByClassName("close");
+		for (var i = 0; i < closees.length; i++)
+			closees[i].onclick = function(event) {
+				console.log("generic Xclose...");
+				event.target.parentNode.parentNode.style.display = "none";
+			}
+
+		// --
+
+		/*
+		var span = document.getElementById("spanCloseXXX");
+		// When the user clicks on <span> (x), close the fullymodal
+		span.onclick = function() {
+			console.log("X click.");
+			fullymodal.style.display = "none";
+		 */
 	}
 
 	// When the user clicks anywhere outside of the fullymodal, close it
 	window.onclick = function(event) {
-		
+
 		var classes = event.target.classList;
 		// so click is on the window outside the frame
 		// hosting the dialog or on the x... (No you need to get parent of x)
-		for (var i=0; i<classes.length; i++) {
+		for (var i = 0; i < classes.length; i++) {
 			var c = classes[i];
 			if (c.id == "modelModalBtn")
-				closeModalGalert();
-			else if (classes[i] == "modal" /*|| classes[i] == "close"*/)
+				closeModalGalert(event);
+			else if (classes[i] == "modal")
 				event.target.style.display = "none";
 		}
-		/*
-		if (event.target == fullymodal) {
-			fullymodal.style.display = "none";
-		} */
 
+	}
 
-}
-
-initModelModalCode();
-
+	initModelModalCode();
 </script>
-    
-<table id=formattedScoreTable>
-  <tr>
-    <th id="strC1">player</th>
-    <th id="strC2">points</th>
-    <th id="scrC3">total</th>
-  </tr>
-  <tr id="scoreTableRow0">
-    <td id="playerp0">Human Player 1</td>
-    <td id="p0s0">0</td>
-    <td id="p0s1">0</td>
-  </tr>
-  <tr id="scoreTableRow1">
-    <td id="playerp1">Robot Player 0</td>
-    <td id="p1s0">0</td>
-    <td id="p1s1">0</td>
-  </tr>
-  <tr id="scoreTableRow2">
-    <td id="playerp2">Robot Player 1</td>
-    <td id="p2s0">0</td>
-    <td id="p2s1">0</td>
-  </tr>
-  <tr id="scoreTableRow3">
-    <td id="playerp3">Robot Player 2</td>
-    <td id="p3s0">0</td>
-    <td id="p3s1">0</td>
-  </tr>
-  <tr id="scoreTableRow4">
-    <td id="playerp4">Robot Player 3</td>
-    <td id="p4s0">0</td>
-    <td id="p4s1">0</td>
-  </tr>
-  <tr id="scoreTableRow5">
-    <td id="playerp5">Robot Player 4</td>
-    <td id="p5s0">0</td>
-    <td id="p5s1">0</td>
-  </tr>
-</table>	
-    
-  </div>
-
-</div>
-</div>
-</body>
-
 </html>
