@@ -61,7 +61,7 @@ function setNarrow() {
 }
 
 function narrowConfig() {
-	if (scrWidth < 400) {
+	if (scrWidth < 420) {
 		setNarrow();
 		return true;
 	}
@@ -75,7 +75,7 @@ function displayWindowSize(){
     var h = document.documentElement.clientHeight;
     clientWidth = w;
     clientHeight = h;
-	xstatusUpdate("config=" + "clientWidth:" + w +  ":" + scrInnerWidth  + " height:" + h);
+	xstatusUpdate("config=" + "Width(client:inner)=(" + w +  ":" + scrInnerWidth  + ") height:" + h);
 
 	// keep handarea on the right...
 	resizeHandArea(clientWidth, scrInnerWidth);
@@ -303,6 +303,7 @@ function wsHandInit() {
 	for (i = 0; i < maxCardsInHand; i++) {
 		// only way to do cardBtn = new Button();
 		cardBtn = document.createElement("Button");
+		// no workee... cardBtn.style = "margin: 0px;" // xxx works?
 		if (cardBtn == null) {
 			alert("ButtonCreate failed on attempt=" + i);
 			console.log("ButtonCreate failed on attempt=" + i);
@@ -2046,10 +2047,6 @@ function scoreHandlerInstall() {
 	closeBtn.addEventListener("click", dismissScoreDialogWindow);
 }
 
-/*
- * experimentalFunction stub for experimenting with new elements invoked from
- * index.html
- */
 function showModal() {
 	var modal = document.getElementById("myExperimentalModal");
 	modal.style.display = "block";
@@ -2197,18 +2194,15 @@ function initScoreDialogDiv() {
 	 */
 
 	// When the user clicks on <span> (x), close the fullymodal
-	span.onclick = function() {
-		initScoreDialogDiv();
-		fullymodal.style.display = "none";
-	}
-
-	// When the user clicks anywhere outside of the fullymodal, close it
-	window.onclick = function(event) {
-		initScoreDialogDiv();		
-		if (event.target == fullymodal) {
-			fullymodal.style.display = "none";
-		}
-	}
+	/*
+	 * No workee... related to remodeling of modals...
+	 * 
+	 * span.onclick = function() { initScoreDialogDiv();
+	 * fullymodal.style.display = "none"; }
+	 *  // When the user clicks anywhere outside of the fullymodal, close it
+	 * window.onclick = function(event) { initScoreDialogDiv(); if (event.target ==
+	 * fullymodal) { fullymodal.style.display = "none"; } }
+	 */
 
 }
 
@@ -2228,10 +2222,24 @@ function wsScoreDialogDiv(score) {
 /*
  * function experimentalFunction(score) { wsScoreDialogDiv(score); }
  */
+/*
+ * experimentalFunction stub for experimenting with new elements invoked from
+ * index.html
+ */
+
+var bToggle = true;
 function experimentalFunction(score) {
-	toggleHandArea();
+	// toggleHandArea();
+	if (bToggle)
+		expandHandArea();
+	else
+		contractHandArea();
+	bToggle = !bToggle;
 	}
 
+/*
+ * box-o-chocolates
+ */
 function experimentalFunction1(s) {
 	console.log("You never know what you're going to get");
 }
@@ -2998,6 +3006,7 @@ function clearDivs() {
 	}
 }
 
+
 // xxx
 function resizeHandArea(width, innerwidth) {
 	expandHandArea();
@@ -3005,7 +3014,7 @@ function resizeHandArea(width, innerwidth) {
 
 function expandHandArea() {
 	var div=document.getElementById("handArea");
-	var startx = 160;
+	var startx = 160;	// 160?
 	div.x = startx;
 	div.width = clientWidth - startx;
 	div.style.zIndex = 3;
@@ -3015,10 +3024,22 @@ function expandHandArea() {
 // this is really just hide hand area...
 function contractHandArea() {
 	var div=document.getElementById("handArea");
+	var startx = clientWidth * .8;	// 160?
+	div.x = startx;
+	div.width = 20; // was... clientWidth - startx;
+
 	div.style.zIndex = 0;
+	
+	// need to make column1 area really big???
+	// ???
+	
+	// bring playfelt (canvas1) to the top
+	feltCanvas = document.getElementById("Canvas1");
+	feltCanvas.style.zIndex = 3;
 	}
 
-function toggleHandArea() {
+// Not used...
+function toggleHandAreaXXXX() {
 	var div=document.getElementById("handArea");
 
 	if (div.style.zIndex > 2)

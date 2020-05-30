@@ -188,7 +188,7 @@ body {
 .column1 {
 	z-index: 1;
 	position: relative;
-	width: 55%;
+	width: 55%;	/* see "pixels to burn" */
 	float: left;
 	 overflow-y: auto;
 }
@@ -205,14 +205,18 @@ body {
 	position: fixed;
 	right: 0;
 	z-index: 0;	/* see comment on column1 */
-	width: 50%;
+	width: 55%;
 	/* left: 550px; */
-	float: left; /* ??? */
+	float: right; /* ??? */
+	/* opacity: .99; */
+	/* see https://philipwalton.com/articles/what-no-one-told-you-about-z-index/ */
 	display: grid;
 	/* grid-template-rows: 80px 80px 80px 80px 80px 80px auto; */
 	/* grid-template-rows: 60px 60px 60px 60px 60px 60px auto; */
 	grid-template-rows: auto; 
 	/* transition: right 3s; */
+	 overflow-y: auto;
+
 }
 
 .column2:touchstart {
@@ -247,7 +251,6 @@ body {
 	justify-content: start;
 	/* grid-gap: 5px 20px; */
 	grid-gap: 0px 0px;
-	
 }
 
 .hoverBtn{
@@ -389,7 +392,10 @@ body {
 .modal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
+  /* float: left;	/* experiment xxx */
   z-index: 6; /* Sit on top */
+ 	/* float: left;	/* experiment with float, not z-index... */
+  	/* width: 250px; /* no workee with column2 */
   padding-top: 100px; /* Location of the box */
   left: 0;
   top: 0;
@@ -539,20 +545,6 @@ body {font-family: Arial, Helvetica, sans-serif;}
   width: 80%;
 }
 
-/* The fClose Button */
-.fclose {
-  color: #aaaaaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.fclose:hover,
-.fclose:focus {
-  color: #000;
-  text-decoration: none;
-  cursor: pointer;
-}
 /* experimental fullyModal */
 </style>
 <style type="text/css">
@@ -650,7 +642,8 @@ tr:nth-child(even) {
   <div class="dropdown">
     <button class="dropbtn"
 		onclick="pinDropDown('gamesMenu', this)"
-		onmouseenter="pinDropDown('gamesMenu', this);">
+		onmouseenter="pinDropDown('gamesMenu', this);"
+		onmouseleave="unpinDropDown('gamesMenu', this);">
 		Game
     </button>
     <div class="dropdown-content" id='gamesMenu'
@@ -690,6 +683,9 @@ tr:nth-child(even) {
 
 	<div class="row"></div>
 	<div class="column1" id="TextScrollDiv">
+	<!-- Note this width for maxTableWidth 
+		Before monkeying with width, See maxFeltWidth "pixels to burn" in expand/contract
+	 -->
 		<canvas id="Canvas1" width=550>
 				Your browser sucks and does not support canvas.
 			</canvas>
@@ -714,16 +710,23 @@ tr:nth-child(even) {
 		<div id="topright" 
 		  style="position: fixed; top: 0; right: 0px;">
 		<p id="gamestatusArea" class="alignRight"
-			style="position: fixed; top: 0; right: 0px;">
+			style="display: none; position: fixed; top: 0; right: 0px;">
 			...</p>
 			<br>
-		<p id="trickArea" class="alignRight">Previous Trick.</p>
+		<p id="trickArea" style="display: none;" class="alignRight">Previous Trick.</p>
 		</div>	
+		<div class="rhsContent">
+<button id="resizeButton" style="text-align: left" onclick="expandContractDiv(event);">
+&lt;&lt; Expand/Contract &gt;&gt;
+</button>
+<p id="infoMessage"> Stuff. </p>
+		
 		<span class="buttonGrid" id="ClubsInHandDiv"></span> <span
 			class="buttonGrid" id="DiamondsInHandDiv"></span> <span
 			class="buttonGrid" id="SpadesInHandDiv"></span> <span
 			class="buttonGrid" id="HeartsInHandDiv"></span>
 	</div>
+</div>
 	<br>
 
 	<div class="column1">
@@ -839,7 +842,7 @@ insert modal stuff here ->
   </div>
 </div>
 
-
+<!-- should this be class="modal" No... Too wide...??? was semiModalLeft -->
 <div class="semiModalLeft" id="passMsgDiv" >
 <div class="semi-modal-content" id="passMsgDiv1">
 	
@@ -900,6 +903,76 @@ window.onclick = function(event) {
     modal.style.display = "none";
   }
 }
+/*
+ * temporarily placed  here... 
+ * TODO: move to OneUtils...
+ */
+ /*
+  * toggle expand or contract
+  */
+ var bExpanded = false;
+ var maxFeltWidth = 550;	// fragile...
+ function contractDiv(event) {
+ 	var div=document.getElementById("handArea");
+ 	div.style.width = "46%"
+ 	// Pixels to burn? Make rhs larger than 45%
+ 	// clientwidth
+ 	// table will not be larger than 550 or 45%, whichever is smaller...
+	detectConfig();
+ 	
+ 	// max width of card table...
+ 	// close but something's wrong...
+ 	// take a walk...
+ 	var cw = clientWidth;	// cf: clientWidth, scrWidth and scrInnerWidth
+ 	var m = .55 * cw;
+ 	var m2 = maxFeltWidth;	// scroll bar...
+ 	if (m > m2)
+ 		m = m2; 
+ 	var pixelsRemaining = Math.round(cw - m);
+ 	var percentRemaining = pixelsRemaining / cw;
+ 	var pixelWidth = "" + pixelsRemaining + "px"
+ 	if (percentRemaining > .45)
+ 		div.style.width = pixelWidth;
+ 	setInfoMessage("scrwidth=" + scrWidth 
+ 				+ " innerWidth=" + innerWidth
+ 				+ " clientWidth=" + clientWidth);
+ 	//setInfoMessage("newWidth =" + pixelWidth + "remain=" + percentRemaining + "%");
+ 	// set button text to <<expand
+ 	var btn=document.getElementById("resizeButton");
+ 	btn.innerText = "<< expand"
+ 	//btn.style = "text-align: left";
+ 	bExpanded = false;	
+ }
+ function expandDiv(event) {
+ 	var div=document.getElementById("handArea");
+ 	div.style.width = "70%"
+ 	//
+ 	// set button text to shrink>>
+ 	var btn=document.getElementById("resizeButton");
+ 	btn.innerText = "shrink panel >>"
+ 	//btn.style = "text-align: left";
+ 	bExpanded = true;	
+ 	setInfoMessage("scrwidth=" + scrWidth 
+				+ " innerWidth=" + innerWidth
+				+ " clientWidth=" + clientWidth);
+ }
+
+ function setInfoMessage(s) {
+	 	var p=document.getElementById("infoMessage");
+	 	p.innerText = s; // "Got it."
+	 
+ }
+ function expandContractDiv(event) {
+ 	//var p=document.getElementById("infoMessage");
+ 	//p.innerText = "Got it."
+	setInfoMessage("Got it...");
+ 	if (bExpanded)
+ 		contractDiv(event);
+ 	else
+ 		expandDiv(event);
+
+ }
+ 
 </script>
 
 </body>
@@ -911,7 +984,8 @@ xx
 <div id="myGenericModal" class="modal">
   <!-- Modal content -->
   <div class="modal-content">
-    <span id="spanCloseXXX" class="close">&times;</span>
+    <span class="close">&times;</span>
+    <!-- id="spanCloseXXX"  -->
     <p>Some text in the Modal..</p>
     <p> Completely broken. Button doesn't close. "open fullymodal" does nothing. </p>
     <p>Something's wrong. You shouldn't see this until you press the button...</p>
@@ -921,7 +995,7 @@ xx
 
 xx
 <!-- Trigger/Open The FullyModal -->
-<button id="modelModalBtn">Open FullyModal</button>
+<button onclick="showModalGalert();" id="modelModalBtn">Open FullyModal</button>
 </div>
 
 <!-- The FullyModal -->
@@ -929,7 +1003,7 @@ xx
 
   <!-- FullyModal content -->
   <div class="fullymodal-content">
-    <span class="fclose">&times;</span>
+    <span class="close">&times;</span>
     <!-- 
     <p>Some text in the FullyModal..</p>
      -->
@@ -944,35 +1018,78 @@ xx
  * init is called on it...
  */
 
+ function shrinkHandAreaDeleteMe() {
+	 contractHandArea();
+	 return;
+	 var handArea = document.getElementById("handArea")
+	  //handArea.style.width = "20%";
+	  handArea.style = "width:20%; float: none;"
+ }
+ /*
+ function expandHandArea() {
+	  var handArea = document.getElementById("handArea")
+	  //handArea.style.width = "50%";	 	
+	  //handArea.style.float = "left"
+	  handArea.style = "width:50%; float: left;"
+ }
+ */
+ function showModalGalert(event) {
+	 /*
+	  * Slide the handDiv to the right...
+	  */
+	  contractHandArea();
+	 var alertDialog = document.getElementById("myGenericModal");
+	 alertDialog.style.display = "block";
+ }
+ function closeModalGalert(event) {
+	 
+ }
 function initModelModalCode() {
 	// Get the fullymodal
 	var fullymodal = document.getElementById("myGenericModal");
 
 	// don't forget to hook the button to open the div
 	// it's modelModalBtn ... xxx
+	/* stands in the way of progress
+	 * trying to use galert... don't set this here...
 	var btn = document.getElementById("modelModalBtn");
 		btn.onclick = function() {
 		fullymodal.style.display = "block";
 	}
+		*/
 
 	// Get the <span> element that closes the fullymodal
 	// tricky because gets by type and assumes this if the first one...
 	// so make sure that the classname is unique
 	var span = document.getElementsByClassName("close")[0];
 
+	/*
 	var span = document.getElementById("spanCloseXXX");
 	// When the user clicks on <span> (x), close the fullymodal
 	span.onclick = function() {
 		console.log("X click.");
 		fullymodal.style.display = "none";
+		*/
 	}
 
 	// When the user clicks anywhere outside of the fullymodal, close it
 	window.onclick = function(event) {
+		
+		var classes = event.target.classList;
+		// so click is on the window outside the frame
+		// hosting the dialog or on the x... (No you need to get parent of x)
+		for (var i=0; i<classes.length; i++) {
+			var c = classes[i];
+			if (c.id == "modelModalBtn")
+				closeModalGalert();
+			else if (classes[i] == "modal" /*|| classes[i] == "close"*/)
+				event.target.style.display = "none";
+		}
+		/*
 		if (event.target == fullymodal) {
 			fullymodal.style.display = "none";
-		}
-	}
+		} */
+
 
 }
 
