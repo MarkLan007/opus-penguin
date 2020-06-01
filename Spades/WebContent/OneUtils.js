@@ -1824,6 +1824,8 @@ function processCardString(cardString) {
 			// console.log("%error:" + cardString);
 			// report user error
 			var msg=cardString.slice(7);
+			if (msg.charAt(msg.length-2) == '%')
+				msg = msg.slice(0,-2); // lop off trailing %
 			gAlert(msg);
 			gamestatusUpdate("error:" + cardString);
 			break;
@@ -2677,6 +2679,15 @@ function setEndpoint(endpoint) {
 
 function setUser(s) {
 	sUser = s;
+}
+
+/*
+ * xxx
+ * Add cookie string to send here... (maybe?)
+ */
+function initWebSocket() {
+	openWebSocket();
+	//serverWrite("Hello world!");
 }
 
 // var sService = "ws://127.0.0.1:8080/"

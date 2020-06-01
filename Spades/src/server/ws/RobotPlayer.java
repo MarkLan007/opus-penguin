@@ -56,7 +56,10 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		/*
 		 * Just digest and process the message synchronously
 		 */
-		if (pm.type == ProtocolMessageTypes.PLAYER_ERROR) {
+		if (pm.type == ProtocolMessageTypes.PLAYER_ERROR &&
+				pm.usertext.startsWith("%ERR:")) {
+			// i.e. don't treat informational MSG: messages as 
+			// calling for approbrium.
 			int trickid;
 			if (cardGame != null)
 				trickid = cardGame.getCurrentTrickId();

@@ -327,12 +327,13 @@ public class CardGame implements GameInterface {
 		 * TODO: should not send your turn if the game is over...
 		 */
 		String msg;
-		if (nCurrentTurn == -1 && (currentTrick == null || currentTrick.subdeck.size() == 0))
-			msg = "%Play the 2 of clubs";
+		if (p.has(deuceClubs))
+			msg = "Lead the 2 of clubs!";
 		else if (currentTrick == null || currentTrick.subdeck.size() == 0) // i.e. your leading, and not first trick
-			msg = "%Your lead.";
+			msg = "Your lead.";
 		else
-			msg = "%Your turn.";
+			msg = "Your turn.";
+		// xxx
 		pm.setUsertext(msg);
 		p.sendToClient(pm);
 		if (nCurrentTurn == -1) {
@@ -485,6 +486,25 @@ public class CardGame implements GameInterface {
 		return "(" + length + ")" + cardString + handString;
 	}
 
+	static ProtocolMessage newErrorMsg(boolean bJustInformational, String sErrorText) {
+		String prefix = "%MSG:";
+		if (bJustInformational)
+			prefix = "%MSG:";
+		else
+			prefix = "%ERR:";
+		ProtocolMessage pm=new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR, 
+				prefix + sErrorText + "%");	// Wrap in %MSG:/%ERR: %
+		return pm;
+	}
+	static String getFormattedAlertMsg(String msg) {
+/*		String spm="";	// Wrap in %MSG: %
+		ProtocolMessage pm=new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR, 
+				"%MSG:" + msg + "%");
+				*/
+		ProtocolMessage pm = newErrorMsg(true, msg);
+		String formattedErrorMsg = pm.encode();
+		return formattedErrorMsg;
+	}
 	String getFormattedPlayerInfo() {
 		int i;
 		String sTemp = "";
@@ -985,8 +1005,9 @@ public class CardGame implements GameInterface {
 			// update the turn, and send trick to next player
 			// is the sender the player with the turn?
 			if (nSender != nCurrentTurn) {
-				returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
-						"%MSG:Not your turn player" + nSender + ". It's Player" + nCurrentTurn + "'s turn!%");
+				returnMessage = newErrorMsg(false, 
+						"Not your turn player" + nSender 
+						+ ". It's Player" + nCurrentTurn + "'s turn!");
 				p.sendToClient(returnMessage);
 				return;
 			}

@@ -68,6 +68,12 @@ public class WsServer {
 		
 		// Catch up...
 		retrievePreviousConversation(sess);
+		//
+		// format welcome message
+		String msg=CardGame.getFormattedAlertMsg(
+				"Successfully Connected to gameserver. Select 'Join' or create 'new' game from menu."
+				);
+		write(sess, msg);
 	}
 	
 	/*
@@ -323,7 +329,12 @@ public class WsServer {
 			if (g == null)
 				g = getDefaultGame();
 			if (!g.start()) {
-				write(us, "Play Initiated. Can't start. User 'resume' or use 'misdeal', 'newdeal' or 'reset' to reset.");
+				// XXX 
+				String msg="Play Initiated. Can't start. User 'resume' or use 'misdeal', 'newdeal' or 'reset' to reset.";
+				String fmsg=CardGame.getFormattedAlertMsg(msg);
+				//write(us, fpmsg);				
+
+				//write(us, "Play Initiated. Can't start. User 'resume' or use 'misdeal', 'newdeal' or 'reset' to reset.");
 			}
 
 			break;
@@ -474,8 +485,16 @@ public class WsServer {
 			if (bJoinStatus) {
 				// joined ok...
 				//
-				write(us, "Successfully joined game:" + g.sGameName + " as " + friendlyName + "...");
-				write(us, "issue start command to initiate play.");
+				String gameName="H0";
+				String msg=friendlyName + " Successfully joined game: " 
+						+ gameName + ". Select 'start' from menu to initiate play. (or wait for other people to join.)";
+				String pmsg=CardGame.getFormattedAlertMsg(msg);
+				write(us, pmsg);		
+				// Announce new player to other humans
+				// hold off on this...
+				//     g.broadcast(true, friendlyName + "seat:" +  us.getpid() + " Has joined the game.");
+				//write(us, "Successfully joined game:" + g.sGameName + " as " + friendlyName + "...");
+				//write(us, "issue start command to initiate play.");
 			}
 			else if (!bJoinStatus  && (sparam.contains("bygod") ||
 					(sname.contains("bygod")))) {
@@ -654,8 +673,10 @@ public class WsServer {
 			conversation += s + "\n";
 			n++;
 			}
-		if(sess.isOpen())
-			asynchRemote.sendText(conversation);
+		if(sess.isOpen()) {
+			//asynchRemote.sendText(conversation);
+			write(sess, conversation);
+		}
 		else
 			System.out.println("attempting to write(" + n + ") to: closed channe.");
 	}
@@ -679,10 +700,57 @@ public class WsServer {
 	}
 	*/
 	
-	boolean verbose=true;
+	static boolean verbose=true;
 	boolean bNeverSleep=true;
-	public void write(UserSession us, String msg) {
+	/*
+	 * underlying routine called by all
+	 *  -- added late so could write a message before a user session
+	 *  is actually created...
+	 */
+	static public void write(Session sess, String msg) {
+		/*
+		 * to thwart the error: 'remote endpoint was in state [TEXT_FULL_WRITING] which
+		 * is an invalid state for called method use basic'
+		 * try, try again...
+		 */
+		RemoteEndpoint.Basic basicRemote = sess.getBasicRemote();
+		int i = 0; // tries...
+		boolean bWriteSucceeded = false;
+		if (verbose) {
+			System.out.println("send(" + "--connecting--" + "):" + msg);
+		}
+		if (sess.isOpen()) {
+			for (i = 0; i < 10 && !bWriteSucceeded; i++) {
+				try {
+					// Crap. Sometimes getting this:
+					// The remote endpoint was in state [TEXT_FULL_WRITING] which is an invalid
+					// state for called method
+					basicRemote.sendText(msg);
+					bWriteSucceeded = true;
+				} catch (IOException e) {
+					// Enhance the auto-generated catch block to try again...
+					// TODO: check for if (e == java.io.EOFException))
+					if (i < 10 && !bWriteSucceeded) {
+						CardGameKernel.msleep(20);
+						System.out.println("Write tried:" + i + "times and failed.");
+						continue;
+					} // Admit failure.
+					System.out.println("Write failed: " + i + " retries. Dumping stackTrace");
+					e.printStackTrace();
+				}
+			}
+		}
+		// succeed on first time and say nothing...
+		if (bWriteSucceeded && i > 0) {
+			System.out.println("Write took " + i + " tries to succeed.");
+		} else
+			System.out.println("Write failed after " + i + " retries.");
+	}
+
+	static public void write(UserSession us, String msg) {
 		Session sess=us.getSession();
+		write(sess, msg);
+		/*
 		if (bNeverSleep)
 			;
 		else if (bBypassKernel)
@@ -692,7 +760,7 @@ public class WsServer {
 		 * 		remote endpoint was in state [TEXT_FULL_WRITING] which is 
 		 * 		an invalid state for called method
 		 * use basic (rather than asynch) and just block and wait
-		 */
+		 * /
 		RemoteEndpoint.Basic basicRemote=sess.getBasicRemote();
 		//RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote();
 		if (verbose) {
@@ -706,10 +774,14 @@ public class WsServer {
 				e.printStackTrace();
 			}
 			//asynchRemote.sendText(msg);		
-	}
+	*/
+		}
+
+		
 	// static version of write...
 	static public void send(UserSession us, String msg) {
 		Session sess=us.getSession();
+		write(sess, msg);
 		//boolean verbose=true;	// local version...
 		/*RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 			
 		if (verbose) {
@@ -722,7 +794,7 @@ public class WsServer {
 		if (verbose) {
 			System.out.println("send(" + us.username + "):" + msg);
 		}
-		*/
+		* /
 		RemoteEndpoint.Basic basicRemote=sess.getBasicRemote();
 		if (sess.isOpen())
 			try {
@@ -732,7 +804,7 @@ public class WsServer {
 				e.printStackTrace();
 			}
 			//asynchRemote.sendText(msg);		
-
+*/
 	}
 	
 	public void broadcast(String msg) {
