@@ -407,20 +407,16 @@ public class WsServer {
 			write(us, s);
 			break;
 		case JCLStart:
-			sname="";
-			sparam="";
-			if (jcl.argc() > 1) {	// argc is always at least 1
-				sname=jcl.getName(1);
-				sparam=jcl.getValue(1);
-				}
-			/*
-			 * sparam for start is ignored
-			 */
-			g=lookupGameFromSession(sparam);
-			if (g == null)
-				g = getDefaultGame();
+			if (us.game == null) {
+				// format error dialog and send back;
+				String msg = "Not currently in a game; 'join' existing game, or 'new' to create.";
+				String pmsg=CardGame.getFormattedAlertMsg(msg);
+				write(us, pmsg);		
+				break;
+			}
+			g = us.game;
 			if (!g.start()) {
-				write(us, "Play Initiated. Can't start. Use 'misdeal' or 'reset'  to reset.");
+				write(us, "Play already initiated. Can't start. Use 'misdeal' or 'reset'  to reset.");
 			}
 			break;
 		case JCLLs:	// list available games...
