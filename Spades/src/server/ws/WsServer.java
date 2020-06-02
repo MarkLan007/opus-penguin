@@ -423,26 +423,6 @@ public class WsServer {
 				write(us, "Play Initiated. Can't start. Use 'misdeal' or 'reset'  to reset.");
 			}
 			break;
-		case JCLNew:	// create a new game...
-			sname="";
-			sparam="";
-			String sUserMsg="new game created. Join in to keep playing!";
-			int argc=jcl.argc();
-			if (argc > 1) {	// argc is always at least 1
-				sname=jcl.getName(1);
-				sparam=jcl.getValue(1);
-				sUserMsg = "new game created:" + sparam + ". Join by name to play!";
-				g = new CardGame(sparam);
-				if (!intern(g)) {
-					write(us, "Created but can't intern game:" + g.getName());
-				}
-			else
-				setNewDefaultGame(); 
-				// No parameter? Just create a new nameless game
-			}
-			System.out.println("new game:" + sname);
-			write(us, sUserMsg);
-			break;
 		case JCLLs:	// list available games...
 			sname="";
 			sparam="";
@@ -451,11 +431,8 @@ public class WsServer {
 			write(us, sparam); // need a "wrap as protocol message command from game"
 			break;
 		case JCLJoin:
-			// here is the confluence of the http server and the gameserver
 			// create a game if one does not exist, and insert this session into it
-			// xxx
 			System.out.println("User: '" + us.username + "' Joining...");
-			//boolean byGod=false;
 			sname="";
 			sparam="";
 			if (jcl.argc() > 1) {	// argc is always at least 1
@@ -464,12 +441,6 @@ public class WsServer {
 				g = lookupGameByName(sparam);
 				}
 			else {
-				/*
-				 * sparam needs to be managed more intensely
-				 */
-				/*
-				 * Wait... there is no game in session... this is join after all...
-				 */
 				g = lookupGameFromSession(sparam);
 			}
 			if (g == null)
@@ -492,43 +463,54 @@ public class WsServer {
 				write(us, pmsg);		
 				// Announce new player to other humans
 				// hold off on this...
+				// shouldn't game do all this???
 				//     g.broadcast(true, friendlyName + "seat:" +  us.getpid() + " Has joined the game.");
 				//write(us, "Successfully joined game:" + g.sGameName + " as " + friendlyName + "...");
 				//write(us, "issue start command to initiate play.");
 			}
-			else if (!bJoinStatus  && (sparam.contains("bygod") ||
-					(sname.contains("bygod")))) {
+			else if (!bJoinStatus && (sparam.contains("bygod") || (sname.contains("bygod")))) {
 				broadcast("Game reset by divine providence. Mortals will need to rejoin.");
 				System.out.println("Game reset by divine providence. Mortals will need to rejoin.");
-				//byGod = true;
+				// byGod = true;
 				g.reset();
 				if (g.join(us, us.sessionId + "/God"))
 					write(us, "%msg%ByGod join successfull");
 				else
 					write(us, "%msg%Divine intervention failed. Still can't join.");
 				System.out.println("Apocalyptic reset complete...");
-				//us.joinBygod();
-			}
-			else {
+			} else {
 				System.out.println("New User cannot join.");
 				write(us, "New User cannot join. Game full.");
-				// Uh oh...
-				// xxx
 			}
+			break;
+		case JCLNew:	// create a new game...
+			setNewDefaultGame();
+			g = getDefaultGame();
+			g.join(us, us.username);
+			String gameName=g.getName();
+			String msg="Created and joined game: " 
+					+ gameName + ". Select 'start' from menu to initiate play. (or wait for other people to join.)";
+			String pmsg=CardGame.getFormattedAlertMsg(msg);
+			write(us, pmsg);		
 			/*
-			if (!us.join() && (sparam.contains("bygod") ||
-					(sname.contains("bygod")))) {
-				broadcast("Game reset by divine providence. Mortals will need to rejoin.");
-				System.out.println("Game reset by divine providence. Mortals will need to rejoin.");
-				byGod = true;
-				us.joinBygod();
+			sname="";
+			sparam="";
+			String sUserMsg="new game created. Join in to keep playing!";
+			int argc=jcl.argc();
+			if (argc > 1) {	// argc is always at least 1
+				sname=jcl.getName(1);
+				sparam=jcl.getValue(1);
+				sUserMsg = "new game created:" + sparam + ". Join by name to play!";
+				g = new CardGame(sparam);
+				if (!intern(g)) {
+					write(us, "Created but can't intern game:" + g.getName());
+				}
+			else
+				setNewDefaultGame(); 
+				// No parameter? Just create a new nameless game
 			}
-			else if (!us.join()) {
-				System.out.println("New User cannot join.");
-				write(us, "New User cannot join. Game full.");
-				// Uh oh...
-				// xxx
-			}
+			System.out.println("new game:" + sname);
+			write(us, sUserMsg);
 			*/
 			break;
 		case JCLRejoin:
