@@ -146,14 +146,8 @@ body {
 	margin-right: 10px;
 	right: 10px;
 }
-/* align left is new and untested... */
-.alignLeft {
-	float: none;
-	text-align: left;
-	margin-left: 1px;
-}
 
-.splitscreen {
+.splitscreen {	/* splitscreen is used by pass dialog. Is it right? */
 	height: 40px;
 	background-color: white;
 	z-index:4;
@@ -180,7 +174,8 @@ body {
 </div>
 */
 /*
- * by default, the felt in column1 covers handArea 
+ * by default, the felt in column1 covers column2 (id=handArea)
+ * 		** it shouldn't be *** 
  * i.e. z-index 1; handarea's zindex is 0; when it's
  * your move it's set to 3.
  * modal dialogs have a zindex of 4. 
@@ -189,7 +184,8 @@ body {
 	z-index: 1;
 	position: relative;
 	width: 55%;	/* see "pixels to burn" */
-	float: left;
+	float: left; /* key point... */
+	display: block;
 	 overflow-y: auto;
 }
 
@@ -204,10 +200,11 @@ body {
 	*/
 	position: fixed;
 	right: 0;
-	z-index: 0;	/* see comment on column1 */
-	width: 55%;
+	z-index: 3;	/* see comment on column1 change 2-3 6/2/20 */
+	width: 45%;
 	/* left: 550px; */
-	float: right; /* ??? */
+	/* float: right, over; /* ??? */
+	display: block;
 	/* opacity: .99; */
 	/* see https://philipwalton.com/articles/what-no-one-told-you-about-z-index/ */
 	display: grid;
@@ -216,7 +213,6 @@ body {
 	grid-template-rows: auto; 
 	/* transition: right 3s; */
 	 overflow-y: auto;
-
 }
 
 .column2:touchstart {
@@ -292,6 +288,10 @@ body {
 		}
 	}
 	*/
+	}
+.expandContractButton {
+	min-width: 60%; 
+	text-align: left;
 }
 
 /* xxx */
@@ -384,8 +384,8 @@ body {
 .modal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
-  /* float: left;	/* experiment xxx */
   z-index: 6; /* Sit on top */
+  /* opacity: .99; /* seious about being on top...*/
  	/* float: left;	/* experiment with float, not z-index... */
   	/* width: 250px; /* no workee with column2 */
   padding-top: 100px; /* Location of the box */
@@ -401,6 +401,7 @@ body {
 /* Modal Content */
 .modal-content {
   background-color: #fefefe;
+  z-index: 7; /* Sit on top */
   margin: auto;
   padding: 20px;
   border: 1px solid #888;
@@ -708,7 +709,7 @@ tr:nth-child(even) {
 		<p id="trickArea" style="display: none;" class="alignRight">Previous Trick.</p>
 		</div>	
 		<div class="rhsContent">
-<button id="resizeButton" style="text-align: left" onclick="expandContractDiv(event);">
+<button id="resizeButton" class="expandContractButton" onclick="expandContractDiv(event);">
 &lt;&lt; Expand/Contract &gt;&gt;
 </button>
 <p id="infoMessage"> Stuff. </p>
@@ -718,6 +719,18 @@ tr:nth-child(even) {
 			class="buttonGrid" id="SpadesInHandDiv"></span> <span
 			class="buttonGrid" id="HeartsInHandDiv"></span>
 	</div>
+	<!-- Make sure galertdiv is a sibling of column1 and column2 -->
+
+<div id="gAlertDiv" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div id="gAlertHTMLMessage">
+    <p> Generic Alert </p>
+    </div>
+    <button onclick="gAlertOK(event);"> Ok </button>
+  </div>
+</div>
+	
 </div>
 	<br>
 
@@ -978,15 +991,6 @@ xx
   </div>
 </div>
 
-<div id="gAlertDiv" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <div id="gAlertHTMLMessage">
-    <p> Generic Alert </p>
-    </div>
-    <button onclick="gAlertOK(event);"> Ok </button>
-  </div>
-</div>
 
 xx
 <!-- Trigger/Open The FullyModal -->
@@ -1070,12 +1074,15 @@ xx
 	}
 	function gAlert(htmlMsg) {
 		console.log("galert: New code.")
-		contractHandArea();
+		//contractHandArea();
 		var msg = document.getElementById("gAlertHTMLMessage");
 		msg.innerText = htmlMsg;
 
+		// elevate frame
 		var alertDialog = document.getElementById("gAlertDiv");
 		alertDialog.style.display = "block";
+		console.log("galert->zIndex=" + alertDialog.style.zIndex);
+		alertDialog.style.zIndex = 6;
 		//alertDialog.ParentNode.style.display = "block";
 	}
 

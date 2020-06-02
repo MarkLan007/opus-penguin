@@ -3033,6 +3033,8 @@ function expandHandArea() {
 	var startx = 160;	// 160?
 	div.x = startx;
 	div.width = clientWidth - startx;
+	if (div.style.zIndex != 3)
+		console.log("handarea.zindex=" + div.style.zIndex + " Yikdes!");
 	div.style.zIndex = 3;
 	// div.css("z-index", 4);
 }
@@ -3044,14 +3046,15 @@ function contractHandArea() {
 	div.x = startx;
 	div.width = 20; // was... clientWidth - startx;
 
-	div.style.zIndex = 0;
+	div.style.zIndex = 3;	// keep at 3...
 	
 	// need to make column1 area really big???
 	// ???
 	
 	// bring playfelt (canvas1) to the top
 	feltCanvas = document.getElementById("Canvas1");
-	feltCanvas.style.zIndex = 3;
+	// Never change playfext zindex! mll 6/2/20
+	feltCanvas.style.zIndex = 2;	// keep under handarea...
 	}
 
 // Not used...
