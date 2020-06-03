@@ -2100,6 +2100,10 @@ function showPassDialogDiv() {
 	/*
 	 * modal.classList.add("left"); modal.classList.add("slideout");
 	 */
+	if (narrowConfig()) 
+		modal.style.width = "50%";	// take up more screen if narrow...
+	else
+		modal.style.width = "30%";
 	expandHandArea();
 	}
 
@@ -2122,7 +2126,9 @@ function initPassDialogDiv(nCards, sMsg) {
 
 	// Get the button that opens the modalDiv
 	var btn = document.getElementById("passCardsButton");
-
+	// Make sure btn is disabled after it is pressed once
+	btn.disabled = true;
+	
 	// Get the <span> element that closes the modalDiv
 	// var span = document.getElementsByClassName("closePassDialogDiv")[0];
 	var span = document.getElementById("closePassDialogDiv");
@@ -2260,8 +2266,27 @@ var colors=[ 'PEACHPUFF', //	#FFDAB9
 
  */
 
+var bDivToggle=false;
+var potsticker=null;
 function makedivs() {
 	var i;
+	if (potsticker == null)
+		;
+	else if (!bDivToggle) {	// already on; turn off;
+		for (i=0;i<6; i++)
+			potsticker[i].style.visibility = "visible";		
+		bDivToggle = true;
+		return;
+	} else {	// onoff is false;
+		// just turn them off
+		for (i=0; i<6; i++)
+			potsticker[i].style.visibility = "hidden";
+		bDivToggle = false;
+		return;
+	}
+	
+	potsticker=new Array(6);
+	bDivToggle = true;
 	// feltDiv in gedenken3...
 	//var iDiv = document.getElementById("outerParent");
 	var iDiv = document.getElementById("TextScrollDiv");
@@ -2293,8 +2318,9 @@ function makedivs() {
 		innerDiv.style.top = top + "px";
 		*/
 		innerDiv.style.backgroundColor = colors[i];
-		innerDiv.display = "block";
+		innerDiv.style.visibility = "block";
 		iDiv.appendChild(innerDiv);
+		potsticker[i] = innerDiv;
 	}
 	
 }
@@ -2439,6 +2465,12 @@ function passCardSelected(event) {
 		passCards[i] = temp[i];
 	iCurrentFreeCardInPass -= nfound;
 	
+	// Bob Blazak's Bug!
+	// since card has been returned to the hand,
+	// disable the pass button!
+	var btn = document.getElementById("passCardsButton");
+	btn.disabled = true;
+
 	console.log("passCard:Click Seen in dialog. Card (sort of) returned to hand...");
 }
 
@@ -3436,6 +3468,8 @@ function pinmenuSelect(sMenu, event) {
 		serverWrite("//refresh");
 		break;
 	case "#scores":
+		serverWrite("//score");
+		break;
 	case "#who":
 	case "#status":
 	case "#about":

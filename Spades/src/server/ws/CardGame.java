@@ -1158,6 +1158,7 @@ public class CardGame implements GameInterface {
 		bGameInProgress = true;
 		populatePlayers();
 		resetGameScores();
+		currentPass = MailBoxExchange.first();
 		reset();
 
 		// xxx
