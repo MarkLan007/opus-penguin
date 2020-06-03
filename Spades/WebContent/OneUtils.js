@@ -548,7 +548,7 @@ function wsShowFelt() {
 
 	feltWindow.onload =
 		function() {
-			var html = '<dev style="font-size:30px">Welcome!</div>';
+			var html = '<div style="font-size:30px">Welcome!</div>';
 			feltWindow.document.body.insertAdjacentHTML('afterbegin', html);
 			feltCanvas = feltWindow.document.getElementById("Canvas1");
 			if (feltCanvas && feltCanvas.getContext) {
@@ -2235,7 +2235,7 @@ function wsScoreDialogDiv(score) {
  */
 
 var bToggle = true;
-function experimentalFunction(score) {
+function experimentalFunctionScore(score) {
 	// toggleHandArea();
 	if (bToggle)
 		expandHandArea();
@@ -2244,11 +2244,67 @@ function experimentalFunction(score) {
 	bToggle = !bToggle;
 	}
 
+var xScale=[1/3, 1/2 + 1/6, 5/6, 2/3, 1/3, 0];
+var yScale=[0, 1/6, 1/2, 5/6, 4/5, 1/2];
+var colors=[ 'PEACHPUFF', //	#FFDAB9
+	 'LEMONCHIFFON', //	#FFFACD
+	 'LIGHTSTEELBLUE', // #B0C4DE
+	 'PEACHPUFF', //	#FFDAB9
+	 'LEMONCHIFFON', //	#FFFACD
+	 'LIGHTSTEELBLUE', // #B0C4DE
+];
+/*
+ * 	 'LAVENDER', //	#E6E6FA
+	 'LIGHTSALMON', //	#FFA07A
+	 'LIGHTCYAN', //	#E0FFFF
+
+ */
+
+function makedivs() {
+	var i;
+	// feltDiv in gedenken3...
+	//var iDiv = document.getElementById("outerParent");
+	var iDiv = document.getElementById("TextScrollDiv");
+
+	var width = 500;	// givens; should use real values
+	var height = 500;
+	var xoffset = 50;
+	var yoffset = 60;
+	for (i=0; i<6; i++) {
+		// Create inner div then appending to the 
+		var innerDiv = document.createElement('div');
+		innerDiv.className = 'potSticker';
+		var p1=document.createElement('p');
+		p1.innerText = "Name" + i;
+		innerDiv.appendChild(p1);
+		var x = xScale[i] * width;
+		if (x > 0)
+			x -= xoffset;
+		var y = yScale[i] * height;
+		if (y > 0)
+			y -= yoffset;
+		innerDiv.style.left = (x) + "px";
+		innerDiv.style.top = (y) + "px";
+		/*
+		// Ok... serious debugging...
+		width += 10;
+		top += 10;
+		innerDiv.style.left = width + "px";
+		innerDiv.style.top = top + "px";
+		*/
+		innerDiv.style.backgroundColor = colors[i];
+		innerDiv.display = "block";
+		iDiv.appendChild(innerDiv);
+	}
+	
+}
+
 /*
  * box-o-chocolates
  */
-function experimentalFunction1(s) {
+function experimentalFunction(s) {
 	console.log("You never know what you're going to get");
+	makedivs();
 }
 
 /*
