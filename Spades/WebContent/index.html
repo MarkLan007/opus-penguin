@@ -686,7 +686,49 @@ tr:nth-child(even) {
 <!-- 
  -->
  
-	<!-- Add styles above, and div below... -->
+	<!-- To fix Safari bug, put modals at top
+	Below menu, but above everything else
+	 -->
+<div class="semiModalLeft" id="passMsgDiv" >
+<div class="semi-modal-content" id="passMsgDiv1">
+	
+    <span id="closePassDialogDiv" class="close">&times;</span>
+	<p id="passMsgText" style="text-align: center">Pass [n] cards prior to
+		play.</p>
+	<p class="right" id="passDialogErrorString"> </p>
+	<span class="splitscreen">
+	<input class="left" id="passCardsButton" onclick="passCardsToServer();"
+		value="Pass Cards" type="button" disabled>
+	</span>
+		<!-- Was:
+	<div class="buttonGrid" id="passDiv"
+		style="align-items: center; width: 400px; height: 275px; background-color: powderblue;">
+		 -->
+	<div id="passDivTop"> </div>
+	<div class="verticalButtonGrid" id="passDiv"
+			style="background-color:var(--blue1);">
+	
+	<!-- 
+		style="align-items: center; width: 100%; height: 100%; background-color: powderblue;">
+		 -->
+		 <!-- Monkeying with the fixed vs % h and w -->
+	</div>
+	<br>
+</div>
+</div>
+
+	<!-- Make sure galertdiv is a sibling of column1 and column2 -->
+
+<div id="gAlertDiv" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div id="gAlertHTMLMessage">
+    <p> Generic Alert </p>
+    </div>
+    <button onclick="gAlertOK(event);"> Ok </button>
+  </div>
+</div>
+
 
 	<div id="outerParent" class="row"></div>
 	<div class="column1" id="TextScrollDiv">
@@ -733,17 +775,6 @@ tr:nth-child(even) {
 			class="buttonGrid" id="SpadesInHandDiv"></span> <span
 			class="buttonGrid" id="HeartsInHandDiv"></span>
 	</div>
-	<!-- Make sure galertdiv is a sibling of column1 and column2 -->
-
-<div id="gAlertDiv" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <div id="gAlertHTMLMessage">
-    <p> Generic Alert </p>
-    </div>
-    <button onclick="gAlertOK(event);"> Ok </button>
-  </div>
-</div>
 	
 </div>
 	<br>
@@ -861,33 +892,6 @@ insert modal stuff here ->
 			</div>
 		</div>
 
-<div class="semiModalLeft" id="passMsgDiv" >
-<div class="semi-modal-content" id="passMsgDiv1">
-	
-    <span id="closePassDialogDiv" class="close">&times;</span>
-	<p id="passMsgText" style="text-align: center">Pass [n] cards prior to
-		play.</p>
-	<p class="right" id="passDialogErrorString"> </p>
-	<span class="splitscreen">
-	<input class="left" id="passCardsButton" onclick="passCardsToServer();"
-		value="Pass Cards" type="button" disabled>
-	</span>
-		<!-- Was:
-	<div class="buttonGrid" id="passDiv"
-		style="align-items: center; width: 400px; height: 275px; background-color: powderblue;">
-		 -->
-	<div id="passDivTop"> </div>
-	<div class="verticalButtonGrid" id="passDiv"
-			style="background-color:var(--blue1);">
-	
-	<!-- 
-		style="align-items: center; width: 100%; height: 100%; background-color: powderblue;">
-		 -->
-		 <!-- Monkeying with the fixed vs % h and w -->
-	</div>
-	<br>
-</div>
-</div>
 </div>
 
 
