@@ -283,8 +283,8 @@ function cardSelected(event) {
 function cardSelected2(event) {
 	var t = event.target;
 	var uniqueId = t.type + t.id;
-	console.log("Double Whoa!" + uniqueId);
-	alert("Whoa Nellie! a doubleclick was seen in:" + t.id);
+	console.log("Double click: Whoa Nellie!" + uniqueId);
+	//alert("Whoa Nellie! a doubleclick was seen in:" + t.id);
 	// sendCardFromButtonPress(parseInt(t.id, 10));
 }
 

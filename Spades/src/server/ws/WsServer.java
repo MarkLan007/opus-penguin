@@ -71,7 +71,10 @@ public class WsServer {
 		//
 		// format welcome message
 		String msg=CardGame.getFormattedAlertMsg(
-				"Successfully Connected to gameserver. Select 'Join' or create 'new' game from menu."
+				//"Successfully Connected to gameserver. Select 'Join' or create 'new' game from menu."
+				//"Successfully connected to Gameserver. Use 'Game' menu to 'Join' game, or 'New' to create one."
+				//"Successfully connected to Gameserver. 'Join' ongoing from 'Game' menu; 'New' to create."
+				"Successfully connected to Gameserver. From 'Game' menu, 'Join' ongoing or create 'New'."
 				);
 		write(sess, msg);
 	}
