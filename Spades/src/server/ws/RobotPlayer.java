@@ -149,13 +149,13 @@ public class RobotPlayer extends Player implements PlayerInterface {
 	static int iSym = 0;
 
 	RobotBrain robotBrain = null; // new RobotBrain();
-
+	int mySeat=-1;
 	RobotPlayer(int pid, GameInterface gameInterfaceCallbacks) {
 		// super();
 		setAsynch(false); // { Because I am a robot, I can be called synchronously }
 		isRobotPlayer = true;
 		//xhand = new Subdeck();
-		robotBrain = new RobotBrain();
+		robotBrain = new RobotBrain(pid);
 		robotBrain.setPID(pid);
 		setPID(pid);
 		setCardgame(gameInterfaceCallbacks);
@@ -181,17 +181,16 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		if (c == null) {
 			// Uh oh... brain failed
 			// note cardLead and currentTrick
-			System.out.println(getName() + ": Catastrophic Brain failure on lead:"); 
+			System.out.println(getName() + ": Catastrophic Brain failure:");
 			robotBrain.brainDump(true);
 			c = robotBrain.getSomething();
-		} else if (!ssHasCard(c)) {
+		}
+		if (!ssHasCard(c)) {
 			// catastrophic error.
 			// There is discrepency between hand and the
 			// Player subdeck holds the official cards.
 			// complain loudly.
-			System.out.println(getName() + 
-					": Catastrophic Error: Cannot confirm card in hand: "
-					+ c.encode());
+			System.out.println(getName() + ": Catastrophic Error: Cannot confirm card in hand: " + c.encode());
 			System.out.println("Subdeck:<" + subdeck.size() + ">=" + subdeck.encode());
 			robotBrain.brainDump(true);
 		}
@@ -325,22 +324,20 @@ public class RobotPlayer extends Player implements PlayerInterface {
 			robotBrain.addCards(m.subdeck);
 			break;
 		case DELETE_CARDS: // CARD+
-			//len = m.subdeck.size();
-			/* clobbers the subdeck!!!
-			for (i = 0; i < len; i++) {
-				c = m.subdeck.pop();
-				// playerErrorLog("RobotPlayer" + getPID() + ": + <" + c.rank + c.suit + ">.");
-				sTemp = sTemp + "<" + c.rank + c.suit + ">";
-				deleteCard(c);
-				robotBrain.deleteCard(c);
-			} */
+			// len = m.subdeck.size();
+			/*
+			 * clobbers the subdeck!!! for (i = 0; i < len; i++) { c = m.subdeck.pop(); //
+			 * playerErrorLog("RobotPlayer" + getPID() + ": + <" + c.rank + c.suit + ">.");
+			 * sTemp = sTemp + "<" + c.rank + c.suit + ">"; deleteCard(c);
+			 * robotBrain.deleteCard(c); }
+			 */
 			if (m.subdeck == null || m.subdeck.subdeck == null)
 				break;
 			for (Card goner : m.subdeck.subdeck) {
 				// deleteCard(goner);
-				robotBrain.deleteCard(goner);
-			} 
-break;
+				robotBrain.hand.deleteCard(goner);
+			}
+			break;
 		case TRICK_CLEARED:
 			robotBrain.trickCleared(m.trick);
 			// TODO: parse and use the actual trick

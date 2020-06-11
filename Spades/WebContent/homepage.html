@@ -27,10 +27,11 @@
 	right: 0;
 	z-index: 1;	
 	width: 50%;
-	height: 100%;
+	height: 680px;
 	float: left; 
 	display: grid;
-	grid-template-rows: auto; 
+	grid-template-rows: auto;
+	overflow-y: none; 
 }
 .wholeTamale {
 	position: absolute;
@@ -125,7 +126,7 @@ function drawDecoration() {
 	context.stroke();
 
 }
-//var sTapeText="ot Cross      Police Line Do Not Cross        Police line Do Not Cross         Police line Do Not Cross";
+
 var sTapeText="Police Line      Do not Cross      ".repeat(16);
 function drawTape(xoffset, yoffset, context) {
 	var canvas=document.getElementById("Canvas1");
@@ -148,11 +149,6 @@ function drawSlantyText() {
 	var width = canvas.width;
 	var height = canvas.height;
 
-	// tape
- 	/*context.fillStyle = "#2ecc71A";
-	var fontsize = 1;
-    context.fillRect(canvas.width / 2 - i / 2,canvas.height / 2 - (fontSize * 1.5) / 2, i, (fontSize * 1.5) );
-*/
 // across the top version...
 	drawTape(0,0, context);
 	
@@ -163,24 +159,7 @@ function drawSlantyText() {
 	 context.translate(newx, newy);
 	 context.rotate(-Math.PI/3); // Vertical text...
 
-	 	drawTape(newx, 2/*newy-(.75*newy)*/, context);
-     //ctx.fillStyle = "RGBA(255, 255, 255, 0.8)";
-
-	 // figure out how to make this 45 degrees
-	 // in yellow police tape.
-
-	 // only draw two for debugging...
-	// drawTape(-10,20, context);
-	 
-	 /*
-	 	context.fillStyle = "YELLOW";
-	context.fillRect(-10, 20, 400, 20);
-	context.fillStyle = "BLACK";
- 
-	 context.textAlign = "center";
-	 context.fillText("Police Line Do Not Cross        Police line Do Not Cross         Police line Do Not Cross", labelXposition, 0);
-	 //context.backgroundColor = "yellow"
-	 */
+	 	drawTape(newx, 2, context);
 	 context.restore();
 
 		var newx = 360;
@@ -188,18 +167,11 @@ function drawSlantyText() {
 		var labelXposition = 120;
 		 context.translate(newx, newy);
 		 context.rotate(-Math.PI/3.6); // Vertical text...
-		 // figure out how to make this 45 degrees
-		 // in yellow police tape.
 		 drawTape(newx, 0, context);
-		 /*
-		 context.textAlign = "center";
-		 context.fillText("Police Line Do Not Cross        Police line Do Not Cross         Police line Do Not Cross", labelXposition, 0);
-		 //context.backgroundColor = "yellow"
-		context.fillStyle = "#2ecc71A";
-		 */
 		 context.restore();
 
 }
+
 drawDecoration();
 drawSlantyText();
 </script>

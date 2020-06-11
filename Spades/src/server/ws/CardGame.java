@@ -21,7 +21,7 @@ public class CardGame implements GameInterface {
 		return nTrickId;
 	}
 
-	boolean bDebugCardCf = true;
+	static boolean bDebugCardCf = true;
 	boolean bGameAborted = false;
 	boolean bHandOver = false;
 	boolean bGameInProgress = true;
@@ -56,17 +56,14 @@ public class CardGame implements GameInterface {
 	 * one lead (or beat the one lead) isHigher(2C,AC) -> false isHigher(2C,3C) ->
 	 * false isHigher(AC,3C) -> true isHigher(AH,2C) -> false
 	 */
-	boolean isHigher(Card cfirst, Card csecond) {
+	static boolean isHigher1(Card cfirst, Card csecond) {
 		/*
 		 * if the suits are different the first card wins
 		 */
-		if (bDebugCardCf)
-			gameErrorLog("?isHigher(" + cfirst.encode() + "," + csecond.encode() + ")");
-
 		if (cfirst.suit != csecond.suit)
 			return false;
 		/*
-		 * otherwise compare ranks, not ace is high
+		 * otherwise compare ranks, note ace is high
 		 */
 		if (csecond.rank == Rank.ACE)
 			return false;
@@ -76,6 +73,12 @@ public class CardGame implements GameInterface {
 			return true;
 		else
 			return false;
+	}
+	static boolean isHigher(Card cfirst, Card csecond) {
+		boolean flag=isHigher1(cfirst, csecond);
+		if (bDebugCardCf)
+			gameErrorLog("?isHigher(" + cfirst.encode() + "," + csecond.encode() + ")->" + flag);
+		return flag;
 	}
 
 	/*
@@ -147,7 +150,7 @@ public class CardGame implements GameInterface {
 
 	// No longer need NIOClientSessions since websockets are full duplex
 	// NIOClientSession[] humanPlayers=new NIOClientSession[10];
-	private int humanPlayerFree = 0;
+	// private int humanPlayerFree = 0;
 
 	/*
 	 * channelHasOwner -- take an accepted channel, and assume that it belongs to
@@ -241,7 +244,7 @@ public class CardGame implements GameInterface {
 		System.out.println("Canot find player in game to resend to:" + us.username);
 	}
 
-	void gameErrorLog(String sError) {
+	static void gameErrorLog(String sError) {
 		MainServer.ttyLogString(sError);
 	}
 
@@ -379,10 +382,11 @@ public class CardGame implements GameInterface {
 	 * broadcastUpdate - send the same message to all the players works even if
 	 * there is no current turn... i.e. during pass
 	 */
+	/*
 	private Player nextp(int i) {
 		i = (i + 1) % nPlayers;
 		return playerArray[i];
-	}
+	} */
 
 	void broadcastUpdate(ProtocolMessage pmsg) {
 		int i, j;
@@ -636,17 +640,20 @@ public class CardGame implements GameInterface {
 			currentTrick.bClosed = true;
 			// Figure out who won, set bWinner;
 			int i = 0;
+			Suit st=null;
 			Card leadingCard = null;
 			/*
 			 * determine who won the trick, and set it closed
 			 */
 			for (Card c : currentTrick.subdeck.subdeck) {
 				// the actual player who won the trick is n players away from the leader or the
-				// leader
+				// leader REVIEW: ???
 				if (i == 0) {
 					leadingCard = c;
+					st = c.suit;
 					currentTrick.winner = currentTrick.leader;
-				} else if (isHigher(c, leadingCard)) { // true if c is higher than leadingcard
+				} else if (c.suit == st && 
+						isHigher(c, leadingCard)) { // true if c is higher than leadingcard
 					if (bDebugCardCf)
 						gameErrorLog("->T");
 					leadingCard = c;
@@ -654,7 +661,7 @@ public class CardGame implements GameInterface {
 				} else {
 					if (bDebugCardCf)
 						gameErrorLog("->F");
-					// card was sloughed
+					// card lower or sloughed
 				}
 				i++;
 			}	// if trick is closed
@@ -717,7 +724,7 @@ public class CardGame implements GameInterface {
 		gameErrorLog("Msg<" + mtype + ">from(" + nsender + ") " 
 				+ p.subdeck.encode());	// pcards bugfix
 		if (c == null) {
-			returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR, "%MSG:Protocol error no card!%");
+			returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR, "%ERR:Protocol error no card!%");
 			p.sendToClient(returnMessage);
 			return;
 		}
@@ -727,7 +734,7 @@ public class CardGame implements GameInterface {
 			gameErrorLog("Housekeeping: find failed<" + c.encode() + "> from(" + nsender + ") subdeck size("
 					+ p.subdeck.size() + "){" + p.subdeck.encode() + "}");
 			returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
-					"%MSG:Player" + p.pid + " doesn't have <" + c.rank + c.suit + ">!%");
+					"%ERR:Player" + p.pid + " doesn't have <" + c.rank + c.suit + ">!%");
 			p.sendToClient(returnMessage);
 			return;
 		}
@@ -738,7 +745,7 @@ public class CardGame implements GameInterface {
 			// does the player have the 2c and didn't play it?
 			if (!c.equals(deuceClubs) && p.has(deuceClubs)) {
 				returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
-						"%MSG:Player" + p.pid + " must lead <" + deuceClubs.rank + deuceClubs.suit + ">!%");
+						"%ERR:Player" + p.pid + " must lead <" + deuceClubs.rank + deuceClubs.suit + ">!%");
 				p.sendToClient(returnMessage);
 				return;
 			}
@@ -747,15 +754,15 @@ public class CardGame implements GameInterface {
 		// did the player lay a qs?
 		// did the player lay a heart (and had non-hearts)
 		if (nTrickId == 0) {
-			if (c.suit == Suit.HEARTS) {
+			if (c.equals(queenSpades) || c.suit == Suit.HEARTS) {
 				// almost certainly a foul but check...
 				//int nonHearts=
-				int nonPoints = p.countNon(Suit.HEARTS);;
+				int nonPoints = p.countNon(Suit.HEARTS);
 				if (p.has(queenSpades))
 					nonPoints--;
 				if (nonPoints > 0) {
 					returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
-							"%MSG:Player" + p.pid + " Illegal:" + c.encode() + ". must play <Non-QS Non-Heart Card>!%");
+							"%ERR:Player" + p.pid + " Illegal:" + c.encode() + ". must play <Non-QS Non-Heart Card>!%");
 					p.sendToClient(returnMessage);
 					return;
 				}
@@ -775,10 +782,10 @@ public class CardGame implements GameInterface {
 				// didn't follow lead. Is that ok?
 				if (!p.subdeck.isVoid(leadSuit)) {
 					// Uh oh. Player could have followed suit but didn't. Error detected!
-					String errorText = "%MSG:Robot-Player " + p.pid 
+					/*String errorText = "%MSG:Robot-Player " + p.pid 
 							+ " required to follow suit <"
-							+ leadSuit + "> but didn't.";
-					String errorString = "%MSG:Player" + p.pid 
+							+ leadSuit + "> but didn't."; */
+					String errorString = "%ERR:Player" + p.pid 
 							+ " required to follow suit <" 
 							+ leadSuit + ">!%";
 					returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
@@ -808,7 +815,7 @@ public class CardGame implements GameInterface {
 					; // ok
 				else {
 					returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
-							"%MSG:Player" + p.pid + " Cannot lead a heart until hearts are broken!%");
+							"%ERR:Player" + p.pid + " Cannot lead a heart until hearts are broken!%");
 					p.sendToClient(returnMessage);
 					return;
 				}
@@ -847,7 +854,7 @@ public class CardGame implements GameInterface {
 	public void sendPlayerUserErrorMsg(Player p, String sError) {
 		gameErrorLog("Error:" + p.pid + ")" + sError);
 		ProtocolMessageTypes mtype = ProtocolMessageTypes.PLAYER_ERROR;
-		ProtocolMessage pm = new ProtocolMessage(mtype, "%MSG:" + sError + "%");
+		ProtocolMessage pm = new ProtocolMessage(mtype, "%ERR:" + sError + "%");
 		p.sendToClient(pm);
 	}
 
@@ -1148,6 +1155,29 @@ public class CardGame implements GameInterface {
 		resetHand();
 	}
 	
+	
+	private Subdeck savedPack=null;
+	private MailBoxExchange.PassType savedPasstype=null;
+	private boolean bDuplicateMode=false;
+
+	void saveCurrentPack(Subdeck saveMe, MailBoxExchange.PassType pt) {
+		savedPack = saveMe;
+		savedPasstype = pt;
+	}
+	
+	Subdeck getDuplicatePack() {
+		return savedPack;
+	}
+	/*
+	 * replay mode
+	 */
+	public void replay() {
+		// get the current pack
+		// put it where the dealer will take it
+		reset();
+		bDuplicateMode = true;
+	}
+	
 	/*
 	 * resetGame -- something bad has happened, possibly?
 	 * essentially new game;
@@ -1278,6 +1308,16 @@ public class CardGame implements GameInterface {
 		//
 		Subdeck pack = new Subdeck(52);	// 52 - standard pack
 		pack.shuffle();
+		if (bDuplicateMode) {
+			pack = getDuplicatePack();
+			if (pack == null) {
+				System.out.println("Duplicate mode not available. No saved pack.");
+				pack = new Subdeck(52);
+			} else {	// i.e. successfully restored the pack; so restore passtype
+				currentPass = savedPasstype;
+			}
+		} 
+		saveCurrentPack(pack, currentPass);
 		//
 		// deal official copy of cards
 		//

@@ -26,6 +26,18 @@ public class Trick {
 		return bHeartsBroken;		
 		}
 	
+	/*
+	 * true if card has been played on this trick false otherwise
+	 *  -- note -- doesn't consider whether it's sloughed as opposed 
+	 *  to played and viing for the lead.
+	 */
+	boolean cardPlayed(Card card) {
+		for (Card c : subdeck.subdeck)
+			if (c.equals(card))
+				return true;
+		return false;
+	}
+	
 	String encode(boolean tVerbose) {
 		if (!tVerbose)
 			return encode();

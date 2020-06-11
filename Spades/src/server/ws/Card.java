@@ -34,7 +34,18 @@ class Card {
 			return c;
 		return this;
 	}
-	
+
+	// new... 6/8/20
+	public Card lowerCard(Card c) {
+		if (c.rank == Rank.ACE)
+			return this;
+		else if (rank == Rank.ACE)
+			return c;
+		if (c.rank.ordinal() < rank.ordinal())
+			return c;
+		return this;
+	}
+
 	private void computeCardIndex(Rank rk, Suit st) {
 		int base = st.ordinal();
 		int i = rk.ordinal();

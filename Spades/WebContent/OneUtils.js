@@ -3225,6 +3225,9 @@ function processLocalCommand(line) {
 				xstatusUpdate("Invalid table parameter. ignored");
 			}
 		}
+	} else if (line.includes("param")) {
+		var param=window.location.href;
+		xstatusUpdate("params=" + param);
 	} else if (line.includes("config")) {
 		var flag = detectConfig();
 		if (flag)
@@ -3462,6 +3465,9 @@ function pinmenuSelect(sMenu, event) {
 		break;
 	case "#resetGame":
 		serverWrite("//reset");
+		break;
+	case "#replay":
+		serverWrite("//replay");
 		break;
 	// Action Menu
 	case "#refresh":

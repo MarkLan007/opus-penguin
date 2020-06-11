@@ -18,7 +18,7 @@ public class UserJCLCommand {
 		JCLSu, 		// SuperUser was JCLSuperUser...
 		JCLRefresh,
 		JCLResend, JCLReset,
-		JCLNewdeal, JCLMisdeal,
+		JCLNewdeal, JCLMisdeal, JCLReplay,
 		JCLShuffle,
 		JCLStatus,
 		JCLPeek,	// peek at a hand

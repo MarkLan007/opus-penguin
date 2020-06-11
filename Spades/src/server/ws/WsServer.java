@@ -102,6 +102,9 @@ public class WsServer {
 		// remove from broadcast queue, etc
 		SessionManager.remove(sess);
 		System.out.println("Close Connection ...");
+		// if (e == java.io.EOFException) { }
+		System.out.println("And crash, and dump stacktrace?");
+
 	}
 	
 	static Vector<String> history=new Vector(10, 5);
@@ -557,6 +560,14 @@ public class WsServer {
 			us.game.sendScore(playerId);			
 			//write(us, "" + jcl.type + "(" + playerId + "): under construction");
 			break;
+		case JCLReplay:
+			if (us.game == null) {
+				write(us, "You aren't in a game. Nothing to replay.");
+				break;
+			}
+			us.game.replay();
+			write(us, "Replay. Duplicate mode initiated. 'Start' to commence play.");
+			break;
 		case JCLMisdeal:
 			/*
 			 * just deal again.
@@ -691,8 +702,7 @@ public class WsServer {
 	static public void write(Session sess, String msg) {
 		/*
 		 * to thwart the error: 'remote endpoint was in state [TEXT_FULL_WRITING] which
-		 * is an invalid state for called method use basic'
-		 * try, try again...
+		 * is an invalid state for called method use basic' try, try again...
 		 */
 		RemoteEndpoint.Basic basicRemote = sess.getBasicRemote();
 		int i = 0; // tries...
@@ -715,17 +725,20 @@ public class WsServer {
 						CardGameKernel.msleep(20);
 						System.out.println("Write tried:" + i + "times and failed.");
 						continue;
-					} // Admit failure.
-					System.out.println("Write failed: " + i + " retries. Dumping stackTrace");
-					e.printStackTrace();
-				}
+					} else if (!bWriteSucceeded) {// Admit failure.
+						System.out.println("Write failed: " + i + " retries. Dumping stackTrace");
+						e.printStackTrace();
+					}
+				} 
+			}
+			// succeed on first time and say nothing...
+			if (bWriteSucceeded) {
+				if (i > 1)
+					System.out.println("Write took " + i + " tries to succeed.");
+			} else {
+				System.out.println("Write failed after " + i + " retries.");
 			}
 		}
-		// succeed on first time and say nothing...
-		if (bWriteSucceeded && i > 0) {
-			System.out.println("Write took " + i + " tries to succeed.");
-		} else
-			System.out.println("Write failed after " + i + " retries.");
 	}
 
 	static public void write(UserSession us, String msg) {
