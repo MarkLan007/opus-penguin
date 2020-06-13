@@ -293,11 +293,19 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		 */
 		robotPlay(sd);
 	}
+	final Card deuceOfClubs = new Card(Rank.DEUCE, Suit.CLUBS);
 
 	public void yourPass(int ncards) {
 		// playerErrorLog("RobotPlayer" + "Passing Under Construction!");
 		// for now, get random cards and pass them...
-		Subdeck sd = robotBrain.getPass(3);
+		Subdeck sd = robotBrain.getPass(ncards);
+		if (sd.find(deuceOfClubs)) {
+			System.out.println("Robot(" + pid + ")Passing the 2C... Har, har");
+		}
+		if (RobotBrain.bDebugPass) {
+			System.out.println("Passing: subdeck=" + sd.encode());
+		}
+
 		cardGame.passCards(self(), sd);
 	}
 

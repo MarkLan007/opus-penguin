@@ -1285,6 +1285,7 @@ public class CardGame implements GameInterface {
 	 *  Now: just reset scores; 
 	 */
 	public void resetHand() {
+		bDuplicateMode = false; 
 		bPlayInitiated = false;
 		resetHandScores();
 	}
