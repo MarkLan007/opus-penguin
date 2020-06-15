@@ -218,7 +218,8 @@ public class RobotBrain {
 			// void in the lead suit. Slough something
 			c = hand.bestSlough(trickCount);
 			if (bThinkingOutLoud)
-				System.out.println("s" + mySeat + "Sloughing w/:" + c.encode());
+				brainDump("Sloughing:" + 
+			((c==null) ? "nil" : c.encode()));
 		}
 		if (c == null) {
 			c = hand.randomCard();
