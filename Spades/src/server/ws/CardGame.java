@@ -16,7 +16,9 @@ public class CardGame implements GameInterface {
 	MailBoxExchange.PassType currentPass = MailBoxExchange.first();
 	MailBoxExchange mbx = null;
 	private int nTrickId = 0;
-
+	static int gameAtom=0;
+	int gameId=0;
+	
 	public int getCurrentTrickId() {
 		return nTrickId;
 	}
@@ -111,8 +113,13 @@ public class CardGame implements GameInterface {
 
 	// create players list, a deck (without faces), and names
 	CardGame() {
+		gameId = gameAtom ++;
 		populatePlayers();
 		resetGameScores();
+	}
+	
+	public int getGameId() {
+		return gameId;
 	}
 
 	public void setName(String s) {
@@ -1073,6 +1080,7 @@ public class CardGame implements GameInterface {
 	void logWinner() {}
 	
 	void gameOver() {
+		System.out.println("Game:" + gameId + " ended.");
 		bGameInProgress = false;
 		// todo
 		// log Winner in the database
@@ -1362,6 +1370,7 @@ public class CardGame implements GameInterface {
 	 */
 	int nHands = 0;
 	void go() {
+		System.out.println("Game:" + gameId + " passType:" + currentPass + " Play started.");
 		setFirstMove();
 		sendNextMove();
 	}

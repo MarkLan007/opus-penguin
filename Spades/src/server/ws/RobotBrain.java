@@ -71,6 +71,11 @@ public class RobotBrain {
 		bThinkingOutLoud = true;
 	}
 
+	void brainDump(String msg) {
+		System.out.println("braindump:" + msg);
+		brainDump(true);
+	}
+	
 	void brainDump(boolean bNow) {
 		if (!bNow)
 			brainDump(); // just make this robot chatty...
@@ -157,7 +162,7 @@ public class RobotBrain {
 			}
 			if (c == null) {
 				if (bThinkingOutLoud)
-					System.out.println("Spades not a good choice. Look for a good lead.");
+					brainDump("Spades not a good choice. Look for a good lead.");
 				c = hand.bestLead(presumptiveSpade); // get the best card to lead
 			}
 			if (c == null) {
@@ -840,7 +845,10 @@ public class RobotBrain {
 						return getSuit(suit).elementAt(2);
 				}
 			}
-			System.out.println("RobotPlayer: Can't do any better..." + candidate.encode());
+			if (candidate == null)
+				System.out.println("RobotPlayer: ToxicCard: nothing mean to play...");
+			else
+				System.out.println("RobotPlayer: Can't do any better..." + candidate.encode());
 			return candidate;
 		}
 
@@ -1059,8 +1067,47 @@ public class RobotBrain {
 			return candidate;
 		}
 
+		/*
+		 * commandLead -- bad name...
+		 * rubicon -- cross or turn back
+		 *   considering whether to go for moon or bleed out high cards
+		 */
 		Card commandLead() {
-			return null;
+			// note: could have something like this:
+			// c:{8C4C} d:{JD7D3D} h:{AH5H} s:{KSQS}
+			// can I draw out spades to slough queen?
+			// can I lead the queen and force it to be taken
+			// can I shoot moon? 
+			// do I have vulnerable hearts?
+			// is there a path to the moon?
+			Card presumptiveLead = highestCardShortestSuitNon(Suit.HEARTS, Suit.SPADES);
+			
+			/*
+			 * spades gambit
+			 */
+			// do I have the queen?
+			// are there higher spades than the queen out there?
+			//   how many?... (ToDO: Maybe... Can I draw them out?)
+			// how many backers out there?
+			if (hand.find(queenOfSpades)) {	// double check...
+				int higherspades = batteryBrain.higherCardsOutThere(queenOfSpades);
+				int myspades = hand.getspades().size();
+				int lowerCardsOutThere = 13 - (higherspades + myspades);
+				if (higherspades > 0 && lowerCardsOutThere <= 0) {
+					brainDump("Bravely leading queen...");
+					presumptiveLead = queenOfSpades;
+				}				
+			}
+			/*
+			 * heart holes? how big?
+			 */
+			
+			/*
+			 * Ok, so if I have heartholes and the queen
+			 * bleed off high cards... Highest card lowest leadable suit
+			 */
+
+			return presumptiveLead;
 		}
 
 		/*
@@ -1225,6 +1272,7 @@ public class RobotBrain {
 				}
 				if (card != null && bThinkingOutLoud) {	// going for it...
 					System.out.println("Brain: Best slough for moon shooter:"+ card.encode() +"?!");
+					brainDump(true);
 				}
 				return card;
 			} else
@@ -1244,6 +1292,7 @@ public class RobotBrain {
 					System.out.println("Best slough:(null/random)?");
 				else
 					System.out.println("Best slough:" + card.encode() + "?");
+				brainDump(true);
 			}
 			if (card == null)
 				card = randomCard();
@@ -1466,6 +1515,8 @@ public class RobotBrain {
 					candidate = duckLead();
 				else
 					candidate = commandLead();
+			} else if (hand.find(queenOfSpades)) {
+				candidate = commandLead();
 			}
 			if (candidate == null) {
 				do {
