@@ -306,6 +306,16 @@ public class RobotPlayer extends Player implements PlayerInterface {
 			System.out.println("Passing: subdeck=" + sd.encode());
 		}
 
+		if (sd.size() != 3) {
+			// Heh, heh... A bit overzealout there...
+			// Ok fix it.
+			if (sd.size() > 3)
+				while (sd.size() > 3)
+					sd.pop();
+		}
+
+		if (sd.size() != 3) 
+			cardGame.declareMisdeal(pid, playerName + ":" + "Mr. Robot");
 		cardGame.passCards(self(), sd);
 	}
 

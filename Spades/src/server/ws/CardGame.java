@@ -1057,6 +1057,7 @@ public class CardGame implements GameInterface {
 
 		case SUPER_USER:
 			String sStatus = getGameStatus();
+			// this functionality is handled in WsServer JCL commands
 			break;
 		default:
 

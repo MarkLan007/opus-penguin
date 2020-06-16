@@ -61,7 +61,7 @@ public class RobotBrain {
 		// hand = new Hand();
 	}
 
-	boolean bThinkingOutLoud = true;
+	boolean bThinkingOutLoud = true; // i.e. chattyrobot
 
 	void thinkOutLoud(boolean b) {
 		bThinkingOutLoud = b;
@@ -76,6 +76,15 @@ public class RobotBrain {
 		brainDump(true);
 	}
 	
+	void brainDump(Card c, String msg) {
+		String cardstring;
+		if (c == null)
+			cardstring = "nil";
+		else
+			cardstring = c.encode();
+		brainDump(msg + "<" + cardstring + ">");
+	}
+	
 	void brainDump(boolean bNow) {
 		if (!bNow)
 			brainDump(); // just make this robot chatty...
@@ -88,14 +97,19 @@ public class RobotBrain {
 				+ hand.getspades().encode() + "}");
 	}
 
+	/*
+	 * getSomething no matter what - last chance return a card no matter what
+	 */
 	Card getSomething() {
 		Card c = hand.randomCard();
 		/*
 		 * Card c = null; c = new Card(Rank.ACE, Suit.SPADES);
 		 */
 		if (c == null)
+			c = hand.peek();
+		if (c == null)
 			c = new Card(Rank.ACE, Suit.SPADES);
-
+		brainDump(c, "Uh oh. last chance to return a card");
 		return c;
 	}
 
@@ -108,14 +122,17 @@ public class RobotBrain {
 			// Make sure I have 13 cards in my hand
 			// or else declare a misdeal (or at least whine)
 			if (hand.size() != 13)
-				System.out.println("*** Robot(?) cards=" + hand.size() + "***");
+				brainDump("*** Robot(?) only " + hand.size() + " cards ***");
+				//System.out.println("*** Robot(?) cards=" + hand.size() + "***");
 		}
 		if (hand.find(deuceOfClubs)) {
-			System.out.println("Robot: I have the 2...");
+			brainDump("Robot: I have the 2...");
+			// System.out.println("Robot: I have the 2...");
 			return deuceOfClubs;
 		} else if (trickCount == 0 && cardLead == null) {
 			// can't happen: first trick without any clubs...
-			System.out.println("Can't happen: Lead on first trick without the 2...");
+			// System.out.println("Can't happen: Lead on first trick without the 2...");
+			brainDump("Can't happen: Lead on first trick without the 2...");
 			// but the show must go on...
 		}
 
@@ -125,6 +142,11 @@ public class RobotBrain {
 			bMoonShooting = false;
 		if (!bMoonShooting && moonPossibleForSomeone())
 			bMoonPolice = true;
+		if (bThinkingOutLoud) {
+			//System.out.println("Robot(seat" + mySeat + "): I have the lead.");
+			//System.out.println("...presumptiveSpade(" + presumptiveSpade + ")");
+			brainDump("Moonshooting: " + bMoonShooting + " Moonpolice: " + bMoonPolice);		
+			}
 
 		/*
 		 * favor drawing out spades unless...
@@ -132,18 +154,16 @@ public class RobotBrain {
 		Card presumptiveSpade = hand.highestCardUnder(queenOfSpades);
 		if (cardLead == null) { // I have the lead
 			if (bThinkingOutLoud) {
-				System.out.println("Robot(seat" + mySeat + "): I have the lead.");
-				System.out.println("...presumptiveSpade(" + presumptiveSpade + ")");
+				//System.out.println("Robot(seat" + mySeat + "): I have the lead.");
+				//System.out.println("...presumptiveSpade(" + presumptiveSpade + ")");
+				brainDump(presumptiveSpade, "Leading. presumptiveSpade:");
 			}
 			if (trickCount == 0) {
 				// can't happen.
 				// I have the lead on the first trick without the 2c
-				System.out.println("Can't happen: void in clubs and I have the lead on the first trick.");
-				c = hand.randomCard();
-				if (c == null) {
-					c = getSomething();
-					System.out.println("Can't play anything... <AS> returned");
-				}
+				//System.out.println("Can't happen: void in clubs and I have the lead on the first trick.");
+				brainDump("Can't happen: void in clubs and I have the lead on the first trick.");
+				c = getSomething();
 				return c;
 			}
 			// Draw out the queen of spades, unless I have it
@@ -157,7 +177,8 @@ public class RobotBrain {
 				// no... get a spade below the queen...
 				// so if QS is still out, be carefull..
 				if (bThinkingOutLoud) {
-					System.out.println("Robot: Attempt to draw the queen out:" + c.encode());
+					brainDump(c, "draw out queen:");
+					//System.out.println("Robot: Attempt to draw the queen out:" + c.encode());
 				}
 			}
 			if (c == null) {
@@ -166,21 +187,23 @@ public class RobotBrain {
 				c = hand.bestLead(presumptiveSpade); // get the best card to lead
 			}
 			if (c == null) {
-				if (bThinkingOutLoud)
-					System.out.println("Bestlead returned nothing; desparate.");
+				brainDump("Bestlead returned nothing; desparation.");
 				c = getSomething();
-				if (bThinkingOutLoud)
-					System.out.println("Robot: Uh oh. desperate/no good choices. About to play..." + c.encode());
 			}
+			// Any time you lead the QS, brain dump...
+			if (c.equals(queenOfSpades))
+				brainDump(c, "*** About to Lead ***");
 			if (bThinkingOutLoud)
-				System.out.println("Robot: About to play..." + c.encode());
+				brainDump(c, "About to lead:");
+			//System.out.println("Robot: About to play..." + c.encode());
 			return c;
 		}
 		/*
 		 * apply the must-follow rule
 		 */
 		if (bThinkingOutLoud) {
-			System.out.println("Robot: must follow " + cardLead.suit + " if possible...");
+			//System.out.println("Robot: must follow " + cardLead.suit + " if possible...");
+			brainDump(cardLead, "Robot: following lead:");
 		}
 		if (trickCount == 0) { // first trick; highest club or slough
 			if (hand.getclubs().size() > 0)
@@ -207,23 +230,26 @@ public class RobotBrain {
 			else
 				c = hand.duckUnder(currentTrick);
 			if (bThinkingOutLoud)
-				System.out.println("s" + mySeat + " ducking under w/:" + c.encode());
+				brainDump(c, "Ducking under");
+				//System.out.println("s" + mySeat + " ducking under w/:" + c.encode());
 			// if so, duck the lead (unless moonshooting...)
 			// c = hand.highest(cardLead.suit);
 			// c = hand.highestNon(cardLead.suit, queenOfSpades);
 		} else { // Slough!
 			if (bThinkingOutLoud) {
-				System.out.println("Robot: can slough!");
+				brainDump("Can slough!");
+				//System.out.println("Robot: can slough!");
 			}
 			// void in the lead suit. Slough something
 			c = hand.bestSlough(trickCount);
 			if (bThinkingOutLoud)
-				brainDump("Sloughing:" + 
-			((c==null) ? "nil" : c.encode()));
+				brainDump(c, "Sloughing:"); 
+				//((c==null) ? "nil" : c.encode()));
 		}
 		if (c == null) {
 			c = hand.randomCard();
-			System.out.println("s" + mySeat + "Dithering. No result. Random:" + c.encode());
+			brainDump(c, "s" + mySeat + ": Dithering. No result. Random:");
+			//System.out.println("s" + mySeat + "Dithering. No result. Random:" + c.encode());
 		}
 		return c;
 	}
@@ -241,7 +267,8 @@ public class RobotBrain {
 
 	Subdeck getPass(int nCardsToPass) {
 		if (nCardsToPass != 3) {
-			System.out.println("Unexpected pass number" + nCardsToPass);
+			brainDump("Likely fatal. Unexpected pass number: " 
+					+ nCardsToPass + "Ignored.");
 			nCardsToPass = 3;
 		}
 		// sort the damn hand so you can debug it...
@@ -256,19 +283,17 @@ public class RobotBrain {
 		// 4. Just be mean... high cards, 2c and a medium heart
 
 		if (RobotBrain.bDebugPass) {
-			System.out.println("Select pass from:");
-			brainDump(true);
+			//System.out.println("Select pass from:");
+			brainDump("Select pass from:");
 		}
 		// idea 1. Emergency 1 jetison QS
 		Subdeck spades = hand.getspades();
-		spades.sort();
 		boolean hasAS = (hand.find(aceOfSpades));
 		boolean hasKS = (hand.find(kingOfSpades));
 		boolean hasQS = (hand.find(queenOfSpades));
 		int topspades = hand.hasTop(Suit.SPADES);
 		int totalSpades = spades.size();
 		Subdeck hearts = hand.gethearts();
-		hearts.sort();
 		int totalhearts = hearts.size();
 		int tophearts = hand.hasTop(Suit.HEARTS);
 		if (hasQS) { // Idea 1.
@@ -283,18 +308,18 @@ public class RobotBrain {
 				// Sorry. Got to fob off the queen...
 				pass.add(queenOfSpades);
 				if (hasKS)
-					pass.add(kingOfSpades);
+					pass.addWithMax(kingOfSpades, nCardsToPass);
 				if (hasAS)
-					pass.add(aceOfSpades);
+					pass.addWithMax(aceOfSpades, nCardsToPass);
 			}
 		} else if ((hasAS && hasKS && totalSpades < 4) || ((hasAS || hasKS) && totalSpades < 3)) {
 			if (tophearts >= 3)
 				bMoonShooting = true;
 			else {
 				if (hasAS)
-					pass.add(aceOfSpades);
+					pass.addWithMax(aceOfSpades, nCardsToPass);
 				if (hasKS)
-					pass.add(aceOfSpades);
+					pass.addWithMax(aceOfSpades, nCardsToPass);
 			}
 		}
 		int leftToPass = nCardsToPass - pass.size();
@@ -324,7 +349,7 @@ public class RobotBrain {
 		} // otherwise accumulate hearts; don't try to pass them.
 
 		leftToPass = nCardsToPass - pass.size();
-		if (leftToPass <= 0)
+		if (leftToPass == 0)
 			return pass;
 
 		// Idea 2. be void in things
@@ -359,6 +384,7 @@ public class RobotBrain {
 		// make sure there is a heart in the pass
 		// ptth.
 		// fine... Just pick something
+		int randomcards = 0;
 		for (int tries = 0; pass.size() < nCardsToPass && tries < 50;) {
 			Card c = hand.randomCard();
 			if (c == null)
@@ -367,11 +393,20 @@ public class RobotBrain {
 				tries++;
 			else {
 				pass.addWithMax(c, nCardsToPass);
+				randomcards++;
 				System.out.println("Robot(" + pid + ")Randomly passing:" + c.encode());
 			}
 		}
+		if (randomcards > 0)
+			brainDump("Pass had " + randomcards + " random cards.");
+
+		int extraCards = 0;
+		for (extraCards = 0; pass.size() > nCardsToPass; extraCards++)
+			pass.pop();
+		if (extraCards > 0)
+			brainDump("Pass had " + extraCards + " to many cards.");
 		if (pass.size() != 3)
-			System.out.println("Cannot find 3 cards to pass...");
+			brainDump("*** Cannot find 3 cards to pass... ***");
 		return pass;
 	}
 
@@ -582,7 +617,9 @@ public class RobotBrain {
 	void trickCleared(Trick trick) {
 		// Show the trick... aaa
 		String s = trick.encode();
-		System.out.println("Robot" + pid + " clearing:" + s);
+		//System.out.println("Robot" + pid + " clearing:" + s);
+		if (bThinkingOutLoud)
+			brainDump("Clearing trick:" + s);
 		//
 		// Keep real time score to for moon shooting / moon policing
 		int winner = trick.winner;
@@ -612,7 +649,16 @@ public class RobotBrain {
 	//
 	// ych. this shouldn't go here... Should be in Cardgame...
 	// use rankOrder...
-	Rank rankOrder[] = { Rank.ACE, Rank.KING, Rank.QUEEN, Rank.JACK, Rank.TEN, Rank.NINE, Rank.EIGHT, Rank.SEVEN,
+	/*
+	 * Specific cardgame Should have
+	 *  static final Rank rankOrder[]={...};
+	 *  // isHigher knows about trumps
+	 *  static boolean isHigher(c1, c2);
+	 *  and for Spades...
+	 *  isHigher(bC1playedFirst, c1, c2);
+	 *  static boolean higherRank(r1, r2);
+	 */
+	final Rank rankOrder[] = { Rank.ACE, Rank.KING, Rank.QUEEN, Rank.JACK, Rank.TEN, Rank.NINE, Rank.EIGHT, Rank.SEVEN,
 			Rank.SIX, Rank.FIVE, Rank.FOUR, Rank.THREE, Rank.DEUCE };
 
 	// true if r1 > r2; false otherwise;
@@ -642,6 +688,8 @@ public class RobotBrain {
 	}
 // -- methods that use hand and battery brain
 
+	// TODO: shouldn't hand by independant of RobotBrain
+	// usable by any robot
 	class Hand {
 		// Subdeck clubs = new Subdeck(), diamonds = new Subdeck(), hearts = new
 		// Subdeck(), spades = new Subdeck();
@@ -731,6 +779,10 @@ public class RobotBrain {
 			return top;
 		}
 
+		/*
+		 * lowestNonPoint - lowest card not worth points
+		 * Review: Hearts specific??? Not properly part of Hand???
+		 */
 		Card lowestNonPoint() {
 			Card candidate = null;
 			for (Suit suit : Suit.suits) {
@@ -763,6 +815,7 @@ public class RobotBrain {
 
 		/*
 		 * biggestLoser -- card least likely to take tricks
+		 * Review: Hearts specific??? Not properly part of Hand???
 		 */
 		Card biggestLoser(Suit suitToAvoid) {
 			Card candidate = null;
@@ -809,6 +862,7 @@ public class RobotBrain {
 
 		/*
 		 * return a generally toxic card from the hand called by slough
+		 * Review: Hearts specific??? Not properly part of Hand???
 		 */
 		Card toxicCard(boolean moonpolice) {
 			// moonpolice or not...
@@ -990,6 +1044,7 @@ public class RobotBrain {
 		 * point of this is to avoid the queen // so this algorithm will return the
 		 * queen unless // it's pulled from my myCards and only return it // as a last
 		 * resort
+* 		 * Review: Hearts specific??? Not properly part of Hand???
 		 */
 		Card duckUnderSpade(Trick trick) {
 			Card cardToDuck = highestCardInTrick(trick);
@@ -1072,6 +1127,7 @@ public class RobotBrain {
 		 * commandLead -- bad name...
 		 * rubicon -- cross or turn back
 		 *   considering whether to go for moon or bleed out high cards
+		 *   return null if nothing good.
 		 */
 		Card commandLead() {
 			// note: could have something like this:
@@ -1249,13 +1305,20 @@ public class RobotBrain {
 				suits[c.suit.ordinal()].add(c);
 			}
 			String type;
+			boolean misdeal=false;
 			if (sd.size() == 13)
 				type = "dealt";
 			else if (sd.size() == 3)
 				type = "passed";
-			else
+			else {
 				type = "huh?";
+				misdeal = true;
+			}
 			System.out.println("Brain:" + type + "[" + sd.encode() + "]");
+			if (misdeal) {
+				brainDump("fatal: I've been passed the wrong number of cards");
+				//cardGame.declareMisdeal(pid, playerName + ":" + pm.usertext);
+			}
 		} // populate
 
 		/*
@@ -1415,10 +1478,13 @@ public class RobotBrain {
 			Suit suit = Suit.value(iSuit);
 			Subdeck sd = null;
 			// don't return a suit with no cards in it, if we can help it.
-			for (int i = 0; i < 4; i++) {
+			for (int i = 0; i < Suit.size(); i++) {
 				sd = suits[suit.ordinal()];
 				if (sd.size() == 0)
-					suit = suit.next();
+					if (suit == Suit.last())
+						suit = Suit.first();
+					else 
+						suit = suit.next();
 				else
 					break;
 			}
@@ -1461,6 +1527,8 @@ public class RobotBrain {
 				return peek();
 
 			Subdeck rs = randomSuit();
+			// randomSuit is guaranteedd to work...
+			// this is unnecessary...
 			for (int i = 0; rs.size() == 0; i++) {
 				rs = randomSuit();
 				if (i > 150) {
@@ -1470,7 +1538,9 @@ public class RobotBrain {
 			}
 			// rs is a non-void suit
 			int isuitsize = rs.size();
-			int index = jRandom(isuitsize);
+			int index = 0;
+			if (isuitsize >= 2)
+				index = jRandom(isuitsize-1);
 			Card c = rs.elementAt(index);
 			return c;
 			/*
