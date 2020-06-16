@@ -8,6 +8,7 @@ import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -103,7 +104,9 @@ public class WsServer {
 		SessionManager.remove(sess);
 		System.out.println("Close Connection ...");
 		// if (e == java.io.EOFException) { }
-		System.out.println("And crash, and dump stacktrace?");
+		// I caught you, literally, you bastard!
+		//  ... see onerror catch clause
+		// System.out.println("And crash, and dump stacktrace?");
 
 	}
 	
@@ -668,9 +671,10 @@ public class WsServer {
 	 * retrievePrevious... send everything in history to new attendee
 	 */
 	void retrievePreviousConversation(Session sess) {
-		int nMessages=history.size();
-		System.out.println("attempting to write(" + nMessages + ") to: ...");
-
+		int nMessages = history.size();
+		if (bLowLevelIODebug) {
+			System.out.println("attempting to write(" + nMessages + ") to: ...");
+		}
 		RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 
 		String conversation = "";
 		int n=0;
@@ -687,8 +691,27 @@ public class WsServer {
 	}
 	
 	@OnError
-	public void onError(Throwable e){
-		e.printStackTrace();
+	public void onError(Session sess, Throwable e) {
+		Throwable cause = e.getCause();
+		/* normal handling... */
+		if (cause != null)
+			System.out.println("Error-info: cause->" + cause);
+		try {
+			// Likely EOF (i.e. user killed session) 
+			// so just Close the input stream as instructed
+			sess.close();
+		} catch (IOException ex) {
+			System.out.println("Handling eof, A cascading IOException was caught: " + ex.getMessage());
+			ex.printStackTrace();
+		} finally {
+			System.out.println("Session error handled. (likely unexpected EOF) resulting in closing User Session.");
+			/*if (e != null) {
+				System.out.println("Error: cause->" + cause);
+				System.out.println("Error: cause->" + e.getLocalizedMessage());
+			} else {
+				System.out.println("Error: Finally: cause->" + e.getLocalizedMessage());				
+			}*/
+		}
 	}
 
 	/*
