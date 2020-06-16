@@ -253,9 +253,11 @@ public class WsServer {
 		String sname="";
 		String sparam="";
 
-		System.out.println("Message from the client: " + message);
-		if (message.startsWith("$")) {
-			processSUCommand(sess, message);
+		if (bLowLevelIODebug) {
+			System.out.println("Message from the client: " + message);
+			if (message.startsWith("$")) {
+				processSUCommand(sess, message);
+			}
 		}
 		// String echoMsg = "Echo from the Server: " + message;
 		UserSession us = SessionManager.getUserSession(sess);
@@ -363,6 +365,17 @@ public class WsServer {
 			write(us, us.sessionId + us.getName());
 			System.out.println("name="+sName);
 			break;
+		case JCLNote:
+			int argc=jcl.argc();
+			String s="UserNote> ";
+			//System.out.println("Argc=" + argc + 
+					// ((argc > 1) ? " Parameters..." : "."));
+			for (int j=0; j<jcl.argc(); j++)
+				s = s + jcl.getName(j) + " ";
+				//System.out.println("Arg" + j 
+						//+ ">" +jcl.getName(j) + "=" + jcl.getValue(j));
+			System.out.println(s);
+			break;
 		case JCLSu:		// was JCLSuperUser
 			us.setSuperUser(true);
 			write(us, "With great power comes great responsibility...");
@@ -386,7 +399,7 @@ public class WsServer {
 				write(us, "Not currently in a game; can't peek");
 				break;
 			}
-			String s = "";
+			s = "";
 			int nparam=0;
 			sname="";
 			sparam="";
@@ -683,7 +696,7 @@ public class WsServer {
 	 *
 	public void write(Session sess, String msg) {
 		RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 			
-		if (verbose) {
+		if (bLowLevelIODebug) {
 			System.out.println("writing(" + msg + "):");
 		}
 		if (sess.isOpen())
@@ -692,7 +705,7 @@ public class WsServer {
 	}
 	*/
 	
-	static boolean verbose=true;
+	static boolean bLowLevelIODebug=false;
 	boolean bNeverSleep=true;
 	/*
 	 * underlying routine called by all
@@ -707,7 +720,7 @@ public class WsServer {
 		RemoteEndpoint.Basic basicRemote = sess.getBasicRemote();
 		int i = 0; // tries...
 		boolean bWriteSucceeded = false;
-		if (verbose) {
+		if (bLowLevelIODebug) {
 			System.out.println("send(" + "--connecting--" + "):" + msg);
 		}
 		if (sess.isOpen()) {
@@ -757,7 +770,7 @@ public class WsServer {
 		 * /
 		RemoteEndpoint.Basic basicRemote=sess.getBasicRemote();
 		//RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote();
-		if (verbose) {
+		if (bLowLevelIODebug) {
 			System.out.println("send(" + us.username + "):" + msg);
 		}
 		if (sess.isOpen())
@@ -776,16 +789,16 @@ public class WsServer {
 	static public void send(UserSession us, String msg) {
 		Session sess=us.getSession();
 		write(sess, msg);
-		//boolean verbose=true;	// local version...
+		//boolean bLowLevelIODebug=true;	// local version...
 		/*RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 			
-		if (verbose) {
+		if (bLowLevelIODebug) {
 			System.out.println("send(" + us.username + "):" + msg);
 		}
 		if (sess.isOpen())
 			asynchRemote.sendText(msg);		
 		RemoteEndpoint.Basic basicRemote=sess.getBasicRemote();
 		//RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote();
-		if (verbose) {
+		if (bLowLevelIODebug) {
 			System.out.println("send(" + us.username + "):" + msg);
 		}
 		* /
@@ -811,7 +824,7 @@ public class WsServer {
 			RemoteEndpoint.Basic basicRemote=sess.getBasicRemote();
 
 			//RemoteEndpoint.Async asynchRemote=sess.getAsyncRemote(); 			
-			if (verbose) {
+			if (bLowLevelIODebug) {
 				System.out.println("writing(" + i + "):" + msg);
 			}
 			if (sess.isOpen())

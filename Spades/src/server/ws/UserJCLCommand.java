@@ -13,6 +13,7 @@ public class UserJCLCommand {
 		JCLJoin, // Join, Rejoin games
 		JCLLs,
 		JCLNew,		// create a new game
+		JCLNote,	// Make a note in the Catalina logfile
 		JCLStart,
 		JCLRejoin, 
 		JCLSu, 		// SuperUser was JCLSuperUser...
@@ -88,6 +89,7 @@ public class UserJCLCommand {
 				}
 	}
 
+	boolean bJCLDebug=false;
 	void buildCommandStructure() {
 		/*
 		 * build structures with the enum value and the string to actually parse for
@@ -99,6 +101,17 @@ public class UserJCLCommand {
 			s = s.toLowerCase();
 			if (dontParse(t))
 				continue;
+			if (bJCLDebug) {
+				System.out.println("?" + s);
+				if (t == JCLType.JCLJoin)
+					;
+				if (JCLType.JCLJoin == t)
+					echo("Join... found");
+				if (JCLType.JCLSu == t)
+					echo("Su... found");
+				if (JCLType.JCLNote == t)
+					echo("Note... found");
+			}
 			c = new Command(t, s);
 			commandList.add(c);
 		}
@@ -151,7 +164,7 @@ public class UserJCLCommand {
 		return argv.get(index).value;
 	}
 	/*
-	 * argc() - wierd, huh? argc is a function. 
+	 * argc() - wierd, huh? argc is a method. 
 	 */
 	public int argc() {
 		return argv.size();	// + 1? Huh?
@@ -241,7 +254,8 @@ public class UserJCLCommand {
 			if (comp == 0) {
 				// it's a match. Set type.
 				this.type = c.type;
-				System.out.println(verb + ".type->" + this.type);
+				if (bJCLDebug)
+					System.out.println(verb + ".type->" + this.type);
 				// Now build argc and argv
 				// get blobs between whitespace
 				// TODO: if there is an equal sign, parse-up
@@ -357,7 +371,9 @@ public class UserJCLCommand {
 			} else {				
 				jcl = new NewUserJCLCommand(input);
 				System.out.println("Type->" + jcl.type);
-				System.out.println("Parameters...");
+				int argc=jcl.argc();
+				System.out.println("Argc=" + argc + 
+						((argc > 1) ? " Parameters..." : "."));
 				for (int j=0; j<jcl.argc(); j++)
 					System.out.println("Arg" + j 
 							+ ">" +jcl.getName(j) + "=" + jcl.getValue(j));
