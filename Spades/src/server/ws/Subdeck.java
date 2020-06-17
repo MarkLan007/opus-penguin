@@ -250,12 +250,14 @@ public class Subdeck implements Iterable<Card> {
 			return;
 		}
 		subdeck.add(c);
+		isSorted = false;
 		}
 
 	public boolean addWithMax(Card c, int maxsize) {
 		if (subdeck.size() > maxsize)
 			return false;
 		subdeck.add(c);
+		isSorted = false;
 		return true;
 		}
 
@@ -473,6 +475,14 @@ public class Subdeck implements Iterable<Card> {
 	    	else if (c1.suit.ordinal() < c2.suit.ordinal())
 	    		return 1;
 	    	else {	// suits are equal
+	    		// Ace high...
+	    		if (c1.rank == Rank.ACE && c2.rank == Rank.ACE)
+	    			return 0;
+	    		if (c1.rank == Rank.ACE)
+	    			return -1;
+	    		if (c2.rank == Rank.ACE)
+	    			return 1;
+	    		// otherwise ordinal is the higher card
 	    		if (c1.rank.ordinal() > c2.rank.ordinal())
 	    			return -1;
 	    		else if (c1.rank.ordinal() < c2.rank.ordinal())

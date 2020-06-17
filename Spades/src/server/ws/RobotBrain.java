@@ -72,7 +72,9 @@ public class RobotBrain {
 	}
 
 	void brainDump(String msg) {
-		System.out.println("braindump:" + msg);
+		System.out.println("s" + mySeat + ">braindump:" + msg 
+				+ " shootmoon=" + bMoonShooting 
+				+ " moonpolice="+ bMoonPolice);
 		brainDump(true);
 	}
 	
@@ -118,6 +120,8 @@ public class RobotBrain {
 		trickCount = actualTrickId;
 
 		// sanity checks...
+		if (hand.size() == 1)
+			return hand.peek();
 		if (trickCount == 0) {
 			// Make sure I have 13 cards in my hand
 			// or else declare a misdeal (or at least whine)
@@ -145,7 +149,7 @@ public class RobotBrain {
 		if (bThinkingOutLoud) {
 			//System.out.println("Robot(seat" + mySeat + "): I have the lead.");
 			//System.out.println("...presumptiveSpade(" + presumptiveSpade + ")");
-			brainDump("Moonshooting: " + bMoonShooting + " Moonpolice: " + bMoonPolice);		
+			brainDump("dbc:strategy checkpoint. ");		
 			}
 
 		/*
@@ -191,8 +195,8 @@ public class RobotBrain {
 				c = getSomething();
 			}
 			// Any time you lead the QS, brain dump...
-			if (c.equals(queenOfSpades))
-				brainDump(c, "*** About to Lead ***");
+			if (c.equals(queenOfSpades) || c.equals(kingOfSpades))
+				brainDump(c, "Yikes! *** About to Lead ***");
 			if (bThinkingOutLoud)
 				brainDump(c, "About to lead:");
 			//System.out.println("Robot: About to play..." + c.encode());
@@ -319,7 +323,7 @@ public class RobotBrain {
 				if (hasAS)
 					pass.addWithMax(aceOfSpades, nCardsToPass);
 				if (hasKS)
-					pass.addWithMax(aceOfSpades, nCardsToPass);
+					pass.addWithMax(kingOfSpades, nCardsToPass);
 			}
 		}
 		int leftToPass = nCardsToPass - pass.size();
@@ -399,7 +403,9 @@ public class RobotBrain {
 		}
 		if (randomcards > 0)
 			brainDump("Pass had " + randomcards + " random cards.");
-
+		if (bDebugPass)
+			System.out.println("Passing:" + pass.encode());
+		
 		int extraCards = 0;
 		for (extraCards = 0; pass.size() > nCardsToPass; extraCards++)
 			pass.pop();
@@ -415,6 +421,7 @@ public class RobotBrain {
 	 */
 	void addCards(Subdeck sd) {
 		hand.populate(sd);
+		hand.sort();
 	}
 
 	void deleteCardXXX(Card c) {
@@ -575,6 +582,27 @@ public class RobotBrain {
 				othersWithPoints++;
 		return othersWithPoints == 0;
 	}
+	
+	boolean badHearts() {
+		Subdeck hearts=hand.gethearts();
+		if (hearts.size() == 0)
+			return false;	// no bad hearts
+		
+		Card lowestHeart=hand.lowest(Suit.HEARTS);
+		int beaters = batteryBrain.higherCardsOutThere(lowestHeart);
+		//if (batteryBrain.higherCardOutThere(lowestHeart))
+			//return false;
+		
+		int tophearts = hand.hasTop(Suit.HEARTS);
+		if (tophearts > beaters) {
+			brainDump("Close but... go launch!");
+			return false;
+		} else {
+			brainDump("Close but NOT going for it...");
+		}
+		
+		return true;
+	}
 
 	void cardPlayed(int seat, Card c) {
 		if (currentTrick == null)
@@ -699,6 +727,12 @@ public class RobotBrain {
 			return suits[suit.ordinal()];
 		}
 
+		void sort() {
+			for (Subdeck suit : suits)
+				if (suit.size() > 0)
+					suit.sort();			
+		}
+		
 		/*
 		 * peek - return the first card you find...
 		 *  was getFirstCard
@@ -1571,7 +1605,7 @@ public class RobotBrain {
 		}
 
 		// TODO: Move this out from Hand.
-		// Hand should be generic for all routines, not Heart Specific...
+		// Hand methods should be generic for all routines, not Hearts Specific...
 		Card bestLead(Card presumptiveSpade) {
 			// leading spades if possible is best idea I have right now...
 			// So I won't play the presumptive spade if
@@ -1584,8 +1618,11 @@ public class RobotBrain {
 					return presumptiveSpade;
 				if (someoneElseHasQueen())
 					candidate = duckLead();
-				else
+				else {
 					candidate = commandLead();
+					if (candidate != null)
+						brainDump(candidate, "Thinking moon...");
+				}
 			} else if (hand.find(queenOfSpades)) {
 				candidate = commandLead();
 			}
@@ -1687,6 +1724,8 @@ public class RobotBrain {
 
 			// Soo... I could shoot the moon.
 			// should I try?
+			if (badHearts())
+				return bDumpPoints;
 
 			// Ok, is there a likely path to the whitehouse?
 			// Is there a suit I will run?

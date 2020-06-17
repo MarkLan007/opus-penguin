@@ -23,7 +23,7 @@ public class CardGame implements GameInterface {
 		return nTrickId;
 	}
 
-	static boolean bDebugCardCf = true;
+	static boolean bDebugCardCf = false;
 	boolean bGameAborted = false;
 	boolean bHandOver = false;
 	boolean bGameInProgress = true;
