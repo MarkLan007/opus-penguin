@@ -366,7 +366,13 @@ public class WsServer {
 			System.out.println("name="+sName);
 			us.setName(sName);
 			write(us, us.sessionId + us.getName());
-			System.out.println("name="+sName);
+			if (us.game != null) {
+				int pid=us.getpid();
+				us.game.setName(pid, sName);
+				System.out.println("Game"+us.game.gameId + " Player" + pid + "=" + sName);
+			} else {
+				System.out.println("name="+sName);
+			}
 			break;
 		case JCLNote:
 			int argc=jcl.argc();
@@ -473,6 +479,11 @@ public class WsServer {
 			boolean bJoinStatus = g.join(us, friendlyName);
 			if (bJoinStatus) {
 				// joined ok...
+				//
+				// First set the user's name from the session into the game
+				if (us.username != "" && us.pid != -1) {
+					g.setName(us.pid, us.username);					
+				}
 				//
 				String gameName="H0";
 				String msg=friendlyName + " Successfully joined game: " 

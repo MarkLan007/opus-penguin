@@ -126,6 +126,14 @@ public class CardGame implements GameInterface {
 		sGameName = s;
 	}
 
+	public void setName(int pid, String sname) {
+		Player p=null;
+		if (pid >= 0 && pid < nPlayers) {
+			p = playerArray[pid];
+			p.setName(sname);
+		}
+	}
+	
 	public String getName() {
 		return sGameName;
 	}
@@ -556,7 +564,8 @@ public class CardGame implements GameInterface {
 				x = "*";
 			else
 				x = "";
-			sTemp = sTemp + "$" + x + playerArray[i].getName() + "=" + playerArray[i].handScore + "."
+			sTemp = sTemp + "$" + x + playerArray[i].getName() +
+					"-p" + i + "=" + playerArray[i].handScore + "."
 					+ playerArray[i].totalScore;
 		}
 		return sTemp + '$' + "#Player#Points#Totals#";

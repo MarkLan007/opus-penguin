@@ -1724,6 +1724,8 @@ public class RobotBrain {
 
 			// Soo... I could shoot the moon.
 			// should I try?
+			// is there a path to the white house? A suit I could rn the table in...
+			///
 			if (badHearts())
 				return bDumpPoints;
 
