@@ -2,7 +2,9 @@ package server.ws;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
@@ -32,7 +34,8 @@ import server.ws.UserJCLCommand.JCLType;
 //@ServerEndpoint("/websocket/{client}")
 //@ServerEndpoint("/server/ws/{client}")
 //@ServerEndpoint("/server/ws/websocket/{client}")
-@ServerEndpoint("/server/ws")
+//@ServerEndpoint("/server/ws")
+@ServerEndpoint("/server/ws/{client}")
 public class WsServer {
 	
 	//public class CardGame { }
@@ -40,6 +43,13 @@ public class WsServer {
 	@OnOpen
 	public void onOpen(Session sess, EndpointConfig endpointConfig){
 		sess.setMaxIdleTimeout(1000000);
+		Principal principal=sess.getUserPrincipal();
+		String pname=null;
+		if (principal != null)
+			pname=principal.getName();
+		System.out.println("Temp/Principalname=" + pname);
+		//
+		
 		//RemoteBasicEndpoint rbe = sess.getBasicRemote();
 		//sess.getBasicRemote().getClass().getAnnotations().getClass().getCanonicalName();
 		String sClientName = "default";
@@ -47,6 +57,11 @@ public class WsServer {
 		String sReallyFriendlyName =
 				sess.getPathParameters().get("client");
 		String sPathParams = sess.getPathParameters().toString();
+		Map<String,String> path=sess.getPathParameters();
+		String p=path.get("path");
+		if (p == null)
+			p = "guest";
+		System.out.println("p=" + p);
 		System.out.println("onOpen... Opening at:" + sPathParams);
 		//sPathParams = sess.
 		if (sess.getRequestParameterMap().containsKey("client")) {
@@ -714,8 +729,13 @@ public class WsServer {
 		} catch (IOException ex) {
 			System.out.println("Handling eof, A cascading IOException was caught: " + ex.getMessage());
 			ex.printStackTrace();
+		} catch (NullPointerException ex) {
+			System.out.println("Yikes: NullPointer!" + ex.getMessage());
+			ex.printStackTrace();
 		} finally {
 			System.out.println("Session error handled. (likely unexpected EOF) resulting in closing User Session.");
+			if (e != null)
+				e.printStackTrace();
 			/*if (e != null) {
 				System.out.println("Error: cause->" + cause);
 				System.out.println("Error: cause->" + e.getLocalizedMessage());

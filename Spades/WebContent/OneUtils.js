@@ -2711,7 +2711,7 @@ var sHost = "172.98.72.44:8080";	// determined at runtime or set by user with
 // var sPort=":8080"; // can't be set by user, yet
 var sRoot = "/Spades";	// was sServiceName
 var sEndPoint = "/server/ws";
-var sUser = "";
+var sUser = "/ClientNameXyzzy01";
 var sConnectionString = "";	// constructed by formatConnectionString
 
 /*

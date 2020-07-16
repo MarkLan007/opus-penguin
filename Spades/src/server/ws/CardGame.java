@@ -900,7 +900,7 @@ public class CardGame implements GameInterface {
 			MailBoxExchange.MailBox mb = mbx.itemAt(i);
 			int from = mb.from, to = mb.to;
 			sd = mb.contents;
-			System.out.println("Passing:(" + sd.size() + ")=" + sd.encode());
+			System.out.println("Passing[" + from + "->" + to + "](" + sd.size() + ")=" + sd.encode());
 			Player p = playerArray[from];
 			/*
 			 * Actually delete the cards to the player's hand internally for (c: sd.subdeck)
