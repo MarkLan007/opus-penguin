@@ -128,10 +128,15 @@ public class CardGame implements GameInterface {
 
 	public void setName(int pid, String sname) {
 		Player p=null;
+		boolean success=false;
 		if (pid >= 0 && pid < nPlayers) {
 			p = playerArray[pid];
 			p.setName(sname);
+			success=true;
 		}
+		if (success)
+			updatePlayerInfo();
+
 	}
 	
 	public String getName() {
@@ -455,7 +460,9 @@ public class CardGame implements GameInterface {
 	 * so game (or robots) can send messages to humans
 	 */
 	public void snark(String s) {
-		broadcast(true, s);
+		//broadcast(true, s);
+		ProtocolMessage pm=newErrorMsg(false, s);
+		broadcastUpdate(pm);
 	}
 
 	boolean validPid(int pid) {
@@ -505,6 +512,20 @@ public class CardGame implements GameInterface {
 		return "(" + length + ")" + cardString + handString;
 	}
 
+	/*
+	 * info messages are processed silently
+	 * otherwise they look like error messages with a leading '%INF:'
+	 */
+	/*
+	 * TODO: Don't really need it's own type. Just process it as an error message...
+	 */
+	static ProtocolMessage newInfoMsg(String sErrorText) {
+		String prefix = "%INF:";
+		ProtocolMessage pm=new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR, 
+				prefix + sErrorText + "%");	// Wrap in %MSG:/%ERR: %
+		return pm;
+	}
+	
 	static ProtocolMessage newErrorMsg(boolean bJustInformational, String sErrorText) {
 		String prefix = "%MSG:";
 		if (bJustInformational)
@@ -875,6 +896,9 @@ public class CardGame implements GameInterface {
 	}
 
 	public void declareMisdeal(int pid, String es) {
+		/*
+		 * TODO: make this use an actual error message...
+		 */
 		broadcast(true, "" + "%I%" + pid + "%" + es);
 		broadcast(true, "" + "%I%" + "Game paused. Suggest misdeal.");
 	}
@@ -1122,9 +1146,13 @@ public class CardGame implements GameInterface {
 
 		// total the hand scores...
 		totalHandScores();
+		// And then... Changed 8/14/20
 		// Total the game score
 		for (int i = 0; i < nPlayers; i++) {
 			playerArray[i].totalScore += playerArray[i].handScore;
+			// apply the "if you hit 100 exactly you now have 50 rule..."
+			if (playerArray[i].totalScore == 100)
+				playerArray[i].totalScore = 50;
 			if (playerArray[i].totalScore >= 100)
 				winnerDetermined = true;
 		}
@@ -1135,6 +1163,9 @@ public class CardGame implements GameInterface {
 		ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PLAYER_SCORES, sTemp);
 		broadcastUpdate(pm);
 
+		// Send %inf every time you update scores (here) and every setname (...)
+		updatePlayerInfo();
+		
 		/*
 		 * the only way to advance the current pass is to successfully complete a hand.
 		 * in reset...
@@ -1151,6 +1182,14 @@ public class CardGame implements GameInterface {
 		}
 	}
 
+	void updatePlayerInfo() {
+		String sTemp = getFormattedGameScore();
+		//ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PLAYER_INFO, sTemp);
+		ProtocolMessage pm = newInfoMsg(sTemp);
+		System.out.println("NewMsg->" + pm.encode());
+		broadcastUpdate(pm);		
+	}
+	
 	void abort() {
 		bGameAborted = true;
 		bGameInProgress = false;

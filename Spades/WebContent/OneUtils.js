@@ -284,7 +284,7 @@ function cardSelected2(event) {
 	var t = event.target;
 	var uniqueId = t.type + t.id;
 	console.log("Double click: Whoa Nellie!" + uniqueId);
-	//alert("Whoa Nellie! a doubleclick was seen in:" + t.id);
+	// alert("Whoa Nellie! a doubleclick was seen in:" + t.id);
 	// sendCardFromButtonPress(parseInt(t.id, 10));
 }
 
@@ -1821,21 +1821,50 @@ function processCardString(cardString) {
 			// clearCardTable(true);
 			break;
 		case '%':
-			// console.log("%error:" + cardString);
-			// report user error
+			// %0%MSG or %0%INF
+			// extract msgtype with slice(...)
+			var msgtype = cardString.slice(3,7);
 			var msg=cardString.slice(7);
 			if (msg.charAt(msg.length-2) == '%')
 				msg = msg.slice(0,-2); // lop off trailing %
-			gAlert(msg);
-			gamestatusUpdate("error:" + cardString);
+
+			// %inf: Seat:Name:Score::
+			// var inf=cardString.slice(5);
+			if (msgtype == 'INF:') {
+				// process info string
+				// just a gamescore string
+				wsParseInfo(msg);
+				break;
+			}
+			else if (msgtype == 'MSG:') {
+				// process msg/info string
+				gAlert(msg);
+				gamestatusUpdate("error:" + cardString);
+				break;
+			}
+			else {
+				// unrecognized info string
+				console.warn("MSG/INFO Unrecognized:"+msgtype);
+				console.warn(msg);
+			}
+			/*
+			 * // default case: error // console.log("%error:" + cardString); //
+			 * report user error var msg=cardString.slice(7); if
+			 * (msg.charAt(msg.length-2) == '%') msg = msg.slice(0,-2); // lop
+			 * off trailing %
+			 */
 			break;
 		case 'Q':
 		case 'B':
 			gameStatusUpdate("Hearts are Broken!");
 			break;
 		case '$':
+			// msgtype = "$0"...
+			msg=cardString.slice(2);
+			if (msg.charAt(msg.length-2) == '%')
+				msg = msg.slice(0,-2); // lop off trailing %
 			console.log("Starting scoredialog...");
-			wsScoreDialog(cardString);
+			wsScoreDialog(msg);
 			break;
 		case '~':
 			// cardString of the form 'NCards to pass left' where N is the
@@ -1906,7 +1935,16 @@ function enableScoreCloseWindowButton() {
 var tempHeaders=["_Player", "_Points", "_Total", "???"];
 
 function formatScore(score) {
-	var w=scoreWindow;	
+	formatScore(score, true)
+}
+
+// bDialog is true if you want it to update the score html table modal dialog
+// false if you just want to update the scores as from an %INF: msg
+function formatScore(score, bDialog) {
+	// var w=scoreWindow;
+	// potstickers must be initialized as scores may show up in 2 ways.
+	// from setnames and from score dialogs, either from user command or end of hand
+	initPotsticker4();
 	var name="",row=0;
 	var handscore="", gamescore="";
 	var c, prefix, elem;
@@ -1914,7 +1952,7 @@ function formatScore(score) {
 	// 
 	// looking at {$name=x.y$}+
 	// scan upto $
-	for (i=1;i<score.length;i++)
+	for (i=0;i<score.length;i++)
 		if (score.charAt(i) == '$')
 			break;
 	// i points at $ (at top and bottom of loop; pre-increment)
@@ -1953,14 +1991,22 @@ function formatScore(score) {
 		// j points at '$'
 		i = j;
 		//
-		// post up result in table
-		prefix = "p" + row;
-		elem = "player" + prefix;
-		document.getElementById(elem).innerText = name;
-		elem = prefix + "s0";
-		document.getElementById(elem).innerText = handscore;
-		elem = prefix + "s1";
-		document.getElementById(elem).innerText = gamescore;
+		// post up result in (modal-dialog) table
+		if (bDialog) {
+			prefix = "p" + row;
+			elem = "player" + prefix;
+			document.getElementById(elem).innerText = name;
+			elem = prefix + "s0";
+			document.getElementById(elem).innerText = handscore;
+			elem = prefix + "s1";
+			document.getElementById(elem).innerText = gamescore;
+			}
+//		else {
+			// xyzzy
+			// always update the playernames and scores...
+			playerNames[row] = name;
+			playerScores[row] = gamescore;
+//			}
 		}
 	// Headers at the end of the string
 	// have a header if i is pointing at #
@@ -2178,6 +2224,78 @@ function initPassDialogDiv(nCards, sMsg) {
 }
 
 /*
+ * wsParseInfo(sMsg) ++ new code ++ being tested
+ */
+var bShowDivs4=false;
+
+function wsParseInfo(sMsg) {
+	formatScore(sMsg, false);	// parse info into arrays
+	//makedivs4(true);	// always display
+	//bShowdivs4 = true;
+	updatePotstickers4();	// put parsed info into the divs
+}
+
+/*
+ * New code. Never debugged or tested. See above...
+ */
+function wsParseInfoDeadCode(sMsg) {
+	// xxx
+	// %inf:0:Name:Score:: ...
+	var i=5; // index in string
+	for (; i<sMsg.length; i++) {
+		var sSeat="";
+		var sName="";
+		var sScore="";
+		var c="";
+		// :
+		if (sMsg.charAt[i] == ':')
+			i++;	// good
+		else {
+			; // uh oh
+		}
+		// Seat no :
+		for (;i<sMsg.length; ) {// i points to a num or terminator
+			c = sMsg.charAt[i];
+			if (c == ':')
+				break;
+			sSeat += c;
+		}
+		var seat = sSeat.parseInt();
+		
+		// Player name :
+		for (;i<sMsg.length; i++) {
+			c = sMsg.charAt[i];
+			if (c == '.')
+				break;
+			sName += c;			
+		}
+		
+		// Score :
+		for (;i<sMsg.length; i++) {
+			c = sMsg.charAt[i];
+			if (c == ':')
+				break;
+			sScore += c;			
+		}
+
+		// trailing :
+		for (;i<sMsg.length; i++) {
+			c = sMsg.charAt[i];
+			if (c == ':')
+				break;
+			sScore += c;			
+		}
+
+		playerName[seat] = sName;
+		playerScore[seat] = sScore;
+		// Update seat info on screen...
+		// rewrite the div for the appropriate potsticker...
+		// maybe just a showdiv4?
+	}
+		
+}
+
+/*
  * wsScoreDialogDiv - pass the score fully modal score over the play field
  */
 function wsScoreDialog(sMsg) {
@@ -2210,10 +2328,10 @@ function initScoreDialogDiv() {
 	 * No workee... related to remodeling of modals...
 	 * 
 	 * span.onclick = function() { initScoreDialogDiv();
-	 * fullymodal.style.display = "none"; }
-	 *  // When the user clicks anywhere outside of the fullymodal, close it
-	 * window.onclick = function(event) { initScoreDialogDiv(); if (event.target ==
-	 * fullymodal) { fullymodal.style.display = "none"; } }
+	 * fullymodal.style.display = "none"; } // When the user clicks anywhere
+	 * outside of the fullymodal, close it window.onclick = function(event) {
+	 * initScoreDialogDiv(); if (event.target == fullymodal) {
+	 * fullymodal.style.display = "none"; } }
 	 */
 
 }
@@ -2229,7 +2347,7 @@ function wsScoreDialogDiv(score) {
 	var s="fjkasd$buzz=0.0$joe=93.95$laura=3.3$anne=0.26$bob=0.26$patti=0.26$";
 	if (score == "")
 		score = s;
-	formatScore(score);	
+	formatScore(score, true);	
 }
 
 /*
@@ -2250,45 +2368,53 @@ function experimentalFunctionScore(score) {
 	bToggle = !bToggle;
 	}
 
-var xScale=[1/3, 1/2 + 1/6, 5/6, 2/3, 1/3, 0];
-var yScale=[0, 1/6, 1/2, 5/6, 4/5, 1/2];
-var colors=[ 'PEACHPUFF', //	#FFDAB9
-	 'LEMONCHIFFON', //	#FFFACD
+var xScale6=[1/3, 1/2 + 1/6, 5/6, 2/3, 1/3, 0];
+var yScale6=[0, 1/6, 1/2, 5/6, 4/5, 1/2];
+// hastily added potsticker4 dimensions
+// positioned at 1st, 3rd, 4th and 6th seats
+// buzz
+var xScale4=[1/3, 5/6, 2/3, 0];
+var yScale4=[0, 1/2, 5/6, 1/2];
+var colors=[ 'PEACHPUFF', // #FFDAB9
+	 'LEMONCHIFFON', // #FFFACD
 	 'LIGHTSTEELBLUE', // #B0C4DE
-	 'PEACHPUFF', //	#FFDAB9
-	 'LEMONCHIFFON', //	#FFFACD
+	 'PEACHPUFF', // #FFDAB9
+	 'LEMONCHIFFON', // #FFFACD
 	 'LIGHTSTEELBLUE', // #B0C4DE
 ];
 /*
- * 	 'LAVENDER', //	#E6E6FA
-	 'LIGHTSALMON', //	#FFA07A
-	 'LIGHTCYAN', //	#E0FFFF
-
+ * 'LAVENDER', // #E6E6FA 'LIGHTSALMON', // #FFA07A 'LIGHTCYAN', // #E0FFFF
+ * 
  */
 
 var bDivToggle=false;
-var potsticker=null;
-function makedivs() {
+var potsticker6=null;
+var potsticker4=null;
+
+var playerNames=null;
+var playerScores=null;
+
+function makedivs6() {
 	var i;
-	if (potsticker == null)
+	if (potsticker6 == null)
 		;
 	else if (!bDivToggle) {	// already on; turn off;
 		for (i=0;i<6; i++)
-			potsticker[i].style.visibility = "visible";		
+			potsticker6[i].style.visibility = "visible";		
 		bDivToggle = true;
 		return;
 	} else {	// onoff is false;
 		// just turn them off
 		for (i=0; i<6; i++)
-			potsticker[i].style.visibility = "hidden";
+			potsticker6[i].style.visibility = "hidden";
 		bDivToggle = false;
 		return;
 	}
 	
-	potsticker=new Array(6);
+	potsticker6=new Array(6);
 	bDivToggle = true;
 	// feltDiv in gedenken3...
-	//var iDiv = document.getElementById("outerParent");
+	// var iDiv = document.getElementById("outerParent");
 	var iDiv = document.getElementById("TextScrollDiv");
 
 	var width = 500;	// givens; should use real values
@@ -2296,31 +2422,167 @@ function makedivs() {
 	var xoffset = 50;
 	var yoffset = 60;
 	for (i=0; i<6; i++) {
-		// Create inner div then appending to the 
+		// Create inner div then appending to the
 		var innerDiv = document.createElement('div');
 		innerDiv.className = 'potSticker';
 		var p1=document.createElement('p');
-		p1.innerText = "Name" + i;
+		p1.innerText = "Name" + i;	// "Name0" etc. 0 of 6
 		innerDiv.appendChild(p1);
-		var x = xScale[i] * width;
+		var x = xScale6[i] * width;
 		if (x > 0)
 			x -= xoffset;
-		var y = yScale[i] * height;
+		var y = yScale6[i] * height;
 		if (y > 0)
 			y -= yoffset;
 		innerDiv.style.left = (x) + "px";
 		innerDiv.style.top = (y) + "px";
 		/*
-		// Ok... serious debugging...
-		width += 10;
-		top += 10;
-		innerDiv.style.left = width + "px";
-		innerDiv.style.top = top + "px";
-		*/
+		 * // Ok... serious debugging... width += 10; top += 10;
+		 * innerDiv.style.left = width + "px"; innerDiv.style.top = top + "px";
+		 */
 		innerDiv.style.backgroundColor = colors[i];
 		innerDiv.style.visibility = "block";
 		iDiv.appendChild(innerDiv);
-		potsticker[i] = innerDiv;
+		potsticker6[i] = innerDiv;
+	}
+	
+}
+
+function initPotsticker4() {
+
+	if (potsticker4 != null)
+		return;
+	potsticker4 = new Array(4);
+	playerNames = new Array(6); 	// 6. why not?
+	playerScores = new Array(6); 	// 6. why not?
+	for (var i=0; i<6; i++) {
+		playerNames[i] = "";
+		playerScores[i] = 0;
+	}
+	playerNames[3]="big-brother";
+
+	// bDivToggle = true;
+	var iDiv = document.getElementById("TextScrollDiv");
+
+	var width = 500;	// givens; should use real values
+	var height = 500;
+	var xoffset = 50;
+	var yoffset = 60;
+	for (i=0; i<4; i++) {
+		// Create inner div then appending to the
+		var innerDiv = document.createElement('div');
+		innerDiv.className = 'potSticker';
+		var p1=document.createElement('p');
+		var t1="Name:" + playerNames[i];	// Name0 etc 0 of 4.
+		var t2="Score:" + playerScores[i];
+		
+		p1.innerHTML = "<p>" + t1 + "</p>" + "<p>" + t2 + "</p>";	// "Name0"
+																	// etc. 0 of
+																	// // 6
+		innerDiv.appendChild(p1);
+
+		var x = xScale4[i] * width;
+		if (x > 0)
+			x -= xoffset;
+		var y = yScale4[i] * height;
+		if (y > 0)
+			y -= yoffset;
+		innerDiv.style.left = (x) + "px";
+		innerDiv.style.top = (y) + "px";
+		/*
+		 * // Ok... serious debugging... width += 10; top += 10;
+		 * innerDiv.style.left = width + "px"; innerDiv.style.top = top + "px";
+		 */
+		innerDiv.style.backgroundColor = colors[i];
+		innerDiv.style.visibility = "block";
+		iDiv.appendChild(innerDiv);
+		potsticker4[i] = innerDiv;
+	}
+
+}
+
+function updatePotstickers4() {
+	var iDiv = document.getElementById("TextScrollDiv");
+
+	// so if there are childred of iDiv, delete them...
+	// const item = document.querySelector('#itemId')
+	var arr=iDiv.getElementsByClassName('potSticker');
+	//var len=arr.length;	// otherwise you don't get them all... duh
+	// it's really a trip that I have to delete these like this...
+	for (var i=0; arr.length>0; i++) {
+		arr[0].remove();
+		arr=iDiv.getElementsByClassName('potSticker');
+		}
+		//iDiv.removeChild(arr[i]);
+	
+	/*for (var div=iDiv.firstChild; div != null; div=div.firstChild) {
+		//while (iDiv.firstChild) {
+		if (div.className == 'potsticker')
+			div.removeChild(iDiv.firstChild);
+		else
+			iDiv;
+			*/
+			
+	//}
+	
+	var width = 500;	// givens; should use real values
+	var height = 500;
+	var xoffset = 50;
+	var yoffset = 60;
+	for (var i=0; i<4; i++) {
+		// Create inner div then appending to the
+		var innerDiv = document.createElement('div');
+		innerDiv.className = 'potSticker';
+		var p1=document.createElement('p');
+		var t1="Name:" + playerNames[i];	// Name0 etc 0 of 4.
+		var t2="Score:" + playerScores[i];
+		
+		p1.innerHTML = "<p>" + t1 + "</p>" + "<p>" + t2 + "</p>";	// "Name0"
+																	// etc. 0 of
+																	// // 6
+		innerDiv.appendChild(p1);
+
+		var x = xScale4[i] * width;
+		if (x > 0)
+			x -= xoffset;
+		var y = yScale4[i] * height;
+		if (y > 0)
+			y -= yoffset;
+		innerDiv.style.left = (x) + "px";
+		innerDiv.style.top = (y) + "px";
+		/*
+		 * // Ok... serious debugging... width += 10; top += 10;
+		 * innerDiv.style.left = width + "px"; innerDiv.style.top = top + "px";
+		 */
+		innerDiv.style.backgroundColor = colors[i];
+		innerDiv.style.visibility = "block";
+		iDiv.appendChild(innerDiv);
+		potsticker4[i] = innerDiv;
+	}
+
+}
+
+function toggleDivs4() {
+	bShowDivs4 = !bShowDivs4;
+	makedivs4(bShowDivs4);
+// makedivs4(false);
+}
+
+/*
+ * makedivs4 creates if they don't exist and if !bVisible makes invisible
+ */
+function makedivs4(bVisible) {
+	var i;
+	initPotsticker4();
+	if (bVisible) {	// already on; turn off;
+		for (i=0;i<4; i++)
+			potsticker4[i].style.visibility = "visible";		
+		return;
+	} else {	// onoff is false;
+		// just turn them off
+		for (i=0; i<4; i++)
+			potsticker4[i].style.visibility = "hidden";
+		return;
 	}
 	
 }
@@ -2330,7 +2592,9 @@ function makedivs() {
  */
 function experimentalFunction(s) {
 	console.log("You never know what you're going to get");
-	makedivs();
+	// makedivs6();
+	// makedivs4(false); // toggle; don't force
+	toggleDivs4();
 }
 
 /*
@@ -2770,12 +3034,11 @@ function setUser(s) {
 }
 
 /*
- * xxx
- * Add cookie string to send here... (maybe?)
+ * xxx Add cookie string to send here... (maybe?)
  */
 function initWebSocket() {
 	openWebSocket();
-	//serverWrite("Hello world!");
+	// serverWrite("Hello world!");
 }
 
 // var sService = "ws://127.0.0.1:8080/"

@@ -115,7 +115,7 @@ public class ProtocolMessage {
 		}
 	
 	//static final String sComChars="=~QS+-?&B$%";
-	static final String sComChars="=~QS+-?&!B$%>";
+	static final String sComChars="=~QS+-?&!B$%%>";
 	static boolean bServer=true;
 	static boolean isProtocolMessage(String sMsg) {
 		int i;
@@ -240,7 +240,12 @@ public class ProtocolMessage {
 		//
 		// Append the type indicator
 		int iTypeIndex=type.ordinal();		
-		sMsg = sMsg + sComChars.charAt(iTypeIndex);
+		if (iTypeIndex >= sComChars.length()) {
+			sMsg = sMsg + '%';
+			// Error... xxx;
+		}
+		else 
+			sMsg = sMsg + sComChars.charAt(iTypeIndex);
 		//
 		// Append the player id
 		if (sender == -1)
