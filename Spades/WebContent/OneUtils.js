@@ -2600,6 +2600,11 @@ function experimentalFunction(s) {
 	//toggleDivs4();
 }
 
+function toggleRealTimeScore() {
+	toggleDivs4();
+
+}
+
 /*
  * wsScoreDialogWindow - not used anymore (div dialogs are better)
  */
