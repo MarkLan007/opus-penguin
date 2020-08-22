@@ -2448,7 +2448,7 @@ function makedivs6() {
 	
 }
 
-function initPotsticker4() {
+function initPotsticker4XXX() {
 
 	if (potsticker4 != null)
 		return;
@@ -2473,8 +2473,8 @@ function initPotsticker4() {
 		var innerDiv = document.createElement('div');
 		innerDiv.className = 'potSticker';
 		var p1=document.createElement('p');
-		var t1="Name:" + playerNames[i];	// Name0 etc 0 of 4.
-		var t2="Score:" + playerScores[i];
+		var t1=/*"Name:" + */playerNames[i];	// Name0 etc 0 of 4.
+		var t2=/*"Score:" + */playerScores[i];
 		
 		p1.innerHTML = "<p>" + t1 + "</p>" + "<p>" + t2 + "</p>";	// "Name0"
 																	// etc. 0 of
@@ -2501,6 +2501,22 @@ function initPotsticker4() {
 
 }
 
+function initPotsticker4() {
+
+	if (potsticker4 != null)
+		return;
+	potsticker4 = new Array(4);
+	playerNames = new Array(6); 	// 6. why not?
+	playerScores = new Array(6); 	// 6. why not?
+	for (var i=0; i<6; i++) {
+		playerNames[i] = "";
+		playerScores[i] = 0;
+	}
+	playerNames[3]="big-brother";
+
+	updatePotstickers4();
+}
+
 function updatePotstickers4() {
 	var iDiv = document.getElementById("TextScrollDiv");
 
@@ -2513,17 +2529,6 @@ function updatePotstickers4() {
 		arr[0].remove();
 		arr=iDiv.getElementsByClassName('potSticker');
 		}
-		//iDiv.removeChild(arr[i]);
-	
-	/*for (var div=iDiv.firstChild; div != null; div=div.firstChild) {
-		//while (iDiv.firstChild) {
-		if (div.className == 'potsticker')
-			div.removeChild(iDiv.firstChild);
-		else
-			iDiv;
-			*/
-			
-	//}
 	
 	var width = 500;	// givens; should use real values
 	var height = 500;
@@ -2534,12 +2539,10 @@ function updatePotstickers4() {
 		var innerDiv = document.createElement('div');
 		innerDiv.className = 'potSticker';
 		var p1=document.createElement('p');
-		var t1="Name:" + playerNames[i];	// Name0 etc 0 of 4.
-		var t2="Score:" + playerScores[i];
+		var t1=/*"Name:" + */ playerNames[i];	// Name0 etc 0 of 4.
+		var t2=/*"Score:" +*/ playerScores[i];
 		
-		p1.innerHTML = "<p>" + t1 + "</p>" + "<p>" + t2 + "</p>";	// "Name0"
-																	// etc. 0 of
-																	// // 6
+		p1.innerHTML = "<p style=\"text-align:center\">" + t1 + "</p>" + "<p style=\"text-align:center\">" + t2 + "</p>";	
 		innerDiv.appendChild(p1);
 
 		var x = xScale4[i] * width;
@@ -2592,9 +2595,9 @@ function makedivs4(bVisible) {
  */
 function experimentalFunction(s) {
 	console.log("You never know what you're going to get");
-	// makedivs6();
+	makedivs6();
 	// makedivs4(false); // toggle; don't force
-	toggleDivs4();
+	//toggleDivs4();
 }
 
 /*
