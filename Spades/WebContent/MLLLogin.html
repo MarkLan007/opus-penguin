@@ -336,7 +336,7 @@ input[type=text], input[type=password] {
 		// window.location = "/Spades"
 		// window.open("http://drafonreef.net:8080/Spades");
 		//location.href = "http://dragonreef.net:8080/Spades";
-		location.href = "/Spades";
+		location.href = "/Spades" + "/?id=" + sUserName;
 	}
 
 	function showCipherLock() {
@@ -432,8 +432,14 @@ XXX, Buzz Shepard, Staff Atty.
 	
 	var magicCookies=["6707","3141", "000", "6992", 
 		"3333", "6174", "1250", "0402"];
-	var magicEcho=["Hi Buzz", "I like Pi!", "Piss off!", "Welcome back, Bob!", "Ok, Joe...", "Hi Anne", "Stealing rolls, again?", "In the beans!"];
+	var magicUserName=["Buzz", "Pi", "ElFucko", 
+		"Bob", "Joe", 
+		"Anne", "Elizabeth", "Laura"];
+	var magicEcho=["Hi Buzz", "I like Pi!", "Piss off!", 
+		"Welcome back, Bob!", "Ok, Joe...", 
+		"Hi Anne", "Stealing rolls, again?", "In the beans!"];
 	var magicAction=[true, true, false, true, true, true, true, true];
+	var sUserName="";
 	
 	function getAction(s) {
 		var i;
@@ -447,9 +453,11 @@ XXX, Buzz Shepard, Staff Atty.
 	
 	function getMatch(s) {
 	var i;
+	sUserName="guest";
 	for (i=0; i<magicCookies.length; i++)
 		if (s == magicCookies[i]) {
 			bCanEnter = magicAction[i];
+			sUserName = magicUserName[i];
 			return magicEcho[i];
 			}
 	return null;

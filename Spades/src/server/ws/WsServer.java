@@ -73,11 +73,14 @@ public class WsServer {
 			// sClientName = sess.getPathParameters().get("client").			
 			System.out.println("Yea! retrieved client name is" + sClientName);
 			System.out.println("Yea! retrieved client name is" + sFriendlyName);
-			System.out.println("Yea! retrieved really friendly client name is" + sReallyFriendlyName);
+			System.out.println("Yea! retrieved really friendly client name is:" + sReallyFriendlyName);
+			/*
+			 * sReallyFriendlyName is the thing to setname to...
+			 */
 		}
 		System.out.println("Open Connection ...");
 		String gensym=newSessionIdentifier();
-		SessionManager.manageSession(sess, sFriendlyName, gensym);
+		SessionManager.manageSession(sess, sReallyFriendlyName, gensym);
 		// call gensym to create a name
 		// and set the session name to that.
 		//  SessionManager.setSessionIdentifier(sess, gensym);
@@ -728,6 +731,9 @@ public class WsServer {
 			sess.close();
 		} catch (IOException ex) {
 			System.out.println("Handling eof, A cascading IOException was caught: " + ex.getMessage());
+			ex.printStackTrace();
+		} catch (IllegalStateException ex) {
+			System.out.println("IllegalStateException - writing to closed channel?" + ex.getMessage());
 			ex.printStackTrace();
 		} catch (NullPointerException ex) {
 			System.out.println("Yikes: NullPointer!" + ex.getMessage());

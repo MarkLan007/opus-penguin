@@ -2975,7 +2975,8 @@ var sHost = "172.98.72.44:8080";	// determined at runtime or set by user with
 // var sPort=":8080"; // can't be set by user, yet
 var sRoot = "/Spades";	// was sServiceName
 var sEndPoint = "/server/ws";
-var sUser = "/ClientNameXyzzy01";
+//var sUser = "/ClientNameXyzzy01";
+var sUser = "/Guest01";
 var sConnectionString = "";	// constructed by formatConnectionString
 
 /*
@@ -3043,9 +3044,20 @@ function initWebSocket() {
 
 // var sService = "ws://127.0.0.1:8080/"
 function openWebSocket() {
+	/*
+	 * retrieve the ?id=XXX component and use XXX as /XXX
+	 * by sSetUser = XXX
+	 */
+	sUser = "/GuestUser";
+	var id=window.location.search;
+	console.log("user="+id);
+	sUser = "/"+id.slice(4);
 	formatConnectionString();
 	console.log("opening:" + sConnectionString + "...");
 	// appendTextToTextArea("connecting to " + sConnectionString + "...");
+	/*
+	 * retrieve the ?id=XXX component and use XXX as /XXX
+	 */
 	echoText.value = "connecting to " + sConnectionString + "..." + echoText.value;
 	/*
 	 * webSocket = new WebSocket("ws://localhost.net:8080/" + sServiceName +
@@ -3705,7 +3717,7 @@ function pinmenuSelect2(sMenu, event) {
 }
 
 function pinmenuSelect(sMenu, event) {
-	console.log("Welcome to the darkest depths of Mordor...")
+	//console.log("Welcome to the darkest depths of Mordor...")
 	// ToDo: perform action...
 	console.log("Act on:" + event.hash);
 	// i.e. close menu when item is selected...
