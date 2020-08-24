@@ -2465,7 +2465,7 @@ function initPotsticker4XXX() {
 	var iDiv = document.getElementById("TextScrollDiv");
 
 	var width = 500;	// givens; should use real values
-	var height = 500;
+	var height = 500;	// these are ignored. See .potSticker class
 	var xoffset = 50;
 	var yoffset = 60;
 	for (i=0; i<4; i++) {
@@ -2530,8 +2530,9 @@ function updatePotstickers4() {
 		arr=iDiv.getElementsByClassName('potSticker');
 		}
 	
+	// these are ignored. See .potSticker class
 	var width = 500;	// givens; should use real values
-	var height = 500;
+	var height = 500;	// new size 500x300
 	var xoffset = 50;
 	var yoffset = 60;
 	for (var i=0; i<4; i++) {
@@ -2541,8 +2542,11 @@ function updatePotstickers4() {
 		var p1=document.createElement('p');
 		var t1=/*"Name:" + */ playerNames[i];	// Name0 etc 0 of 4.
 		var t2=/*"Score:" +*/ playerScores[i];
-		
-		p1.innerHTML = "<p style=\"text-align:center\">" + t1 + "</p>" + "<p style=\"text-align:center\">" + t2 + "</p>";	
+
+		// two-line printout
+		//p1.innerHTML = "<p style=\"text-align:center\">" + t1 + "</p>" + "<p style=\"text-align:center\">" + t2 + "</p>";
+		// one-line printout
+		p1.innerHTML = "<p style=\"text-align:center\">" + t1 + ":" + t2 + "</p>";	
 		innerDiv.appendChild(p1);
 
 		var x = xScale4[i] * width;
