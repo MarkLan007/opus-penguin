@@ -5,7 +5,7 @@ package server.ws;
 //import java.nio.channels.SocketChannel;
 //import java.util.LinkedList;
 
-public class CardGame implements GameInterface {
+public abstract class CardGame implements GameInterface {
 	int nPlayers = 4;
 	private int nCurrentTurn = -1; // index of player with current turn or -1 if undefined
 	int nTricksPerHand = 52 / nPlayers;
@@ -18,7 +18,11 @@ public class CardGame implements GameInterface {
 	private int nTrickId = 0;
 	static int gameAtom=0;
 	int gameId=0;
-	
+
+	private Suit suitThatMustBeBroken = Suit.HEARTS;
+	protected void setSuitThatMustBeBroken(Suit st) {
+		suitThatMustBeBroken = st;
+	}
 	public int getCurrentTrickId() {
 		return nTrickId;
 	}
@@ -29,7 +33,9 @@ public class CardGame implements GameInterface {
 	boolean bGameInProgress = true;
 
 	String sGameName = "_AnonHearts";
-
+	String sGameType = "hearts";
+	public String nameOfTheGame() { return sGameType; }
+	
 	public boolean gameInProgress() {
 		return bGameInProgress;
 	}
@@ -39,7 +45,7 @@ public class CardGame implements GameInterface {
 	 * there is only one game for now, and it is created in ttyhandler or WsServer
 	 * Let him who is without sin cast the first stone. (Hey, I'll fix it soon...)
 	 */
-	static public CardGame theGame = null;
+	//static public CardGame theGame = null;
 
 	Trick getCurrentTrick() {
 		return currentTrick;
@@ -53,36 +59,9 @@ public class CardGame implements GameInterface {
 	final Card deuceClubs=new Card(Rank.DEUCE, Suit.CLUBS);
 	final Card queenSpades=new Card(Rank.QUEEN, Suit.SPADES);
 	
-	/*
-	 * true if in this GAME cfirst is higher than csecond; assume csecond was the
-	 * one lead (or beat the one lead) isHigher(2C,AC) -> false isHigher(2C,3C) ->
-	 * false isHigher(AC,3C) -> true isHigher(AH,2C) -> false
-	 */
-	static boolean isHigher1(Card cfirst, Card csecond) {
-		/*
-		 * if the suits are different the first card wins
-		 */
-		if (cfirst.suit != csecond.suit)
-			return false;
-		/*
-		 * otherwise compare ranks, note ace is high
-		 */
-		if (csecond.rank == Rank.ACE)
-			return false;
-		if (cfirst.rank == Rank.ACE)
-			return true;
-		if (cfirst.rank.ordinal() > csecond.rank.ordinal())
-			return true;
-		else
-			return false;
-	}
-	static boolean isHigher(Card cfirst, Card csecond) {
-		boolean flag=isHigher1(cfirst, csecond);
-		if (bDebugCardCf)
-			gameErrorLog("?isHigher(" + cfirst.encode() + "," + csecond.encode() + ")->" + flag);
-		return flag;
-	}
-
+ // ishigher goes here...
+	public abstract boolean isHigher(Card cfirst, Card csecond);
+	
 	/*
 	 * The hack that never got implemented: See "step" in ttyhandler boolean
 	 * bStepTurns = false; // this and game stepping isn't really completely
@@ -141,6 +120,10 @@ public class CardGame implements GameInterface {
 	
 	public String getName() {
 		return sGameName;
+	}
+
+	public String getGameType() {
+		return sGameType;
 	}
 
 	CardGame(String gamename) {
@@ -594,7 +577,7 @@ public class CardGame implements GameInterface {
 
 	private int gensymName = 1;
 
-	String uniqueName(String fname) {
+	public String uniqueName(String fname) {
 		for (int i = 0; i < nPlayers; i++)
 			if (playerArray[i].playerName.equalsIgnoreCase(fname))
 				return fname + gensymName++;
@@ -657,8 +640,8 @@ public class CardGame implements GameInterface {
 		 * add the card to the trick's subdeck, and see if hearts are broken
 		 */
 		currentTrick.subdeck.add(card);
-		if (card.suit == Suit.HEARTS) {
-			currentTrick.breakHearts();
+		if (card.suit == suitThatMustBeBroken) {	// suitThatMustBeBroken
+			currentTrick.breakSuit();
 		}
 
 		/*
@@ -719,8 +702,8 @@ public class CardGame implements GameInterface {
 			 * prepare for the next trick..
 			 */
 			currentTrick = new Trick(nTrickId);
-			if (previousTrick.heartsBroken())
-				currentTrick.breakHearts();
+			if (previousTrick.suitBroken())
+				currentTrick.breakSuit();
 			currentTrick.leader = previousTrick.winner; // the leader is the player who won the last trick...
 			trickArray[nTrickId] = currentTrick;
 			/*
@@ -835,24 +818,27 @@ public class CardGame implements GameInterface {
 					} */
 					return;
 				}
-				if (c.suit == Suit.HEARTS) {
-					// Hearts are broken
-					currentTrick.breakHearts();
+				if (c.suit == suitThatMustBeBroken) {
+					// Hearts (or Spades) are broken
+					currentTrick.breakSuit();
 					// broadcast message?
 				}
 			}
 		} else { // lead...
 			// Is this a legal lead? hhh
 			// If it's a heart, then hearts must be broken, or only has hearts
-			if (c.suit == Suit.HEARTS) {
+			if (c.suit == suitThatMustBeBroken) {
 				// lead a heart. Is that ok?
-				if (currentTrick.heartsBroken())
+				if (currentTrick.suitBroken())
 					; // ok
 				else if (p.subdeck.hasOnly(Suit.HEARTS))
 					; // ok
 				else {
 					returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
-							"%ERR:Player" + p.pid + " Cannot lead a heart until hearts are broken!%");
+							"%ERR:Player" + p.pid + " Cannot lead a " + suitThatMustBeBroken + "until "
+							+ suitThatMustBeBroken + "s are broken!%"
+							//"%ERR:Player" + p.pid + " Cannot lead a heart until hearts are broken!%"
+							);
 					p.sendToClient(returnMessage);
 					return;
 				}
@@ -909,6 +895,8 @@ public class CardGame implements GameInterface {
 	 * 
 	 * passCards - collect passed cards from players and robots
 	 *  when mbx is full, exchange them, and call go()
+	 *  
+	 *  TODO: modify this for spades with blind nil
 	 */
 	public void passCards(int nsender, Subdeck sd) {
 		int recipient = mbx.lookupRecipient(nsender);
@@ -1024,7 +1012,7 @@ public class CardGame implements GameInterface {
 	// Review: does this state (bPlayInitiated) add value?
 	private boolean bPlayInitiated = false;
 
-	void process(ProtocolMessage m) {
+	public void process(ProtocolMessage m) {
 		if (bMessageDebug)
 			System.out.println("CGProcess: " + m.type + ":" + m.usertext);
 
@@ -1089,7 +1077,7 @@ public class CardGame implements GameInterface {
 			break;
 
 		case SUPER_USER:
-			String sStatus = getGameStatus();
+			//String sStatus = getGameStatus();
 			// this functionality is handled in WsServer JCL commands
 			break;
 		default:
@@ -1135,7 +1123,7 @@ public class CardGame implements GameInterface {
 	 * 
 	 * call reset at the end if game goes on
 	 */
-	void handOver() {
+	public void handOver() {
 		// make sure handover called only once per hand
 		if (bHandOver)
 			return;

@@ -15,6 +15,20 @@ public interface GameInterface {
 	 * Once I get sockets implemented I can know who the player is from the socket it was received from (but what about robots?)
 	 *  (How do robots know who they are if you don't tell them...)
 	 */
+	/*
+	 * New interface prototypes for Spades
+	 * ++
+	 */
+	void process(ProtocolMessage m);
+	boolean start();
+	String uniqueName(String fname);
+	void setName(int pid, String sname);
+	public String getGameType();
+	void handOver();
+	String nameOfTheGame();
+	//
+	boolean isHigher(Card cfirst, Card csecond);
+	// --
 	void playCard(int fromPlayer, Card card);	// server tells client to delete card if successful; sends errormsg if not
 	void passCards(int fromPlayer, Subdeck cards);
 	void bidTricks(int fromPlayer, Subdeck subdeck);

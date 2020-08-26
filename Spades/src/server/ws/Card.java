@@ -9,7 +9,15 @@ class Card {
 	int cardindex;
 	Rank rank=Rank.ACE;		// Default Card AS
 	Suit suit=Suit.SPADES;
-	
+
+	static final Card deuceOfClubs = new Card(Rank.DEUCE, Suit.CLUBS);
+	//Card deuceOfClubs = new Card(Rank.DEUCE, Suit.CLUBS);
+	static final Card aceOfSpades = new Card(Rank.ACE, Suit.SPADES);
+	static final Card kingOfSpades = new Card(Rank.KING, Suit.SPADES);
+	static final Card queenOfSpades = new Card(Rank.QUEEN, Suit.SPADES);
+	static final Card deuceOfHearts = new Card(Rank.DEUCE, Suit.HEARTS);
+	static final Card threeOfHearts = new Card(Rank.THREE, Suit.HEARTS);
+
 	public Card(int iOrdinal) {
 		int iCard = iOrdinal % 13;
 		int iSuit = iOrdinal / 13;

@@ -14,15 +14,22 @@ public class UserSession {	// wrapper for data to keep with Session
 	boolean bSuperUser=false;
 	// game variables
 	CardGame game=null;		// placeholder for a pointer to a game;
+	String sDefaultGameType=null;
 	void setgame(CardGame g) {
 		game = g;
+	}
+	void setDefaultGame(String sgame) {
+		sDefaultGameType = sgame;
+	}
+	String getDefaultGame() {
+		return sDefaultGameType;
 	}
 	CardGame getGame() {
 		return game;
 	}
 	
 	CardGameKernel cgk=null;	// kernel queue
-	String username="";
+	String username="guest";
 
 	/*
 	 * sessionId allows user to rejoin a game if connection dropped.

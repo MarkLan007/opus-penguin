@@ -213,7 +213,7 @@ public class ProtocolMessage {
 			t.leader = cLeader - '0';
 			t.winner = cWinner - '0';
 			if (cBroken == 'T' || cBroken == 't')
-				t.breakHearts();
+				t.breakSuit();
 			//t.bHeartsBroken = Boolean.parseBoolean("" + cBroken); // No workee
 			subdeck = new Subdeck(sCards);
 			t.subdeck = subdeck;

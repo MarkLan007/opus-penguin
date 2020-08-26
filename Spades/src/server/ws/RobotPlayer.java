@@ -155,11 +155,20 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		setAsynch(false); // { Because I am a robot, I can be called synchronously }
 		isRobotPlayer = true;
 		//xhand = new Subdeck();
-		robotBrain = new RobotBrain(pid);
+		String sGameName = gameInterfaceCallbacks.nameOfTheGame();
+		String roboname="robot";
+		if (sGameName.equalsIgnoreCase("spades")) {
+			robotBrain = new SpadesRobotBrain(pid, gameInterfaceCallbacks);
+			roboname = "spadesbot";
+		}
+		else if (sGameName.equalsIgnoreCase("hearts"))
+			robotBrain = new HeartsRobotBrain(pid, gameInterfaceCallbacks);
+		else 
+			robotBrain = new RobotBrain(pid, gameInterfaceCallbacks);
 		robotBrain.setPID(pid);
 		setPID(pid);
 		setCardgame(gameInterfaceCallbacks);
-		setName("robot" + iSym++);
+		setName(roboname + iSym++);
 	}
 
 	/*
@@ -293,13 +302,18 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		 */
 		robotPlay(sd);
 	}
-	final Card deuceOfClubs = new Card(Rank.DEUCE, Suit.CLUBS);
 
+	/*
+	 * Ok, so yourPass is going to be a problem for generic robotbrain...
+	 *  So if ncards is 3, it's hearts. If it's {1,-1} then you are playing spades
+	 *  and if -1 you are passing your highest card (i.e. you're nill)
+	 *  and if 1 your lowest (i.e. you are taking tricks)
+	 */
 	public void yourPass(int ncards) {
 		// playerErrorLog("RobotPlayer" + "Passing Under Construction!");
 		// for now, get random cards and pass them...
 		Subdeck sd = robotBrain.getPass(ncards);
-		if (sd.find(deuceOfClubs)) {
+		if (sd.find(Card.deuceOfClubs)) {
 			System.out.println("Robot(" + pid + ")Passing the 2C... Har, har");
 		}
 		if (RobotBrain.bDebugPass) {
@@ -307,7 +321,7 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		}
 
 		if (sd.size() != 3) {
-			// Heh, heh... A bit overzealout there...
+			// Heh, heh... A bit overzealous there...
 			// Ok fix it.
 			if (sd.size() > 3)
 				while (sd.size() > 3)
@@ -377,19 +391,12 @@ public class RobotPlayer extends Player implements PlayerInterface {
 			c = m.subdeck.subdeck.peek();
 			notePlayed(m.sender, c); // TODO: Isn't it a bit redundant to have BOTH ofo these???
 			robotBrain.cardPlayed(m.sender, c);
-			// notePlayed(tm.player, c); // TODO: Isn't it a bit redundant to have BOTH ofo
-			// these???
-			// robotBrain.cardPlayed(tm.player, c);
-			// Isn't
-			// the
-			// message
-			// sender
-			// the
-			// player
-			// of
-			// this
-			// card?
-
+			/*
+			 * notePlayed(tm.player, c); // TODO: Isn't it a bit redundant to have BOTH ofo
+			 * these??? robotBrain.cardPlayed(tm.player, c); 
+			 * Isn't the message sender the
+			 * player of this card?
+			 */
 			playerErrorLog("RobotPlayer" + getPID() + "***Trick" + robotBrain.currentTrickId() + ": Player" + m.sender + 
 					": Card<" + m.subdeck.encode() + "> ***");
 			/*
