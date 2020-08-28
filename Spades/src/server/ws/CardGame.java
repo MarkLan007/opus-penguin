@@ -661,7 +661,7 @@ public abstract class CardGame implements GameInterface {
 					leadingCard = c;
 					st = c.suit;
 					currentTrick.winner = currentTrick.leader;
-				} else if (c.suit == st && 
+				} else if (/* c.suit == st && */ 
 						isHigher(c, leadingCard)) { // true if c is higher than leadingcard
 					if (bDebugCardCf)
 						gameErrorLog("->T");
