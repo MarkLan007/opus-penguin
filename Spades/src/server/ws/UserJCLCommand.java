@@ -20,6 +20,7 @@ public class UserJCLCommand {
 		JCLRefresh,
 		JCLResend, JCLReset,
 		JCLNewdeal, JCLMisdeal, JCLReplay,
+		JCLBid,
 		JCLShuffle,
 		JCLStatus,
 		JCLPeek,	// peek at a hand

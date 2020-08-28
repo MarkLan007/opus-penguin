@@ -7,7 +7,7 @@ package server.ws;
 
 public abstract class CardGame implements GameInterface {
 	int nPlayers = 4;
-	private int nCurrentTurn = -1; // index of player with current turn or -1 if undefined
+	protected int nCurrentTurn = -1; // index of player with current turn or -1 if undefined
 	int nTricksPerHand = 52 / nPlayers;
 	Trick[] trickArray = new Trick[(nTricksPerHand) + 1];
 	Trick currentTrick = null;
@@ -15,7 +15,9 @@ public abstract class CardGame implements GameInterface {
 	final int LAST_TRICK = (52 / nPlayers);
 	MailBoxExchange.PassType currentPass = MailBoxExchange.first();
 	MailBoxExchange mbx = null;
-	private int nTrickId = 0;
+	boolean bPassDisabled = false;
+	void disablePass() { bPassDisabled = true; }
+	protected int nTrickId = 0;
 	static int gameAtom=0;
 	int gameId=0;
 
@@ -23,6 +25,10 @@ public abstract class CardGame implements GameInterface {
 	protected void setSuitThatMustBeBroken(Suit st) {
 		suitThatMustBeBroken = st;
 	}
+	public Suit getSuitThatMustBeBroken() {
+		return suitThatMustBeBroken;
+	}
+	
 	public int getCurrentTrickId() {
 		return nTrickId;
 	}
@@ -91,10 +97,49 @@ public abstract class CardGame implements GameInterface {
 	 */
 
 	// create players list, a deck (without faces), and names
-	CardGame() {
+	private CardGame() {
 		gameId = gameAtom ++;
+	}
+
+	CardGame(String gamename) {
+		this();
+		setName(gamename);
+		setGameType(gamename);	// "nameOfTheGame"
 		populatePlayers();
 		resetGameScores();
+	}
+
+	public void setBid(int n, int nseat) {
+		Player p = getPlayer(nseat);
+		int partner = (nseat + nPlayers/2) % nPlayers;
+		boolean setNil=false;
+		if (p == null)
+			return;
+		p.setBid(n);
+		// now determine consequences...
+		// if n > 0, set partner = 0
+		if (n > 0) {
+			p = getPlayer(partner);
+			p.setBid(0);
+			setNil = true;
+		}
+		System.out.println("Player(" + nseat + ")" + "->" + n + ".");
+		if (setNil)
+			System.out.println("Player(" + partner + ")" + "->" + "nil" + ".");
+	}
+	
+	public int getBid(int nseat) {
+		Player p = getPlayer(nseat);
+		if (p == null)
+			return -1;
+		return p.getBid();
+	}
+	
+	public int getTricks(int nseat) {
+		Player p = getPlayer(nseat);
+		if (p == null)
+			return -1;
+		return p.iTricks;
 	}
 	
 	public int getGameId() {
@@ -125,11 +170,11 @@ public abstract class CardGame implements GameInterface {
 	public String getGameType() {
 		return sGameType;
 	}
-
-	CardGame(String gamename) {
-		this();
-		setName(gamename);
+	
+	void setGameType(String sname) {
+		sGameType = sname;
 	}
+
 
 	private void populatePlayers() {
 		//
@@ -558,22 +603,7 @@ public abstract class CardGame implements GameInterface {
 		return sTemp;
 	}
 
-	String getFormattedGameScore() {
-		int i;
-		String sTemp = "";
-		boolean bGameInProgress = nCurrentTurn != -1;
-		String x = "";
-		for (i = 0; i < nPlayers; i++) {
-			if (bGameInProgress && i == nCurrentTurn)
-				x = "*";
-			else
-				x = "";
-			sTemp = sTemp + "$" + x + playerArray[i].getName() +
-					"-p" + i + "=" + playerArray[i].handScore + "."
-					+ playerArray[i].totalScore;
-		}
-		return sTemp + '$' + "#Player#Points#Totals#";
-	}
+	abstract String getFormattedGameScore();
 
 	private int gensymName = 1;
 
@@ -588,48 +618,7 @@ public abstract class CardGame implements GameInterface {
 	 * totalHandScores - total the scores for the hand checks for moonshooting and
 	 * game-end
 	 */
-	void totalHandScores() {
-		int i, iTrickTotal;
-		for (i = 0; i < nTrickId; i++) {
-			Trick t = trickArray[i];
-			// sum up the no of hearts in the trick, the QS and give to the winner
-			iTrickTotal = 0;
-			for (Card c : t.subdeck.subdeck) {
-				if (c.suit == Suit.HEARTS)
-					iTrickTotal++ ;
-				else if (c.rank == Rank.QUEEN && c.suit == Suit.SPADES)
-					iTrickTotal = iTrickTotal + 13;
-			}
-			playerArray[t.winner].handScore = playerArray[t.winner].handScore + iTrickTotal;
-		}
-		/*
-		 * Check to see if someone shot the moon! shot the moon if p[i] has pts && no
-		 * one else does so count the number of nonzero pts
-		 */
-		int playersWithPts = 0;
-		int moonShooter = -1;
-		for (i = 0; i < nPlayers; i++)
-			if (playerArray[i].handScore > 0) {
-				playersWithPts++;
-				moonShooter = i;
-			}
-		if (playersWithPts == 1) {
-			// then moonShooter is not -1 and shot the moon
-			for (i = 0; i < nPlayers; i++)
-				if (i == moonShooter)
-					playerArray[i].handScore = 0;
-				else
-					playerArray[i].handScore = 26;
-		}
-		/*
-		 * Not here... do this in turn if (winnerDetermined) handOver();
-		 *   Wait, shouldn't I do a resetHand here?
-		 *   scores are totaled but players are not notified.
-		 */
-		// resetHand();
-		// ToDo:
-		// should sort by total score...
-	}
+	abstract void totalHandScores();
 
 	/*
 	 * Update the trick with the (legally played) card, send updated trick to
@@ -677,15 +666,20 @@ public abstract class CardGame implements GameInterface {
 					if (bDebugCardCf)
 						gameErrorLog("->T");
 					leadingCard = c;
+					st = c.suit;	// ++ so if the leader is now a trump, must be a trump to be considered...
 					currentTrick.winner = (i + currentTrick.leader) % nPlayers;
 				} else {
 					if (bDebugCardCf)
 						gameErrorLog("->F");
 					// card lower or sloughed
 				}
-				i++;
+				i++;				
 			}	// if trick is closed
 
+			//
+			// update the number of tricks taken by each player
+			playerArray[currentTrick.winner].iTricks ++;
+			
 			nTrickId++;
 			/*
 			 * now broadcast the completed trick with a CURRENT_TRICK message for the closed
@@ -728,6 +722,8 @@ public abstract class CardGame implements GameInterface {
 
 	} // trickUpdate
 
+	abstract ProtocolMessage legalFirstPlay(Player p, Card c);
+	
 	/*
 	 * playCard - detect if the sender can legally play the card; emit error message
 	 * if not if legal, send updates and progress turn
@@ -774,6 +770,12 @@ public abstract class CardGame implements GameInterface {
 		// did the player lay a qs?
 		// did the player lay a heart (and had non-hearts)
 		if (nTrickId == 0) {
+			returnMessage = legalFirstPlay(p, c);
+			if (returnMessage != null) {
+				p.sendToClient(returnMessage);
+				return;				
+			}
+			/*
 			if (c.equals(queenSpades) || c.suit == Suit.HEARTS) {
 				// almost certainly a foul but check...
 				//int nonHearts=
@@ -786,7 +788,8 @@ public abstract class CardGame implements GameInterface {
 					p.sendToClient(returnMessage);
 					return;
 				}
-			}
+				
+			} */
 		}
 
 		// Is this a legal follow?
@@ -828,15 +831,15 @@ public abstract class CardGame implements GameInterface {
 			// Is this a legal lead? hhh
 			// If it's a heart, then hearts must be broken, or only has hearts
 			if (c.suit == suitThatMustBeBroken) {
-				// lead a heart. Is that ok?
+				// lead a heart/spade. Is that ok?
 				if (currentTrick.suitBroken())
 					; // ok
-				else if (p.subdeck.hasOnly(Suit.HEARTS))
+				else if (p.subdeck.hasOnly(suitThatMustBeBroken))
 					; // ok
 				else {
 					returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
-							"%ERR:Player" + p.pid + " Cannot lead a " + suitThatMustBeBroken + "until "
-							+ suitThatMustBeBroken + "s are broken!%"
+							"%ERR:Player" + p.pid + " Cannot lead " + suitThatMustBeBroken + " until "
+							+ suitThatMustBeBroken + " are broken!%"
 							//"%ERR:Player" + p.pid + " Cannot lead a heart until hearts are broken!%"
 							);
 					p.sendToClient(returnMessage);
@@ -990,6 +993,8 @@ public abstract class CardGame implements GameInterface {
 	 * gneralized gameInterface (projected) not used in hearts
 	 *  projected use in spades (and others...)
 	 */
+	// why did I think this would take a subdeck? See iBid...
+	// see setbid, getbid
 	public void bidTricks(int nsender, Subdeck cards) {
 		gameErrorLog("Can't happen: Game received unimplemented BID request. Bidding not yet implemented.");
 	}
@@ -1278,7 +1283,8 @@ public abstract class CardGame implements GameInterface {
 		}
 
 		deal();
-		if (currentPass == MailBoxExchange.PassType.Hold)
+		if (currentPass == MailBoxExchange.PassType.Hold ||
+				bPassDisabled)
 			go();
 		else
 			initiatePass(currentPass);

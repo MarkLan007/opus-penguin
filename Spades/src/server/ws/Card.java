@@ -7,6 +7,7 @@ package server.ws;
  */
 class Card {
 	int cardindex;
+	String sname="";
 	Rank rank=Rank.ACE;		// Default Card AS
 	Suit suit=Suit.SPADES;
 
@@ -25,6 +26,8 @@ class Card {
 
 		rank = Rank.values()[iCard];
 		suit = Suit.values()[iSuit];
+		sname = rank.name() + "-" + suit.name();
+
 		}
 	
 	static Card cardBack() {
@@ -65,6 +68,7 @@ class Card {
 		rank = rk;
 		suit = st;
 		computeCardIndex(rk, st);
+		sname = rk.name() + "-" + st.name();
 		}
 
 	public boolean equals(Rank r, Suit st) {
@@ -113,6 +117,8 @@ class Card {
 		// Otherwise default card is AS, as initialized
 		// TODO: throw hissy fit.
 		computeCardIndex(rank, suit);
+		sname = rank.name() + "-" + suit.name();
+
 		}
 	
 	/*

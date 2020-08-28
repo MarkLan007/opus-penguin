@@ -211,12 +211,19 @@ public class WsServer {
 		return cardGames[0];
 	}
 
-	boolean intern(CardGame g) {
-		for (int i = 0; i < cardGames.length; i++)
-			if (cardGames[i] == null) {
+	/*
+	 * intern - makes this game the default game of the type
+	 *  -- clobbers the old game.
+	 *  This is hugely temporary
+	 */
+	boolean internDefault(CardGame g) {
+		for (int i = 0; i < cardGames.length; i++) {
+			String gtype = g.getGameType();
+			if (cardGames[i] == null) 
+				continue;
+			if (gtype.equalsIgnoreCase(cardGames[i].getGameType()))
 				cardGames[i] = g;
-				return true;
-			}
+		}
 		return false;
 	}
 
@@ -225,29 +232,53 @@ public class WsServer {
 	 * requested type
 	 */
 	CardGame lookupGameByType(String stype) {
+		makeDefaultGames();
 		int i;
 		System.out.println("LookupGame: Under construction... relying on default game to be returned.");
-		for (i = 0; i < cardGames.length; i++)
+		for (i = 0; i < cardGames.length; i++) {
+			String gname="";
+			if (cardGames[i] != null)
+				gname=cardGames[i].getGameType();
 			if (cardGames[i] != null && stype.equalsIgnoreCase(cardGames[i].getGameType())) {
 				// found it
 				return cardGames[i];
 			}
+		}
 		return null;
 	}
 
 	/*
 	 * TODO: This could be astonishing to users if this isn't generalized...
+	 * (somewhat fixed. Still temporary)
 	 */
 	void setNewDefaultGame() {
-		cardGames[0] = new HeartsGame();
+		bMakeDefaultGames = true;
+		makeDefaultGames();
+		//cardGames[0] = new HeartsGame();
 	}
 
 	void setNewDefaultGame(CardGame g) {
-		cardGames[0] = g;
+		internDefault(g);
+		//cardGames[0] = g;
+	}
+
+	boolean bMakeDefaultGames = true;
+
+	void makeDefaultGames() {
+		if (bMakeDefaultGames)
+			;
+		else
+			return;
+		bMakeDefaultGames = false;
+
+		cardGames[0] = new HeartsGame();
+		cardGames[1] = new SpadesGame(); // this is temporary? TODO: change this?
 	}
 
 	CardGame getDefaultGame(String sGameType) {
+		makeDefaultGames();
 		if (cardGames[0] == null) {
+			// This can be deleted, right? makeDefaultGames should work right?
 			System.out.println("Generating new (default) game...");
 			cardGames[0] = new HeartsGame();
 			cardGames[1] = new SpadesGame(); // this is temporary? TODO: change this?
@@ -261,11 +292,7 @@ public class WsServer {
 	}
 
 	CardGame getDefaultGame() {
-		if (cardGames[0] == null) {
-			System.out.println("Generating new (default) game...");
-			cardGames[0] = new HeartsGame();
-			cardGames[1] = new SpadesGame(); // this is temporary? TODO: change this?
-		}
+		makeDefaultGames();
 		return cardGames[1];
 	}
 
@@ -471,6 +498,47 @@ public class WsServer {
 				s += " AKA " + "g" + "0" + us.pid;
 			write(us, s);
 			break;
+		case JCLBid:
+			if (us.game == null) {
+				String msg = "Not currently in a game; 'join' existing game, or 'new' to create.";
+				String pmsg = CardGame.getFormattedAlertMsg(msg);
+				write(us, pmsg);
+				break;				
+			}
+			g = us.game;
+			if (!g.nameOfTheGame().equalsIgnoreCase("spades")) {
+				String msg = "Can only bid in spades (or some game that's implemented yet...)";
+				String pmsg = CardGame.getFormattedAlertMsg(msg);
+				write(us, pmsg);
+				break;
+			}
+			// //bid returns the bids
+			if (jcl.argc() == 1) {
+				// get the bids and write them back...
+				for (int i=0; i<g.nPlayers; i++) {
+					int bid = g.getBid(i);
+					write(us, "p(" + i + ")->" + bid + ".");
+				}
+			}
+			// bid n [seat] sets the bid
+			if (jcl.argc() > 1) { // argc is always at least 1
+				String sBid = jcl.getValue(1);
+				int iSeat = us.getpid();
+				String sSeat="";
+				if (jcl.argc() > 2) {
+					sSeat = jcl.getValue(2);
+					iSeat = Integer.parseInt(sSeat);
+				}
+				String xstring = "SettingBid:" + sBid + " iseat=" + iSeat;
+				System.out.println(xstring);
+				g.setBid(Integer.parseInt(sBid), iSeat);
+				write(us, xstring);
+			} else {
+				// String sdefault=us.getDefaultGame();
+				System.out.println("Using default:" + sGameType);
+				g = lookupGameByType(sGameType);
+			}
+			break;
 		case JCLStart:
 			if (us.game == null) {
 				// format error dialog and send back;
@@ -495,16 +563,14 @@ public class WsServer {
 			// Join hearts|spades [gameid]
 			// create a game if one does not exist, and insert this session into it
 			System.out.println("User: '" + us.username + "' Joining...");
-			sname = "";
-			sGameType = "";
+			sGameType = "spades";
 			sparam = "";
 			if (jcl.argc() > 1) { // argc is always at least 1
 				String sGameId = "?G0551"; // not yet implemented... Random id...
-				sname = jcl.getName(1); // ignored
 				sGameType = jcl.getValue(1);
-				if (sname.equalsIgnoreCase("hearts"))
+				if (sGameType.equalsIgnoreCase("hearts"))
 					;
-				else if (sname.equalsIgnoreCase("spades"))
+				else if (sGameType.equalsIgnoreCase("spades"))
 					;
 				else {
 					write(us, "invalid game specified:" + sname);
@@ -516,12 +582,9 @@ public class WsServer {
 				System.out.println("Joining:" + sGameType + " gameid=" + sGameId);
 				g = lookupGameByType(sGameType);
 			} else {
-				String sdefault=us.getDefaultGame();
-				System.out.println("Using default:" + sdefault);
-				if (sdefault == null)
-					g = lookupGameFromSession(sparam);
-				else
-					g = lookupGameByType(sGameType);
+				// String sdefault=us.getDefaultGame();
+				System.out.println("Using default:" + sGameType);
+				g = lookupGameByType(sGameType);
 			}
 			if (g == null)
 				g = getDefaultGame(sGameType);
@@ -555,6 +618,7 @@ public class WsServer {
 				// "...");
 				// write(us, "issue start command to initiate play.");
 			} else if (!bJoinStatus && (sparam.contains("bygod") || (sname.contains("bygod")))) {
+				// doubt bygod works anymore...
 				broadcast("Game reset by divine providence. Mortals will need to rejoin.");
 				System.out.println("Game reset by divine providence. Mortals will need to rejoin.");
 				// byGod = true;
@@ -569,7 +633,7 @@ public class WsServer {
 				write(us, "New User cannot join. Game full.");
 			}
 			break;
-		case JCLNew: // create a new game...
+		case JCLNew: // create a new game... clobber the old
 			sname = "";
 			sGameType = "";
 			sparam = "";
@@ -591,7 +655,7 @@ public class WsServer {
 					break;
 				}
 				// intern the game
-				intern(g);
+				internDefault(g);
 			} else {
 				// Must designate a type of game to create...
 				// but if you are in a game, use the type

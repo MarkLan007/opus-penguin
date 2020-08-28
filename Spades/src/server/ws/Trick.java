@@ -18,10 +18,16 @@ public class Trick {
 		trickid = t;
 		}
 	
+	/*
+	 * called by CardGame.trickupdate() and brokenness is propagated in each new trick 
+	 */
 	void breakSuit() {
 		bSuitBroken = true;
 		}
 	
+	/*
+	 * should be part of gameinterface, no?
+	 */
 	boolean suitBroken() {
 		return bSuitBroken;		
 		}

@@ -26,6 +26,8 @@ public interface GameInterface {
 	public String getGameType();
 	void handOver();
 	String nameOfTheGame();
+	// generalize breaking suits...
+	Suit getSuitThatMustBeBroken();
 	//
 	boolean isHigher(Card cfirst, Card csecond);
 	// --
@@ -37,5 +39,11 @@ public interface GameInterface {
 	void disconnect(int pid);	// disconnect from game;
 	int getCurrentTrickId();
 	void declareMisdeal(int pid, String string);
+	//
+	// Spades additions
+	int getBid(int nseat);
+	void setBid(int n, int nseat);
+	public int getTricks(int nseat);
+	
 }
 

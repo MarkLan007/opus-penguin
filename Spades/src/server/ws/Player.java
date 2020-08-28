@@ -31,10 +31,17 @@ public class Player /*implements PlayerInterface */{
 	Boolean bIsMyMove = false;
 	public Subdeck subdeck=new Subdeck();	/* this is the server's copy of the cards */
 	
+	protected int iBid=-1;	// current bid (changes per hand)
+	void setBid(int bid) {
+		if (bid >=0 & bid <= 13)	// 13? Generalize this...
+			iBid = bid;
+	}
+	public int getBid() { return iBid; }
+	
 	public boolean has(Card card) {
 		return subdeck.find(card);
 	}
-	
+		
 	public int count(Suit suit) {
 		return subdeck.count(suit);	// delegate
 		/*
@@ -66,11 +73,15 @@ public class Player /*implements PlayerInterface */{
 		if (i > 0)
 			playerErrorLog("deleted " + i + " leftover cards.");
 		bIsMyMove = false;
+		iBid = 1;
+		iTricks = 0;
 	}
 	
 	String playerName="";
 	int handScore=0;
 	int totalScore=0;
+	protected int iTricks=-1;	// number of tricks taken so far this hand
+
 	// pid, critically, corresponds to table-seat
 	// wait... Is this used? Yes.
 	// it gets set in the subclasses. new robotplayer

@@ -76,6 +76,7 @@ public class Subdeck implements Iterable<Card> {
 
 		}
 	
+	
 	boolean isVoid(Suit st) {
 		for (Card c: subdeck)
 			if (c.suit == st)

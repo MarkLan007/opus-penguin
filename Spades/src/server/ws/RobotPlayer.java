@@ -164,7 +164,7 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		else if (sGameName.equalsIgnoreCase("hearts"))
 			robotBrain = new HeartsRobotBrain(pid, gameInterfaceCallbacks);
 		else 
-			robotBrain = new RobotBrain(pid, gameInterfaceCallbacks);
+			robotBrain = new HeartsRobotBrain(pid, gameInterfaceCallbacks);
 		robotBrain.setPID(pid);
 		setPID(pid);
 		setCardgame(gameInterfaceCallbacks);

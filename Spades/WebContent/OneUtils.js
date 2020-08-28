@@ -1856,7 +1856,7 @@ function processCardString(cardString) {
 			break;
 		case 'Q':
 		case 'B':
-			gameStatusUpdate("Hearts are Broken!");
+			gamestatusUpdate("Hearts are Broken!");
 			break;
 		case '$':
 			// msgtype = "$0"...

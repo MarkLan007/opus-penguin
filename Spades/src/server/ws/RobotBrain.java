@@ -5,15 +5,14 @@ import java.util.Arrays;
 
 //import RobotBrain.Hand;
 
-public class RobotBrain {
+abstract public class RobotBrain {
 	int trickCount = 0;
 	int pid;
 	Hand hand = new Hand();
 	BatteryBrain batteryBrain = new BatteryBrain();
 	boolean bSuitBroken = false;
-	boolean bMoonPolice = false;
-	boolean bMoonShooting = false;
 	GameInterface cardGame; // for isHigher
+	int tricksTaken=-1;
 	
 	final int nPlayers = 4;
 	int mySeat = -1;
@@ -22,34 +21,29 @@ public class RobotBrain {
 		pid = n;
 	}
 
-	/*
-	 * true if hearts broken on previous trick
-	 */
-	boolean heartsAlreadyBroken() {
-		return bSuitBroken;
-	}
-
-	/*
-	 * hearts have been player OR I have nothing but hearts left...
-	 */
-	boolean heartsBroken() {
-		if (bSuitBroken)
-			return true;
-		// Now I could have nothing but hearts left...
-		// look at all my suits, and if there is at least one non-heart
-		// then hearts aren't forced open
-		int i = 0;
-		for (Suit st = Suit.first(); i < Suit.size(); st = st.next(), i++)
-			if (st != Suit.HEARTS && hand.getSuit(st).size() > 0)
-				return false;
-		return true;
-	}
 
 	RobotBrain(int pid, GameInterface gameInterfaceCallbacks) {
 		mySeat = pid; // can this change? If it does I'm screwed
 		cardGame = gameInterfaceCallbacks;
 	}
 
+	int getBid() {
+		int bid=cardGame.getBid(mySeat);
+		return bid;
+	}
+	int getBid(int seat) {
+		int bid=cardGame.getBid(seat);
+		return bid;
+	}
+	int haveTricks() {
+		return tricksTaken;
+	}
+	boolean bMoonPolice = false;
+	boolean bMoonShooting = false;
+
+	/*
+	 * reset -- called per hand...
+	 */
 	void reset() {
 		// seat should not change...
 		trickCount = 0;
@@ -58,8 +52,11 @@ public class RobotBrain {
 		hand.clear();
 		batteryBrain.reset();
 		bSuitBroken = false;
+		// hearts specific...
 		bMoonPolice = false;
 		bMoonShooting = false;
+		// spades specific
+		tricksTaken = 0;
 		// hand = new Hand();
 	}
 
@@ -75,6 +72,7 @@ public class RobotBrain {
 
 	void brainDump(String msg) {
 		System.out.println("s" + mySeat + ">braindump:" + msg 
+				+ " suitBroken=" + bSuitBroken
 				+ " shootmoon=" + bMoonShooting 
 				+ " moonpolice="+ bMoonPolice);
 		brainDump(true);
@@ -117,6 +115,8 @@ public class RobotBrain {
 		return c;
 	}
 
+	abstract Card determineBestCard(int actualTrickId);
+	/*
 	Card determineBestCard(int actualTrickId) {
 		Card c = null;
 		trickCount = actualTrickId;
@@ -154,9 +154,7 @@ public class RobotBrain {
 			brainDump("dbc:strategy checkpoint. ");		
 			}
 
-		/*
-		 * favor drawing out spades unless...
-		 */
+		// favor drawing out spades unless...
 		Card presumptiveSpade = hand.highestCardUnder(Card.queenOfSpades);
 		if (cardLead == null) { // I have the lead
 			if (bThinkingOutLoud) {
@@ -204,9 +202,8 @@ public class RobotBrain {
 			//System.out.println("Robot: About to play..." + c.encode());
 			return c;
 		}
-		/*
-		 * apply the must-follow rule
-		 */
+		//
+		// apply must-follow rule
 		if (bThinkingOutLoud) {
 			//System.out.println("Robot: must follow " + cardLead.suit + " if possible...");
 			brainDump(cardLead, "Robot: following lead:");
@@ -259,7 +256,8 @@ public class RobotBrain {
 		}
 		return c;
 	}
-
+*/
+	
 	/*
 	 * RobotBrain::getPass
 	 */
@@ -585,26 +583,6 @@ public class RobotBrain {
 		return othersWithPoints == 0;
 	}
 	
-	boolean badHearts() {
-		Subdeck hearts=hand.gethearts();
-		if (hearts.size() == 0)
-			return false;	// no bad hearts
-		
-		Card lowestHeart=hand.lowest(Suit.HEARTS);
-		int beaters = batteryBrain.higherCardsOutThere(lowestHeart);
-		//if (batteryBrain.higherCardOutThere(lowestHeart))
-			//return false;
-		
-		int tophearts = hand.hasTop(Suit.HEARTS);
-		if (tophearts > beaters) {
-			brainDump("Close but... go launch!");
-			return false;
-		} else {
-			brainDump("Close but NOT going for it...");
-		}
-		
-		return true;
-	}
 
 	void cardPlayed(int seat, Card c) {
 		if (currentTrick == null)
@@ -655,7 +633,9 @@ public class RobotBrain {
 		int winner = trick.winner;
 		for (Card c : trick.subdeck) {
 			batteryBrain.played(c);
-			if (c.suit == Suit.HEARTS) {
+			// found you, you little bastard...
+			//if (c.suit == Suit.HEARTS) {
+			if (c.suit == cardGame.getSuitThatMustBeBroken()) {
 				batteryBrain.pointTotals[winner]++;
 				bSuitBroken = true;
 			} else if (c.equals(Card.queenOfSpades))
@@ -712,6 +692,126 @@ public class RobotBrain {
 	}
 // -- methods that use hand and battery brain
 
+	/*
+	 * canLoseTrick if there is a card that I could play that could be taken by
+	 * someone else
+	 * 
+	 * return the lead loser that I'm longest in... i.e. fewest number of cards I
+	 * have to lose to shoot moon...
+	 * 
+	 * return null if no candidates
+	 */
+	Card leadLoser() {
+		for (Suit st : Suit.suits) {
+			Subdeck cards = hand.getSuit(st);
+			// NOTE: highercardoutthere doesn't know
+			// about the game order!!!
+			for (Card c : cards) {
+				if (batteryBrain.higherCardOutThere(c))
+					return c;
+			}
+		}
+		return null;
+	}
+	
+	/*
+	 * card most likely to lose lead, or null if nothing
+	 */
+	Card leadLoserNon(Suit skip) {
+		for (Suit st : Suit.suits) {
+			if (st == skip)
+				continue;
+			Subdeck cards = hand.getSuit(st);
+			// NOTE: highercardoutthere doesn't know
+			// about the game order!!!
+			for (Card c : cards) {
+				if (batteryBrain.higherCardOutThere(c))
+					return c;
+			}
+		}
+		return null;
+	}
+
+	/*
+	 * duckUnder(Trick trick) - do everthing possible to duck the trick if can't be
+	 * ducked either be lowest or if inevitable take with highest return null only
+	 * if no cards of the suit in hand
+	 * 
+	 * duckunder(trick) - avoid taking this trick if possible if not possible take
+	 * with the highest card in the suit. special case for spades/queen of spades
+	 * handled separately
+	 * 
+	 * I think it properly belonds here, in robotBrain, but
+	 * my belong in heartsRobotBrain as being hearts-specific.
+	 */
+	Card duckUnder(Trick ct) {
+		Card cardToDuck = highestCardInTrick(ct);
+		Card candidate = duckUnder(cardToDuck);
+		if (candidate == null) { // couldn't find one
+			candidate = hand.lowest(cardToDuck.suit);
+			// otherwise take with highest (unless moonshooting)
+			if (ct.subdeck.size() == 3) // if not, am I last?
+				candidate = hand.highest(cardToDuck.suit);
+		}
+		return candidate;
+	}
+
+	/*
+	 * duckUnder - if possible, return a card under the one given null if there
+	 * aren't any.
+	 */
+	Card duckUnder(Card cardToDuck) {
+		// Card cardToDuck=highestCardInTrick(ct);
+		Suit st = cardToDuck.suit;
+		Subdeck myCards = hand.getSuit(st);
+		Card candidate = null;
+
+		// can I get under?
+		// find the highest card below the lead card
+		for (Card c : myCards)
+			// get highest card below lead
+			if (cardGame.isHigher(c, cardToDuck))// i.e. 2c,Ac -> F
+				if (candidate == null)
+					candidate = c;
+				else
+					candidate = candidate.higherCard(c);
+		return candidate;
+	}
+
+	/*
+	 * currentLeader - card that is the current leader of a trick
+	 * Note. this is called from spades as super.highestCardInTrick...
+	 */
+	Card highestCardInTrick(Trick trick) {
+		int i = 0;
+		Suit st = null;
+		// final int nPlayers = 4;
+		Card leadingCard = null;
+		/*
+		 * enumerate the trick, and get highest TODO: integrate with code in CardGame
+		 * this should only get done once...
+		 */
+		for (Card c : trick.subdeck) {
+			// the actual player who won the trick is n players away from the leader or the
+			// leader
+			if (i == 0) {
+				leadingCard = c;
+				st = c.suit;
+			} else if (c.suit == st && cardGame.isHigher(c, leadingCard)) { // true if c is higher than leadingcard
+				// if (bDebugCardCf)
+				// gameErrorLog("->T");
+				leadingCard = c;
+				// currentTrick.winner = (i + currentTrick.leader) % nPlayers;
+			} else {
+				// if (bDebugCardCf)
+				// gameErrorLog("->F");
+				// card was sloughed
+			}
+			i++;
+		}
+		return leadingCard;
+	}
+	
 	// TODO: shouldn't hand by independant of RobotBrain
 	// usable by any robot
 	class Hand {
@@ -844,53 +944,6 @@ public class RobotBrain {
 		}
 
 		/*
-		 * biggestLoser -- card least likely to take tricks
-		 * Review: Hearts specific??? Not properly part of Hand???
-		 */
-		Card biggestLoser(Suit suitToAvoid) {
-			Card candidate = null;
-			int beaters = 0;
-
-			for (Suit suit : Suit.suits) {
-				if (suit == suitToAvoid)
-					continue;
-				Subdeck sd=getSuit(suit);
-				//
-				// the lowest card in a suit I can't run
-				// Can I run this suit?
-				// if not, return the lowest card
-				if (sd.size() == 0)
-					continue;
-				candidate = highest(suit);
-				int b = batteryBrain.higherCardsOutThere(candidate);
-				if (b > beaters) {
-					beaters = b;
-					candidate = lowest(suit);
-				}
-			}
-			// i.e. lowest card in a suit that there are higher
-			// cards out there...
-			if (candidate != null)
-				return candidate;
-
-			// No big losers! ok, good news
-			if (bThinkingOutLoud) {
-				System.out.println("Robot(seat" + mySeat + "): Preparing for moon landing.");
-			}
-
-			candidate = lowestNonPoint();
-			if (candidate != null)
-				return candidate;
-			// uh oh. Bad news: no nonpt cards
-			if (bThinkingOutLoud) {
-				System.out.println("Robot(seat" + mySeat + "): Abort! No nonpt cards to slough!");
-			}
-			if (find(Card.queenOfSpades))
-				return Card.queenOfSpades;
-			return highest(Suit.HEARTS);
-		}
-
-		/*
 		 * return a generally toxic card from the hand called by slough
 		 * Review: Hearts specific??? Not properly part of Hand???
 		 */
@@ -949,8 +1002,10 @@ public class RobotBrain {
 			for (Suit st : Suit.suits) {
 				int n = getSuit(st).size();
 				if (st == notSuit1 || st == notSuit2)
-					continue;
-				if (ncards == 0 && !voidIn(st)) {
+					;
+				else if (voidIn(st))
+					;
+				else if (ncards == 0 && !voidIn(st)) {
 					ncards = n;
 					candidate = highest(st);
 				} else if (n < ncards) {
@@ -1033,213 +1088,8 @@ public class RobotBrain {
 			return candidate;
 		}
 
-		/*
-		 * currentLeader - card that is the current leader of a trick
-		 */
-		Card highestCardInTrick(Trick trick) {
-			int i = 0;
-			Suit st = null;
-			// final int nPlayers = 4;
-			Card leadingCard = null;
-			/*
-			 * enumerate the trick, and get highest TODO: integrate with code in CardGame
-			 * this should only get done once...
-			 */
-			for (Card c : trick.subdeck) {
-				// the actual player who won the trick is n players away from the leader or the
-				// leader
-				if (i == 0) {
-					leadingCard = c;
-					st = c.suit;
-				} else if (c.suit == st && cardGame.isHigher(c, leadingCard)) { // true if c is higher than leadingcard
-					// if (bDebugCardCf)
-					// gameErrorLog("->T");
-					leadingCard = c;
-					// currentTrick.winner = (i + currentTrick.leader) % nPlayers;
-				} else {
-					// if (bDebugCardCf)
-					// gameErrorLog("->F");
-					// card was sloughed
-				}
-				i++;
-			}
-			return leadingCard;
-		}
 
-		/*
-		 * duckUnderSpade - different because I don't care if I take a spade trick
-		 * (usually). And if I have the queen I want to avoid playing it unless someone
-		 * has a higher card on the trick already. (or if the only cards left to be
-		 * played are the AK ... ... already determined if I can slough... // the whole
-		 * point of this is to avoid the queen // so this algorithm will return the
-		 * queen unless // it's pulled from my myCards and only return it // as a last
-		 * resort
-* 		 * Review: Hearts specific??? Not properly part of Hand???
-		 */
-		Card duckUnderSpade(Trick trick) {
-			Card cardToDuck = highestCardInTrick(trick);
-			Suit st = cardToDuck.suit;
-			Subdeck myCards = hand.getSuit(st);
-			// if I have the queen and it's my only spade,
-			// just admit defeat.
-			boolean iHaveTheQueen = myCards.find(Card.queenOfSpades);
-			if (iHaveTheQueen) {
-				if (trick.cardPlayed(Card.aceOfSpades) || trick.cardPlayed(Card.kingOfSpades))
-					return Card.queenOfSpades;
-				if (hand.getspades().size() == 1) {
-					// snark: Oh crap. Can't be helped.
-					return Card.queenOfSpades;
-				}
-			} else if (trick.cardPlayed(Card.queenOfSpades)) {
-				return duckUnder(trick);
-			}
-			// TODO: might do something else if I'm moonshooting
-			// or want to be the moonpolice
-			return duckUnder(trick);
 
-			/*
-			 * // Great find another spade. // can I get under? for (Card c : myCards) //
-			 * get highest card below lead if (CardGame.isHigher(c, cardToDuck))// i.e.
-			 * 2c,Ac -> F if (candidate == null) candidate = c; else candidate =
-			 * candidate.higherCard(c);
-			 * 
-			 * if (candidate == null) { // couldn't find one candidate = hand.lowest(st); if
-			 * (ct.subdeck.size() == 3) // if not, am I last? candidate = hand.highest(st);
-			 * } // otherwise take with highest (unless moonshooting) if (candidate == null)
-			 * candidate = lastResort; return candidate;
-			 */
-		}
-
-		/*
-		 * duckUnder(Trick trick) - do everthing possible to duck the trick if can't be
-		 * ducked either be lowest or if inevitable take with highest return null only
-		 * if no cards of the suit in hand
-		 * 
-		 * duckunder(trick) - avoid taking this trick if possible if not possible take
-		 * with the highest card in the suit. special case for spades/queen of spades
-		 * handled separately
-		 */
-		Card duckUnder(Trick ct) {
-			Card cardToDuck = highestCardInTrick(ct);
-			Card candidate = duckUnder(cardToDuck);
-			if (candidate == null) { // couldn't find one
-				candidate = hand.lowest(cardToDuck.suit);
-				// otherwise take with highest (unless moonshooting)
-				if (ct.subdeck.size() == 3) // if not, am I last?
-					candidate = hand.highest(cardToDuck.suit);
-			}
-			return candidate;
-		}
-
-		/*
-		 * duckUnder - if possible, return a card under the one given null if there
-		 * aren't any.
-		 */
-		Card duckUnder(Card cardToDuck) {
-			// Card cardToDuck=highestCardInTrick(ct);
-			Suit st = cardToDuck.suit;
-			Subdeck myCards = hand.getSuit(st);
-			Card candidate = null;
-
-			// can I get under?
-			// find the highest card below the lead card
-			for (Card c : myCards)
-				// get highest card below lead
-				if (cardGame.isHigher(c, cardToDuck))// i.e. 2c,Ac -> F
-					if (candidate == null)
-						candidate = c;
-					else
-						candidate = candidate.higherCard(c);
-			return candidate;
-		}
-
-		/*
-		 * commandLead -- bad name...
-		 * rubicon -- cross or turn back
-		 *   considering whether to go for moon or bleed out high cards
-		 *   return null if nothing good.
-		 */
-		Card commandLead() {
-			// note: could have something like this:
-			// c:{8C4C} d:{JD7D3D} h:{AH5H} s:{KSQS}
-			// can I draw out spades to slough queen?
-			// can I lead the queen and force it to be taken
-			// can I shoot moon? 
-			// do I have vulnerable hearts?
-			// is there a path to the moon?
-			Card presumptiveLead = highestCardShortestSuitNon(Suit.HEARTS, Suit.SPADES);
-			
-			/*
-			 * spades gambit
-			 */
-			// do I have the queen?
-			// are there higher spades than the queen out there?
-			//   how many?... (ToDO: Maybe... Can I draw them out?)
-			// how many backers out there?
-			if (hand.find(Card.queenOfSpades)) {	// double check...
-				int higherspades = batteryBrain.higherCardsOutThere(Card.queenOfSpades);
-				int myspades = hand.getspades().size();
-				int lowerCardsOutThere = 13 - (higherspades + myspades);
-				if (higherspades > 0 && lowerCardsOutThere <= 0) {
-					brainDump("Bravely leading queen...");
-					presumptiveLead = Card.queenOfSpades;
-				}				
-			}
-			/*
-			 * heart holes? how big?
-			 */
-			
-			/*
-			 * Ok, so if I have heartholes and the queen
-			 * bleed off high cards... Highest card lowest leadable suit
-			 */
-
-			return presumptiveLead;
-		}
-
-		/*
-		 * countHigherCards - count the number of cards higher than this that haven't
-		 * been played that aren't in your hand
-		 */
-		int countHigherCards(Card c) {
-			int n = 0;
-			Suit suit = c.suit;
-			for (Rank rank : Rank.values()) {
-				Card c2 = new Card(rank, suit);
-				if (cardGame.isHigher(c2, c) && !hand.find(c2) && !batteryBrain.isPlayed(c2))
-					n++;
-			}
-			return n;
-		}
-
-		/*
-		 * duckLead - card in hand with most cards above it not in hand or null if there
-		 * aren't any...
-		 */
-		Card duckLead() {
-			// best chance to lose lead is the card with the most
-			// outstanding cards higher than yours that you don't have
-			Card candidate = null;
-			int highestSoFar = 0;
-			for (int i = Suit.first().ordinal(); i <= Suit.last().ordinal(); i++) {
-				Card lc = hand.lowest(Suit.value(i));
-				if (lc == null)
-					continue;
-				if (lc.suit == Suit.HEARTS && !heartsBroken())
-					continue;
-				int countHigherCardsInSuit = countHigherCards(lc);
-				if (countHigherCardsInSuit <= 0)
-					continue;
-				if (candidate == null) {
-					highestSoFar = countHigherCardsInSuit;
-					candidate = lc;
-				} else if (countHigherCardsInSuit > highestSoFar) {
-					highestSoFar = countHigherCardsInSuit;
-					candidate = lc;
-				}
-			}
-			return candidate;
-		}
 
 		/*
 		 * highestCardUnder - return highest card in same suite from hand below that is
@@ -1351,136 +1201,6 @@ public class RobotBrain {
 			}
 		} // populate
 
-		/*
-		 * bestSlough for non-first trick
-		 */
-		Card bestSlough() {
-			Card card = null;
-			if (size() == 1)
-				return peek();
-
-			if (shootMoonOrDumpPoints()) {
-				card = biggestLoser(Suit.HEARTS);
-				if (bThinkingOutLoud) {	// going for it...
-					System.out.println("Robot(seat" + mySeat + "): Thinking moon...");
-				}
-				if (card != null && bThinkingOutLoud) {	// going for it...
-					System.out.println("Brain: Best slough for moon shooter:"+ card.encode() +"?!");
-					brainDump(true);
-				}
-				return card;
-			} else
-				card = highestCardShortestSuitNon(Suit.HEARTS, Suit.SPADES);
-
-			if (card != null && bThinkingOutLoud) {	// going for it...
-				System.out.println("Brain: Best slough no moon dreams:"+ card.encode() +"?!");
-				brainDump(true);
-			}
-			if (card != null)
-				return card;
-			// play something low, and avoid breaking hearts
-			// not moonshooting...
-			card = toxicCard(bMoonPolice);
-			if (bThinkingOutLoud) {	// going for it...
-				if (card == null)
-					System.out.println("Best slough:(null/random)?");
-				else
-					System.out.println("Best slough:" + card.encode() + "?");
-				brainDump(true);
-			}
-			if (card == null)
-				card = randomCard();
-			return card;
-		}
-
-		/*
-		 * TODO: get the 1-per-lifetime cases of 13 Hearts, or QS+12 Hearts
-		 */
-		Card bestSlough(int trick) {
-			// this is just the best first-trick special case...
-			if (trick != 0)
-				return bestSlough();
-			/*
-			 * -- NOTE --- slough for JUST the FIRST TRICK...
-			 */
-			//
-			// If you have the QS don't slough a spade
-			// i.e. any spade is a backer...
-			//
-			boolean saveSpades = hand.find(Card.queenOfSpades);
-			if (!saveSpades && hand.find(Card.kingOfSpades))
-				return Card.kingOfSpades;
-			if (!saveSpades && hand.find(Card.aceOfSpades))
-				return Card.aceOfSpades;
-			// Ok, can't or shouldn't slough the AS or KS.
-			// if moonshooting play something low
-			//
-			// if moonshooting, play lowest card that isn't a top card in suit
-			// if !moonshooting, play highest card in shortest suit
-			Card card = null;
-			if (shootMoonOrDumpPoints()) {
-				card = lowestCardNotTop(Suit.HEARTS, Suit.SPADES); // moonshooting
-				if (card == null)
-					card = lowestCardInHand(Suit.HEARTS, Suit.SPADES);
-			} else
-				card = highestCardShortestSuitNon(Suit.HEARTS, Suit.SPADES);
-			if (card != null)
-				return card;
-			// if we have made it this far, we couldn't find
-			// a legal non-spade, non-point card to slough.
-			// So we only have Spades and point cards...
-			// (Still first trick...)
-			// Ok... I have only spades and hearts?
-			// Crikey! how many spades do I have?
-			System.out.println("Crikey! Take a picture. First Trick:");
-			brainDump(true);
-
-			int nspades = hand.getspades().size();
-			if (nspades == 1) {
-				bMoonShooting = true;
-				return hand.getspades().peek();
-			} else if (nspades > 1) {
-				// Rats. I have to get rid of a useful backer
-				// and possibly the only card that could prevent
-				// me from shooting the moon...
-				Card highest = hand.highestNon(Card.queenOfSpades);
-				return highest;
-			} else { // All hearts and the queenofspades
-				// make sure
-				int ptcards = 0;
-				Card nonPtCard = null;
-				int i = 0;
-				for (Suit st = Suit.first(); i < Suit.size(); st = st.next(), i++) {
-					if (st == Suit.HEARTS)
-						ptcards++;
-					else if (st == Suit.SPADES) {
-						Subdeck spades = hand.getspades();
-						for (Card c : spades.subdeck)
-							if (c.equals(Card.queenOfSpades))
-								ptcards++;
-							else {
-								nonPtCard = c;
-							}
-					} else {
-						for (Card c : hand.getSuit(st)) {
-							ptcards++;
-							nonPtCard = c;
-						}
-					}
-				}
-				if (nonPtCard != null) {
-					System.out.println("Can't happen? But ok... Ptcards=" + ptcards);
-					return nonPtCard;
-				}
-				if (nonPtCard == null) {
-					System.out.println("Can't happen: first-card search problem.");
-					card = randomNonPointCard();
-					if (card != null)
-						return card;
-				}
-			}
-			return hand.lowest(Suit.HEARTS); // moon...
-		}
 
 		/*
 		 * find - find a card in the hand
@@ -1532,23 +1252,24 @@ public class RobotBrain {
 			return coin == 1 ? true : false;
 		}
 
-		Card randomNonPointCard() {
-			if (size() == 0)
-				return null;
-			if (size() == 1)
-				return peek();
+		/*
+		Card randomNon(Suit nonst) {
 
-			Card c = randomCard();
-			for (int i = 0; i < 50; c = randomCard(), i++) {
-				if (c.suit == Suit.HEARTS)
+			// how many are there non-suit left?
+			int i=0;
+			for (Suit st : Suit.suits) {
+				if (st == nonst)
 					continue;
-				if (c.equals(Card.queenOfSpades))
-					continue;
-				break;
+				else 
+					i += hand.count(st);
 			}
-			return c;
+			if (i == 0)
+				return null;
+			else if (i == 1)
+				return peek();
+			
 		}
-
+		*/
 		Card randomCard() {
 			// int iSuit = jRandom(4);
 			if (size() == 0)
@@ -1589,46 +1310,7 @@ public class RobotBrain {
 			return 13 - (hand.count(st) + suitPlayed);
 		}
 
-		/*
-		 * true if queen is out and I don't have it
-		 */
-		boolean someoneElseHasQueen() {
-			if (hand.find(Card.queenOfSpades))
-				return false; // someone has it and it's me...
-			if (!batteryBrain.isPlayed(Card.queenOfSpades))
-				return true; // hasn't been played, so...
-			return false;
-		}
 
-		// TODO: Move this out from Hand.
-		// Hand methods should be generic for all routines, not Hearts Specific...
-		Card bestLead(Card presumptiveSpade) {
-			// leading spades if possible is best idea I have right now...
-			// So I won't play the presumptive spade if
-			// .. I have the queen
-			// ... unless I'm running everyone out of spades
-			Card candidate = null;
-			if (shootMoonOrDumpPoints()) { // shoot moon!
-				// don't think about shooting the moon till the queen is out...
-				if (someoneElseHasQueen() && presumptiveSpade != null)
-					return presumptiveSpade;
-				if (someoneElseHasQueen())
-					candidate = duckLead();
-				else {
-					candidate = commandLead();
-					if (candidate != null)
-						brainDump(candidate, "Thinking moon...");
-				}
-			} else if (hand.find(Card.queenOfSpades)) {
-				candidate = commandLead();
-			}
-			if (candidate == null) {
-				do {
-					candidate = hand.randomCard();
-				} while (candidate.suit == Suit.HEARTS && !heartsBroken());
-			}
-			return candidate;
-		}
 
 		/*
 		 * if (presumptiveSpade != null && !hand.find(queenOfSpades)) return
@@ -1676,70 +1358,6 @@ public class RobotBrain {
 		 * true; // i.e. you have all of suit st //suit = st; } return false; }
 		 */
 
-		/*
-		 * canLoseTrick if there is a card that I could play that could be taken by
-		 * someone else
-		 * 
-		 * return the lead loser that I'm longest in... i.e. fewest number of cards I
-		 * have to lose to shoot moon...
-		 */
-		Card leadLoser() {
-			for (Suit st : Suit.suits) {
-				Subdeck cards = hand.getSuit(st);
-				// NOTE: highercardoutthere doesn't know
-				// about the game order!!!
-				for (Card c : cards) {
-					if (batteryBrain.higherCardOutThere(c))
-						return c;
-				}
-			}
-			return null;
-		}
-
-		final boolean bShootMoon = true;
-		final boolean bDumpPoints = false;
-
-		/*
-		 * true if I should shoot the moon false if I should dump points
-		 */
-		void setMoonPolice() {
-			bMoonPolice = true;
-		}
-
-		void setMoonPolice(boolean bOnOff) {
-			bMoonPolice = bOnOff;
-		}
-
-		boolean shootMoonOrDumpPoints() {
-			if (!moonPossibleForSomeone()) {
-				setMoonPolice(false);
-				return bDumpPoints;
-			} else if (!moonPossibleForMe())
-				// moon possible for someone, just not me...
-				setMoonPolice();
-
-			// Soo... I could shoot the moon.
-			// should I try?
-			// is there a path to the white house? A suit I could rn the table in...
-			///
-			if (badHearts())
-				return bDumpPoints;
-
-			// Ok, is there a likely path to the whitehouse?
-			// Is there a suit I will run?
-			Card ll = leadLoser();
-			if (ll == null)
-				return bShootMoon; // I can't lose the lead; done;
-			// Can I protect ll?
-			// Are there cards in that suit I can win with?
-			Card highestCardInSuit = hand.highest(ll.suit);
-			// if there is a card that can take my highest, then punt
-			// otherwise try to draw out cards.
-			if (batteryBrain.higherCardOutThere(highestCardInSuit))
-				return bDumpPoints;
-
-			return bShootMoon;
-		}
 
 		/*
 		 * hand utility functions
