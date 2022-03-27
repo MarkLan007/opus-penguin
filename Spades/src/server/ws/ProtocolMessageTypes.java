@@ -20,8 +20,11 @@ public enum ProtocolMessageTypes {
 	TRICK_CLEARED,	// ! nn L W B [subdeck] for trick-id Leader Winner H.Broken [Cards+]
 	BROKEN_SUIT, // B hearts/spades are broken
 	PLAYER_SCORES, // $ Player-score, Player-score...
-	PLAYER_ERROR, // %Text {Please play 2c, Follow Suit, Hearts/Spades not broken, not-your-turn, don't-have-that-card, user-error}
-	PLAYER_WELCOME,
+	PLAYER_ERROR, // %MSG Text Display immediately; {Please play 2c, Follow Suit, Hearts/Spades not broken, not-your-turn, don't-have-that-card, user-error}
+	PLAYER_INFO,		// %INF Text Display later; player-info to be displayed when asked
+	PLAYER_WELCOME;
+	static public ProtocolMessageTypes first() { return PLAY_CARD; }
+	static public ProtocolMessageTypes last() { return PLAYER_WELCOME; }
 	}
 /* Eleven Messages at the moment */
 

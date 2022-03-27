@@ -75,7 +75,7 @@ public class MailBoxExchange {
 			break;
 		case Right:
 			int left;
-			for (i=0,left=exchangeSize-1; i<exchangeSize; i++) {
+			for (i=0,left=1; i<exchangeSize; i++) {
 				mb = exchange[i];
 				mb.to = i;
 				mb.from = left;

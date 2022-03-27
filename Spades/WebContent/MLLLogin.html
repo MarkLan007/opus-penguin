@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Mimitu Labs, Ltd.</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/*  Flat color palette downloaded from
+ *  http://htmlcolorcodes.com/color-charts/
+ *
+ *  Check out our powerful color picker
+ *  http://htmlcolorcodes.com/color-picker/
+ *
+ *  Want to learn more about colors in CSS?
+ *  http://htmlcolorcodes.com/tutorials/
+ *
+ *  - - - - - - - - - - - - - - - - - - 
+ *  Credits:
+ *
+ *  Original color palette by
+ *  http://designmodo.github.io/Flat-UI/
+ *
+ *  - - - - - - - - - - - - - - - - - -
+ *  How to use:
+ *  
+ *  Include this file with your stylesheets
+ *  in the <head> of your HTML file:
+ *
+ *  <head>
+ *    ...
+ *    <link href="path/to/css/flat_colors.css" rel="stylesheet">
+ *    ...
+ *  </head>
+ *  
+ *  and in the <body> of your HTML you can style
+ *  any element using a class:
+ *	
+ *	<body>
+ *		...
+ *  	<h1 class="turquoise">Your Colored Title</h1>
+ *    ...
+ *  </body>
+ */
+
+ :root {
+    --mllGrey: #E5E8E8; 
+    --mllLightblue: #3ADAE1; 
+    --mllFeltGreen: #3AE15E;
+    
+    --teal1: #2ecc71;
+    --teal2: #16a085;
+    
+    --green1:#2ecc71; /* emerald */
+    --green2:#27ae60; /* nephritis */ 
+
+	--yellow1: #e67e22; /* sunflower */
+	--yellow2: #f39c12; /* orange */
+	
+	--orange1: #e67e22;	/* carrot */
+	--orange2:  #e67e22;/* pumpkin */
+	
+	--red1: #e74c3c;	/* alizarin */
+	--red2: #c0392b;	/* pomegranate */
+	
+    --blue1:#3498db; /* peter-river */
+    --blue2:#2980b9; /* belize-hole */
+    
+    --purple1: #9b59b6; /* .amethyst { color: #9b59b6; } */
+    --purple2: #8e44ad /* wisteria */
+    
+    --black1: #34495e; /* wet-asphalt { color: #34495e; */
+    --black2: #2c3e50; /* midnight-blue */
+
+	--grey1: #95a5a6; /* concrete */
+	--grey2: #7f8c8d; /* asbestos */
+}
+/*
+	Site color choices:
+	#3AE196 // lighter green
+	#3AE15E	// felt light green
+	#3ADAE1 // light blue
+	#EAF2F8 // blue-gray
+	#EBEDEF // light-gray
+	#E5E8E8 // darker-gray
+	
+	Or...
+	#57B05A	// olive felt-green?
+	#6A5ACD	// blue
+	#800080	// purple
+	#3AE196 // green
+	#3AE15E	// light-green
+	#3ADAE1 // the light blue to use
+	#E5E8E8 // the gray
+ */
+  
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	background-color: var(--grey1);
+	color: var(--black2);
+}
+
+.dialog {
+	background-color: var(--purple1);
+	color: var(--black2);
+}
+
+/* The Close Button */
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Center the image and position the close button */
+.mllLogo {
+  text-align: center;
+  margin: 24px 0 12px 0;
+  position: relative;
+}
+
+mllLogo.avatar {
+  width: 40%;
+  border-radius: 50%;
+}
+
+.container {
+  padding: 16px;
+}
+
+span.psw {
+  float: right;
+  padding-top: 16px;
+}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 6; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: var(--grey1);
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+.modal-content-cipher {
+  background-color: var(--grey1);
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 200px;
+}
+
+/* new-temp... */
+.btn { /* is this used??? */
+   float:left;
+}
+
+.btn-group button {
+  background-color: #4CAF50; /* Green background */
+  border: 1px solid green; /* Green border */
+  color: white; /* White text */
+  padding: 10px 24px; /* Some padding */
+  cursor: pointer; /* Pointer/hand icon */
+  float: left; /* Float the buttons side by side */
+}
+
+/* Clear floats (clearfix hack) */
+.btn-group:after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.btn-group button:not(:last-child) {
+  border-right: none; /* Prevent double borders */
+}
+
+/* Add a background color on hover */
+.btn-group button:hover {
+  background-color: #3e8e41;
+}
+
+/* Add Zoom Animation */
+.animate {
+  -webkit-animation: animatezoom 0.6s;
+  animation: animatezoom 0.6s
+}
+
+@-webkit-keyframes animatezoom {
+  from {-webkit-transform: scale(0)} 
+  to {-webkit-transform: scale(1)}
+}
+  
+@keyframes animatezoom {
+  from {transform: scale(0)} 
+  to {transform: scale(1)}
+}
+
+/* Extra styles for the cancel button */
+.cancelbtn {
+  width: auto;
+  padding: 10px 18px;
+  background-color: var(--red2);
+}
+
+ /* Set a style for all buttons */
+button {
+  background-color: var(--green2);
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;  /* width: 100%;*/
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+/* Change styles for span and cancel button on extra small screens */
+@media screen and (max-width: 300px) {
+  span.psw {
+     display: block;
+     float: none;
+  }
+  .cancelbtn {
+     width: 100%;
+  }
+}
+
+body {font-family: Arial, Helvetica, sans-serif;}
+
+/* Full-width input fields */
+input[type=text], input[type=password] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.buttonGrid {
+	display: grid; 
+	grid-template-columns: repeat(3, 1fr);
+	
+	/*grid-template-columns: repeat(21, 20px [ col-end ]); */
+	/* align-items: end; */
+	justify-content: start;
+	/* grid-gap: 5px 20px; */
+	grid-gap: 0px 0px;
+	
+}
+
+</style>
+</head>
+<body>
+
+<h2>Mimitu Labs, Ltd. Login page</h2>
+<p> Welcome to Mimitu Labs, Ltd. </p>
+<p> To enter the Mimitu Labs lounge, you must first login. Or enter through the cipher lock at the back door in the alley next to the dumpster... </p>
+<p> Mind yo hed. Always under construction... </p>
+
+<div class="btn-group">
+  <button onclick="document.getElementById('id01').style.display='block'">Login</button>
+  <button onclick="showDiv('id02');">Cipher Lock</button>
+</div>
+
+<div id="id01" class="modal">     
+  <form class="modal-content animate" 
+	action="javascript:;" 
+	onsubmit="validateAndJump(this)">
+	<span id="spanCloseXXX" class="close">&times;</span>
+    <div class="mllLogo">
+       <h2>Mimitu Labs Ltd.</h2>
+    </div>
+    <div class="container">
+      <label for="uname"><b>Username</b></label>
+      <input type="text" placeholder="Enter Username" id="uname" required>
+
+      <label for="psw"><b>Password</b></label>
+      <input type="password" placeholder="Enter Password" id="psw" required>
+        
+      <button type="submit">Login</button>
+      <label>
+        <input type="checkbox" checked="checked" name="remember"> Remember me
+      </label>
+    </div>
+    <div class="container" style="background-color:#f1f1f1">
+      <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+      <span class="psw">Forgot <a href="#">password?</a></span>
+    </div>
+  </form>
+</div>
+
+<div id='id02' class='modal'>
+  <div class="modal-content-cipher">
+    <span class="close">&times;</span>
+    <p id="echoText"> Ok, fine. </p>    
+	<div class="buttonGrid" id="cipherLock">
+   </div>
+</div>
+
+</div>
+<script>
+	function validateAndJump(event) {
+		console.log("Yea! Redirecting to /Spades");
+		var name = document.getElementById("uname").value;
+		var pw = document.getElementById("psw").value;
+		console.log("name=" + name + " pw+" + pw + ".");
+		console.log("Yea! Redirecting to /Spades");
+
+		// window.location = "/Spades"
+		// window.open("http://drafonreef.net:8080/Spades");
+		//location.href = "http://dragonreef.net:8080/Spades";
+		location.href = "/Spades" + "/?id=" + sUserName;
+	}
+
+	function showCipherLock() {
+		console.log("Showing Cipher Lock...");
+		var cipherLock = document.getElementById('id02')
+		cipherLock.style.display = "block";
+	}
+	// showDiv - open div by name
+	//  but they are closed by class who looks up the target and parent...
+	function showDiv(idName) {
+		console.log("Showing id:" + idName);
+		var popupDiv = document.getElementById(idName);
+		popupDiv.style.display = "block";
+	}
+</script>
+<body>
+<p> The Mgmt. Mimitu Labs, Ltd. </p>
+
+<div id="termsAndConditions" class="modal">
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span id="spanCloseXXX" class="close">&times;</span>
+    <p>There really aren't any... Not now at least.</p>
+    <p>Use at your own risk. No Warranties, not merchantable, etc.</p>
+    
+    <p> We don't use information for anything at the moment. </p>
+    <p> Stay tuned. </p>
+        <p> Mgmt. </p>
+    
+    
+  </div>
+</div>
+XXX, Buzz Shepard, Staff Atty.
+<div class="btn-group">
+<button onclick="showDiv('termsAndConditions');" > T's and C's</button>
+</div>
+<script>
+	/*
+	 * Note that code must be AFTER all the items that are referenced...
+	 * for example this must follow the button that is created since 
+	 * init is called on it...
+	 */
+	function initModelModalCode() {
+
+		// clicking outside the dialog closes the dialog
+		var enclosingDivs = document.getElementsByClassName("modal");
+		for (var i = 0; i < enclosingDivs.length; i++)
+			enclosingDivs[i].onclick = function(event) {
+				console.log("generic out-of-div click close...");
+				// This event is triggered on the x close
+				// don't disappear unrelated stuff...
+				if (event.target.className == "modal")
+					event.target.style.display = "none";
+			}
+
+		//
+		// close x on rhs of window by class close
+		var closees = document.getElementsByClassName("close");
+		for (var i = 0; i < closees.length; i++)
+			closees[i].onclick = function(event) {
+				console.log("generic close...");
+				event.target.parentNode.parentNode.style.display = "none";
+			}
+		
+		var buttonDiv = document.getElementById("cipherLock");
+		for (var i=1; i<=12; i++) {
+			// create a new button, and add it to the cipher lock
+			var btn = document.createElement("Button");
+			btn.innerText = i;
+			btn.addEventListener("click", buttonPress);
+			buttonDiv.appendChild(btn);
+			switch (i) {
+			case 10:
+				btn.innerText = "*";
+				break;
+			case 11:
+				btn.innerText = "0";
+				break;
+			case 12:
+				btn.innerText = "#";
+				break;
+			default:
+					// do nothing
+				break;
+			}
+		}
+		
+	}
+	
+	var inputString="";
+	var bClearInput=true;	// true if the input marks a new line
+	var bCanEnter = false;
+	
+	var magicCookies=["6707","3141", "000", "6992", 
+		"3333", "6174", "1250", "0402"];
+	var magicUserName=["Buzz", "Pi", "ElFucko", 
+		"Bob", "Joe", 
+		"Anne", "Elizabeth", "Laura"];
+	var magicEcho=["Hi Buzz", "I like Pi!", "Piss off!", 
+		"Welcome back, Bob!", "Ok, Joe...", 
+		"Hi Anne", "Stealing rolls, again?", "In the beans!"];
+	var magicAction=[true, true, false, true, true, true, true, true];
+	var sUserName="";
+	
+	function getAction(s) {
+		var i;
+		for (i=0; i<magicCookies.length; i++)
+			if (s == magicCookies[i]) {
+				bCanEnter = magicAction[i];
+				return magicEcho[i];
+				}
+		return false;
+	}
+	
+	function getMatch(s) {
+	var i;
+	sUserName="guest";
+	for (i=0; i<magicCookies.length; i++)
+		if (s == magicCookies[i]) {
+			bCanEnter = magicAction[i];
+			sUserName = magicUserName[i];
+			return magicEcho[i];
+			}
+	return null;
+	}
+
+	function inputChar(s) {
+		var echoArea = document.getElementById("echoText");
+		if (bCanEnter) {
+			validateAndJump();
+		}
+		if (s == "#") {
+			bClearInput = true;
+			return;
+		}
+		if (inputString.length >= 6) {
+			var msg = "Pathetic. Try again.";
+			echoArea.innerText = msg;
+			inputString = "";
+			bClearInput = true;
+			return;
+		}
+		else if (bClearInput) {
+			inputString = "";
+			bClearInput = false;
+		}
+		inputString += s;
+		var echoArea = document.getElementById("echoText");
+		echoArea.innerText = inputString;
+
+		bCanEnter = false;	// getmatch sets as side effect
+		var match = getMatch(inputString);
+		if (match != null) {
+			echoArea.innerText = match;
+			bClearInput = true;
+		}
+
+	}
+
+	function buttonPress(event) {
+		// put up the text (if I do that)
+		// note the number pressed
+		console.log("Saw:" + event.target.innerText);
+		inputChar(event.target.innerText);
+	}
+
+	initModelModalCode();
+</script>
+</body>
+</html>

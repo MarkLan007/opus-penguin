@@ -9,20 +9,106 @@
  -->
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Spades Game Console</title>
 <!-- Define style for menu bar -->
-
-
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-
 <style>
+/*  Flat color palette downloaded from
+ *  http://htmlcolorcodes.com/color-charts/
+ *
+ *  Check out our powerful color picker
+ *  http://htmlcolorcodes.com/color-picker/
+ *
+ *  Want to learn more about colors in CSS?
+ *  http://htmlcolorcodes.com/tutorials/
+ *
+ *  - - - - - - - - - - - - - - - - - - 
+ *  Credits:
+ *
+ *  Original color palette by
+ *  http://designmodo.github.io/Flat-UI/
+ *
+ *  - - - - - - - - - - - - - - - - - -
+ *  How to use:
+ *  
+ *  Include this file with your stylesheets
+ *  in the <head> of your HTML file:
+ *
+ *  <head>
+ *    ...
+ *    <link href="path/to/css/flat_colors.css" rel="stylesheet">
+ *    ...
+ *  </head>
+ *  
+ *  and in the <body> of your HTML you can style
+ *  any element using a class:
+ *	
+ *	<body>
+ *		...
+ *  	<h1 class="turquoise">Your Colored Title</h1>
+ *    ...
+ *  </body>
+ */
+
+ :root {
+    --mllGrey: #E5E8E8; 
+    --mllLightblue: #3ADAE1; 
+    --mllFeltGreen: #3AE15E;
+    
+    --teal1: #2ecc71;
+    --teal2: #16a085;
+    
+    --green1:#2ecc71; /* emerald */
+    --green2:#27ae60; /* nephritis */ 
+	--green3: #228B22;
+	
+	--yellow1: #f1c40f; /* sunflower */
+	--yellow2: #f39c12; /* orange */
+	
+	--orange1: #e67e22;	/* carrot */
+	--orange2:  #d35400;/* pumpkin */
+	
+	--red1: #e74c3c;	/* alizarin */
+	--red2: #c0392b;	/* pomegranate */
+	
+    --blue1:#3498db; /* peter-river */
+    --blue2:#2980b9; /* belize-hole */
+    
+    --purple1: #9b59b6; /* .amethyst { color: #9b59b6; } */
+    --purple2: #8e44ad /* wisteria */
+    
+    --black1: #34495e; /* wet-asphalt { color: #34495e; */
+    --black2: #2c3e50; /* midnight-blue */
+
+	--grey1: #95a5a6; /* concrete */
+	--grey2: #7f8c8d; /* asbestos */
+}
+/*
+	Site color choices:
+	#3AE196 // lighter green
+	#3AE15E	// felt light green
+	#3ADAE1 // light blue
+	#EAF2F8 // blue-gray
+	#EBEDEF // light-gray
+	#E5E8E8 // darker-gray
+	
+	Or...
+	#57B05A	// olive felt-green?
+	#6A5ACD	// blue
+	#800080	// purple
+	#3AE196 // green
+	#3AE15E	// light-green
+	#3ADAE1 // the light blue to use
+	#E5E8E8 // the gray
+ */
+
 body {
 	margin: 0;
 	font-family: Arial, Helvetica, sans-serif;
 }
 
 .topnav {
+	width:50%;
 	overflow: hidden;
 	background-color: #333;
 }
@@ -42,76 +128,39 @@ body {
 }
 
 .topnav a.active {
-	background-color: #4CAF50;
+	background-color: var(--green1);
 	color: white;
 }
 </style>
 <style>
-.dropbtn {
-	background-color: #3498DB;
-	color: white;
-	padding: 16px;
-	font-size: 16px;
-	border: none;
-	cursor: pointer;
-}
-
-.dropbtn:hover, .dropbtn:focus {
-	background-color: #2980B9;
-}
-
-.dropdown {
-	position: relative;
-	display: inline-block;
-}
-
-.dropdown-content {
-	display: none;
-	position: absolute;
-	background-color: #f1f1f1;
-	min-width: 160px;
-	overflow: auto;
-	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-	z-index: 1;
-}
-
-.dropdown-content a {
-	color: black;
-	padding: 12px 16px;
-	text-decoration: none;
-	display: block;
-}
-
-.dropdown a:hover {
-	background-color: #ddd;
-}
 
 .show {
 	display: block;
 	}
+	
 </style>
 <style>
 .alignRight {
-	float:none;
-	text-align:right;
-	margin-right:10px;
-	}
-	/* align left is new and untested... */
-.alignLeft {
-	float:none;
-	text-align:left;
-	margin-left:1px;
+	/*float: none;*/
+	text-align: right;
+	margin-right: 10px;
+	right: 10px;
 }
 
-.splitscreen {
-    display:flex;
+.splitscreen {	/* splitscreen is used by pass dialog. Is it right? */
+	height: 40px;
+	background-color: white;
+	z-index:4;
+	/* display: flex; */
 }
+
 .splitscreen .left {
-    flex: 1;
+	flex: 1;
 }
+
 .splitscreen .right {
-	text-align:center;
-    flex: 1;
+	text-align: center;
+	flex: 1;
 }
 /*
 <div class="splitscreen">    
@@ -124,45 +173,193 @@ body {
     </div>
 </div>
 */
-.column1 {
-	width: 55%;
-	float: left;
-	}
-
 /*
- * column2 is a container of rows
- *  must think about column2 and buttonGrid very differently
- * close but not quite...
-	display:	flex;
-	flex-direction:	row;
-	flex-wrap:	wrap;
-	justify-content:	start;
-
-	float: right;
-
+ * by default, the felt in column1 covers column2 (id=handArea)
+ * 		** it shouldn't be *** 
+ * i.e. z-index 1; handarea's zindex is 0; when it's
+ * your move it's set to 3.
+ * modal dialogs have a zindex of 4. 
  */
+.column1 {
+	z-index: 1;
+	position: relative;
+	width: 55%;	/* see "pixels to burn" */
+	float: left; /* key point... */
+	display: block;
+	 overflow-y: auto;
+}
+
 .column2 {
 	/*
 	 * the column aspect; i.e. relationship with rest of page
 	 *  i.e. cf with column1
 	 */
-	 z-index: 1;
-	 width: 45%;  
+	 /* was:
+	position: relative;
+	make it position: fixed; right: 0;...
+	*/
+	position: fixed;
+	right: 0;
+	z-index: 3;	/* see comment on column1 change 2-3 6/2/20 */
+	width: 45%;
 	/* left: 550px; */
+	/* float: right, over; /* ??? */
+	display: block;
+	/* opacity: .99; */
+	/* see https://philipwalton.com/articles/what-no-one-told-you-about-z-index/ */
 	display: grid;
-	grid-template-rows: 80px 80px 80px auto;
+	/* grid-template-rows: 80px 80px 80px 80px 80px 80px auto; */
+	/* grid-template-rows: 60px 60px 60px 60px 60px 60px auto; */
+	grid-template-rows: auto; 
+	/* transition: right 3s; */
+	 overflow-y: auto;
 }
 
+.column2:touchstart {
+  z-index: 3;
+}
+.column2:hover {
+  z-index: 3;
+}
+
+.verticalButtonGrid {
+	display: grid;
+	height: 350px;
+	align-items: left;
+	/*grid-template-rows: 30% 30% 30%;*/
+	grid-template-rows: 50px 50px 50px;
+}
+
+.buttonGrid {
+	display: grid; 
+	grid-template-columns: repeat(5, 1fr);
+	
+	/*grid-template-columns: repeat(21, 20px [ col-end ]); */
+	/* align-items: end; */
+	justify-content: start;
+	/* grid-gap: 5px 20px; */
+	grid-gap: 0px 0px;
+}
+
+.hoverBtn{
+	cursor:grab;
+	position:relative;
+	/* padding:10px 20px; */
+	background: purple;
+	font-size:28px;
+	/*
+	border-top-right-radius:10px;
+	border-bottom-left-radius:10px;
+	*/
+	border-top-left-radius:15px;
+	/* border-radius:15px; */
+	transition:all 1s;
 /*
- * buttonGrid is a container for a row of buttons
- */
- .buttonGrid {
- 	display:grid;
- 	grid-gap: 5px 20px;
- 	grid-template-columns: repeat(21, 20px [col-end]);
-	align-items: end;
- 	}
- /* using flex didn't do what I wanted
+	&:after,&:before{
+		content:" ";
+		width:10px;
+		height:10px;
+		position:absolute;
+		border :0px solid #fff;
+		transition:all 1s;
+		}
+	&:after{
+		top:-1px;
+		left:-1px;
+		border-top:5px solid black;
+		border-left:5px solid black;
+	}
+	&:before{
+		bottom:-1px;
+		right:-1px;
+		border-bottom:5px solid black;
+		border-right:5px solid black;
+	}
+	&:hover{
+		border-top-right-radius:0px;
+	border-bottom-left-radius:0px;
+		// background:rgba(0,0,0,.5);
+		// color:white;
+		&:before,&:after{
+			
+			width:100%;
+			height:100%;
+			// border-color:white;
+		}
+	}
+	*/
+	}
+.expandContractButton {
+	min-width: 60%; 
+	text-align: left;
+}
+
+/* xxx */
+.hoverBtn:after,.hoverBtn:before{
+		content:" ";
+		width:10px;
+		height:10px;
+		position:absolute;
+		border :0px solid #fff;
+		transition:all 1s;
+		}
+.hoverBtn:after{
+/*
+		top:-1px;
+		left:-1px;
+		*/
+		border: var(--blue1);
+		/*
+		border-top:5px solid black;
+		border-left:5px solid black;
+		*/
+	}
+.hoverBtn:before{
+/*
+		bottom:-1px;
+		right:-1px;
+		*/
+				border: var(--blue1);
+		/*
+		border-bottom:5px solid black;
+		border-right:5px solid black;
+		*/
+	}
+.hoverBtn:hover{
+/*
+	border-top-right-radius:0px;
+	border-bottom-left-radius:0px;
+	*/
+	border-top-left-radius:15px;
+	border: 5px solid black;
+	/*
+		bottom:-1px;
+		right:-1px;
+		border-bottom:5px solid black;
+		border-right:5px solid black;
+		border-top:5px solid black;
+		border-left:5px solid black;
+		*/
+		/* background:rgba(0,0,0,.5); */
+		/* color:white; */
+		/*
+		&:before,&:after{
+			
+			width:100%;
+			height:100%;
+			// border-color:white;
+		}
+		*/
+	}
+.hoverBtn:before,:after{			
+			width:100%;
+			height:100%;
+			border-color:white;
+		}
+
+
+
+/* using flex didn't do what I wanted
 .buttonGrid {
 	display: flex;
 	flex-direction:	row;
@@ -173,6 +370,10 @@ body {
 */
 
 /* Clearfix (clear floats) */
+.row {
+	position: absolute;
+}
+
 .row:after {
 	content: "";
 	clear: both;
@@ -184,11 +385,13 @@ body {
 /* Styles for modal dialogs */
 
 /* The Modal (background) */
-/* The Modal (background) */
 .modal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
+  z-index: 6; /* Sit on top */
+  /* opacity: .99; /* seious about being on top...*/
+ 	/* float: left;	/* experiment with float, not z-index... */
+  	/* width: 250px; /* no workee with column2 */
   padding-top: 100px; /* Location of the box */
   left: 0;
   top: 0;
@@ -202,6 +405,7 @@ body {
 /* Modal Content */
 .modal-content {
   background-color: #fefefe;
+  z-index: 7; /* Sit on top */
   margin: auto;
   padding: 20px;
   border: 1px solid #888;
@@ -209,12 +413,13 @@ body {
 }
 
 /* The Semi-Modal (background)
+ * used by large-screen passdialog
  * mll 
  */
 .semiModal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
-  z-index: 2; /* Sit on top */
+  z-index: 4; /* Sit on top */
   padding: 0px; /* 20px; Location of the box */
   left: 0;
   top: 0;
@@ -222,7 +427,7 @@ body {
    * cover the play felt
    */
   width: 450px; /* partial width */
-  height: 63%; /* partial height */
+  height: 45%; /* partial height */
   /* width: 590px; */
   /* height: 270px; */
   overflow: auto; /* Enable scroll if needed */
@@ -230,11 +435,64 @@ body {
   background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
 
+/*
+ * semiModalLeft -- emerge from the left...
+ */
+.semiModalLeft {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 4; /* Sit on top */
+  /* TODO: z-index and fixed posisiont are incompatible... */
+  padding: 0px; /* 20px; Location of the box */
+  left: 0;
+  top: 0;
+  /*
+   * cover only a portion of the play felt
+   */
+  width: 40%; /* partial width */
+  transition: width 3s;
+  
+  height: 70%; /* partial height */
+  /* width: 590px; */
+  /* height: 270px; */
+  /* overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/*
+.semiModalLeft:hover {
+  width: 300px;
+}
+*/
+
+/* touchmove, touchstart and touchend are the events that 
+ * make this possible.
+ .semiModalLeft:touchmove,
+.semiModalLeft:touchstart,
+
+.column2:hover {
+	width: 150px;
+	right: 150px;
+	z-index: 3;
+}
+
+ */
+/*
+.semiModalLeft:touchstart {
+  width: 200px;
+}
+.semiModalLeft:hover {
+  width: 200px;
+}
+*/
+
+
 /* Modal Content */
 .semi-modal-content {
   background-color: #fefefe;
-  width: 410px;
-  height: 400px;
+  width: 90%;
+  height: 90%;	/* was 600px */
   margin: auto;
   padding: 5px;
   border: 1px solid #888;
@@ -258,13 +516,13 @@ body {
 </style>
 <style>
 /* experiment with fully modal */
-body {font-family: Arial, Helvetica, sans-serif;}
+/* 2nd (dubious) boyd tag... */
 
 /* The FullyModal (background) */
 .fullymodal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
+  z-index: 5; /* Sit on top */
   padding-top: 100px; /* Location of the box */
   left: 0;
   top: 0;
@@ -284,27 +542,23 @@ body {font-family: Arial, Helvetica, sans-serif;}
   width: 80%;
 }
 
-/* The fClose Button */
-.fclose {
-  color: #aaaaaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
+.potSticker {
+position: absolute;
+left: 100;
+top:100;
+height: 70px;
+width: 150px;
+background-color: LEMONCHIFFON;
+z-index:6;
 }
 
-.fclose:hover,
-.fclose:focus {
-  color: #000;
-  text-decoration: none;
-  cursor: pointer;
-}
 /* experimental fullyModal */
 </style>
 <style type="text/css">
 /* styles for the score table */
 #canvas1 {
 	border: dotted 3 px #c0c0c0;
-	background-color: lightblue
+	background-color: var(--blue1);
 }
 .scoreGrid {
 	display: flex;
@@ -325,33 +579,163 @@ td, th {
 tr:nth-child(even) {
   background-color: #dddddd;
 }
+/* new navbar implementation */
+/* Navbar container */
+.navbar {
+  overflow: hidden;
+  background-color: #333;
+}
+
+.navbar a {
+  float: left;
+  font-size: 16px;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+.dropdown {
+  float: left;
+  overflow: hidden;
+}
+
+.dropdown .dropbtn {
+  font-size: 16px;  
+  border: none;
+  outline: none;
+  color: white;
+  padding: 14px 16px;
+  background-color: inherit;
+  font-family: inherit;
+  margin: 0;
+}
+
+.navbar a:hover, .dropdown:hover .dropbtn {
+  background-color: green;
+  cursor:grab;  
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 6;
+}
+
+.dropdown-content a {
+  float: none;
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
+.dropdown:hover .dropdown-content {
+  display: block;
+}
 </style>
 
 </head>
 
 <body>
-	<div class="topnav">
-		<a class="active" href="#home" onclick="menuDropDown();">Home</a> <a
-			href="#view">View</a> <a href="#settings">Settings</a> <a
-			href="#about">About</a>
-	</div>
-
+<div class="navbar">
+  <div class="dropdown">
+    <button class="dropbtn"
+		onclick="pinDropDown('gamesMenu', this)"
+		onmouseenter="pinDropDown('gamesMenu', this);"
+		onmouseleave="unpinDropDown('gamesMenu', this);">
+		Game
+    </button>
+    <div class="dropdown-content" id='gamesMenu'
+			onmouseenter="pinDropDown('gamesMenu', this);"
+			onmouseleave="unpinDropDown('gamesMenu', this);">
+			<a onmousedown="pinmenuSelect('gamesMenu',this)" href="#reconnect">Reconnect</a> 
+			<a onmousedown="pinmenuSelect('gamesMenu',this)" href="#join">Join...</a> 
+			<a onmousedown="pinmenuSelect('gamesMenu',this)" href="#start">Start</a> 
+			<a onmousedown="pinmenuSelect('gamesMenu',this)" href="#replay">Replay/duplicate hand</a> 
+			<a onmousedown="pinmenuSelect('gamesMenu',this)" href="#new">New</a> 
+			<a onmousedown="pinmenuSelect('gamesMenu',this)" href="#misdeal">Misdeal</a> 			
+			<a onmousedown="pinmenuSelect('gamesMenu',this)" href="#resetGame">Reset Game</a> 			
+			<a onmousedown="pinmenuSelect('gamesMenu',this)" href="#exit">Exit</a>
+    </div>
+  </div>
+  <div class="dropdown">
+    <button class="dropbtn"
+			onclick="pinDropDown('actionsMenu', this)"
+			onmouseenter="pinDropDown('actionsMenu', this);"
+			onmouseleave="unpinDropDown('actionsMenu', this);">
+			Show
+    </button>
+    <div class="dropdown-content" id='actionsMenu'
+			onmouseenter="pinDropDown('actionsMenu', this);"
+			onmouseleave="unpinDropDown('actionsMenu', this);">
+			<a onmousedown="pinmenuSelect('actionsMenu',this)" href="#refresh">Refresh</a> 
+			<a onmousedown="pinmenuSelect('actionsMenu',this)" href="#scores">Scores</a> 
+			<a onmousedown="pinmenuSelect('actionsMenu',this)" href="#who">Who</a> 
+			<a onmousedown="pinmenuSelect('actionsMenu',this)" href="#status">Status</a> 
+			<a onmousedown="pinmenuSelect('actionsMenu',this)" href="#about">About</a> 			
+    </div>
+  </div>
+</div>
+<!-- 
+ -->
+ 
+	<!-- To fix Safari bug, put modals at top
+	Below menu, but above everything else
+	 -->
+<div class="semiModalLeft" id="passMsgDiv" >
+<div class="semi-modal-content" id="passMsgDiv1">
+	
+    <span id="closePassDialogDiv" class="close">&times;</span>
+	<p id="passMsgText" style="text-align: center">Pass [n] cards prior to
+		play.</p>
+	<p class="right" id="passDialogErrorString"> </p>
+	<span class="splitscreen">
+	<input class="left" id="passCardsButton" onclick="passCardsToServer();"
+		value="Pass Cards" type="button" disabled>
+	</span>
+		<!-- Was:
+	<div class="buttonGrid" id="passDiv"
+		style="align-items: center; width: 400px; height: 275px; background-color: powderblue;">
+		 -->
+	<div id="passDivTop"> </div>
+	<div class="verticalButtonGrid" id="passDiv"
+			style="background-color:var(--blue1);">
+	
 	<!-- 
-  <button onclick="dropDown()" class="item1-menu"></button>
-    <button onclick="menuDropDown()" class="tmpbutton">Foobar</button>
-  
-   -->
-	<div class="MenubarItem1Dropdown">
-		<div id="item1-menu" class="dropdown-content" onclick="menuDropDown()"
-			onmouseleave="mouseExitDropDownMenu(this)">
-			<a href="#home">File Open</a> <a href="#about">Save</a> <a
-				href="#contact">Exit</a>
-		</div>
+		style="align-items: center; width: 100%; height: 100%; background-color: powderblue;">
+		 -->
+		 <!-- Monkeying with the fixed vs % h and w -->
 	</div>
-	<!-- Add styles above, and div below... -->
+	<br>
+</div>
+</div>
 
-	<div class="row"></div>
+	<!-- Make sure galertdiv is a sibling of column1 and column2 -->
+
+<div id="gAlertDiv" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div id="gAlertHTMLMessage">
+    <p> Generic Alert </p>
+    </div>
+    <button onclick="gAlertOK(event);"> Ok </button>
+  </div>
+</div>
+
+
+	<div id="outerParent" class="row"></div>
 	<div class="column1" id="TextScrollDiv">
+	<!-- Note this width for maxTableWidth 
+		Before monkeying with width, See maxFeltWidth "pixels to burn" in expand/contract
+	 -->
 		<canvas id="Canvas1" width=550>
 				Your browser sucks and does not support canvas.
 			</canvas>
@@ -365,24 +749,35 @@ tr:nth-child(even) {
 		<img id="HeartsImage" src="Hearts.jpg" style="display: none;"
 			onload="setTimeout(function(){logCardImage();}, 300);"> 
 		<img id="buttonfaceimage" src="buttonfacetest.png" style="display: none;"
-			onload="setTimeout(function(){logCardImage();}, 300);"> 
-			
-		
+			onload="setTimeout(function(){logCardImage();}, 300);"> 		
 	</div>
 
-	<p id="gamestatusArea" class="alignRight"> Cards as buttons go here. </p>
-	<p id="trickArea" class="alignRight"> Previous Trick. </p>
-
 	<div class="column2" id="handArea"
-		style="height: 415px; background-color: powderblue;">
+		style="height: 500px; background-color: var(--blue1);">
 		<!--  
 		<div class="buttonGrid" id="CardsInHandDiv"></div>
 		-->
-		<span class="buttonGrid" id="ClubsInHandDiv"></span>
-		<span class="buttonGrid" id="DiamondsInHandDiv"></span>
-		<span class="buttonGrid" id="SpadesInHandDiv"></span>
-		<span class="buttonGrid" id="HeartsInHandDiv"></span>
+		<div id="topright" 
+		  style="position: fixed; top: 0; right: 0px;">
+		<p id="gamestatusArea" class="alignRight"
+			style="display: none; position: fixed; top: 0; right: 0px;">
+			...</p>
+			<br>
+		<p id="trickArea" style="display: none;" class="alignRight">Previous Trick.</p>
+		</div>	
+		<div class="rhsContent">
+<button id="resizeButton" class="expandContractButton" onclick="expandContractDiv(event);">
+&lt;&lt; Expand/Contract &gt;&gt;
+</button>
+<p id="infoMessage"> Stuff. </p>
+		
+		<span class="buttonGrid" id="ClubsInHandDiv"></span> <span
+			class="buttonGrid" id="DiamondsInHandDiv"></span> <span
+			class="buttonGrid" id="SpadesInHandDiv"></span> <span
+			class="buttonGrid" id="HeartsInHandDiv"></span>
 	</div>
+	
+</div>
 	<br>
 
 	<div class="column1">
@@ -394,9 +789,11 @@ tr:nth-child(even) {
 			onclick="wsSendMessage();" value="Submit" type="button"> <br />
 		<input onclick='wsPassDialog();' 
 			value="Pass Dialog"
-			type="button"> 
-		<input onclick='wsScoreDialog("fjkasd$Buzz=0.0$Joe=93.95$Laura=3.3$Anne=0.26$Bob=0.26$Patti=0.26$");' 
-			value="Score Dialog"
+			type="button">
+			<!-- 'wsScoreDialog("fjkasd$Buzz=0.0$Joe=93.95$Laura=3.3$Anne=0.26$Bob=0.26$Patti=0.26$");' 
+			--> 
+		<input onclick='toggleRealTimeScore("");' 
+			value="Real-Time Score"
 			type="button"> 
 		<input onclick='experimentalFunction("");' value='Box-o-Chocolates'
 			type="button">
@@ -415,48 +812,61 @@ tr:nth-child(even) {
 		<div id="statusArea">Loading...</div>
 		<br />
 	</div>
-	<textarea id="echoText" rows="15" cols="40" readonly></textarea>
-
+	<div class="column1">
+		<textarea id="echoText" rows="15" cols="40" readonly></textarea>
+	</div>
 	<script id="scriptdiv" type="text/javascript" src="OneUtils.js">
-		// Key Point: Would prefer to use module and import/export (like this)
-		// But modules dont' actually work as of Chrome 79..
-		//	<script "module" src="SocketUtils.js">
-		'use strict';
-		/* x
-		 * I have no idea why these logging functinos don't produce visible output...
-		 */
-		console.log("Now in GameConsole.html back from loading OneUtils.js...");
-		alert("logging load...");
-		/*console.log(versionString1);
-		const consoleVersion="v0.01a";
-		console.log(versionString2);
-		console.log(versionString1 + consoleVersion + versionString2);
-		 */
-		// Dropdown Menu stuff
-		// Close the dropdown if the user clicks outside of it
-		window.onclick = function(event) {
-			console.log("onclick...");
-
-			if (!event.target.matches('.dropbtn')) {
-				console.log("Trying to close after select...")
-				var dropdowns = document
-						.getElementsByClassName("dropdown-content");
-				var i;
-				for (i = 0; i < dropdowns.length; i++) {
-					var openDropdown = dropdowns[i];
-					if (openDropdown.classList.contains('show')) {
-						openDropdown.classList.remove('show');
-					}
+	
+	</script>
+	<script type="text/javascript">
+	// this code can probably be deleted... Maybe...
+	'use strict';
+	/* x
+	 * I have no idea why these logging functinos don't produce visible output...
+	 */
+	// console.log("Now in long abandoned module in ... GameConsole.html back from loading OneUtils.js...");
+	// alert("logging load...");
+	/*console.log(versionString1);
+	const consoleVersion="v0.01a";
+	console.log(versionString2);
+	console.log(versionString1 + consoleVersion + versionString2);
+	 */
+	// Dropdown Menu stuff
+	// Close the dropdown if the user clicks outside of it
+	// suspect...
+	window.addEventListener("onclick", menuClicker);
+	 
+	/* window.onclick = function(event) { */
+		// This code is highly suspect...
+		// Buzz
+	function menuClicker(event) {
+		console.log("onclick...");
+		var bDoNothing=true;
+		if (bDoNothing) return;
+		
+		if (!event.target.matches('.dropbtn')) {
+			console.log("Trying to close after select...")
+			var dropdowns = document
+					.getElementsByClassName("dropdown-content");
+			var i;
+			for (i = 0; i < dropdowns.length; i++) {
+				var openDropdown = dropdowns[i];
+				if (openDropdown.classList.contains('show')) {
+					openDropdown.classList.remove('show');
 				}
 			}
 		}
+	}
 
-		openWebSocket();
-		document.addEventListener('keydown', keyFilter, true);
-		document.getElementById('testButton').addEventListener('click',
-				selectButtonPress);
+	//openWebSocket();
+	document.addEventListener('keydown', keyFilter, true);
+	/*
+	document.getElementById('testButton').addEventListener('click',
+			selectButtonPress);
+	*/
 
-		//wsHandInit();
+	//wsHandInit();
+
 	</script>
 	<script type="text/javascript">
 		//<script type="module" >
@@ -468,45 +878,23 @@ tr:nth-child(even) {
 		wsHandInit();
 		wsFeltInit(); // auto-init felt canvas
 	</script>
+<div class="column1">
 insert modal stuff here ->
 <!-- Trigger/Open The Modal -->
 <button id="myBtn">Open Modal</button>
 
-<!-- The Modal Dialogs here -->
-<div id="myExperimentalModal" class="modal">
-<!-- Learning that class names are case sensitive the hard way...
- -->
-  <!-- Modal content -->
-  <div class="modal-content" >
-    <span class="close">&times;</span>
-    <p>Some vacuous text in the Modal..</p>
-    <p> bug: clicking outside the dialog doesn't close it..</p>
-  </div>
-</div>
+		<!-- The Modal Dialogs here -->
+		<!-- Standard modal and Modal content wrapper -->
+		<div id="myExperimentalModal" class="modal">
+			<div class="modal-content">
+				<span class="close">&times;</span>
+				<p>Some vacuous text in the Modal..</p>
+				<p>click outside the dialog to close it..</p>
+				<p>But shrinks under the rhs handDiv</p>
+				<p>At least until fully modal invoked...</p>
+			</div>
+		</div>
 
-<!-- Generic Modal Here -->
-
-<div class="semiModal" id="passMsgDiv" >
-<div class="semi-modal-content" id="passMsgDiv1">
-	
-    <span id="closePassDialogDiv" class="close">&times;</span>
-	<p id="passMsgText" style="text-align: center">Pass [n] cards prior to
-		play.</p>
-	<div class="buttonGrid" id="passDiv"
-			style="align-items: center; width: 400px; height: 275px; background-color: powderblue;">
-	
-	<!-- 
-		style="align-items: center; width: 100%; height: 100%; background-color: powderblue;">
-		 -->
-		 <!-- Monkeying with the fixed vs % h and w -->
-	</div>
-	<br>
-	<span class="splitscreen">
-	<input class="left" id="passCardsButton" onclick="passCardsToServer();"
-		value="Pass Cards" type="button" disabled>
-	<p class="right" id="passDialogErrorString"> </p>
-	</span>
-</div>
 </div>
 
 
@@ -517,17 +905,12 @@ var modal = document.getElementById("myExperimentalModal");
 // Get the button that opens the modal
 var btn = document.getElementById("myBtn");
 
-// Get the <span> element that closes the modal
-var span = document.getElementsByClassName("close")[0];
-
+	
 // When the user clicks the button, open the modal 
 btn.onclick = function() {
   modal.style.display = "inline-block";	// ?
-}
-
-// When the user clicks on <span> (x), close the modal
-span.onclick = function() {
-  modal.style.display = "none";
+  // And contract the hand area... See fully modal
+  contractHandArea();
 }
 
 // I see... you need to set this every time it comes up..
@@ -540,41 +923,151 @@ window.onclick = function(event) {
     modal.style.display = "none";
   }
 }
+/*
+ * temporarily placed  here... 
+ * TODO: move to OneUtils...
+ */
+ /*
+  * toggle expand or contract
+  */
+ var bExpanded = false;
+ var maxFeltWidth = 550;	// fragile...
+ function contractDiv(event) {
+ 	var div=document.getElementById("handArea");
+ 	div.style.width = "46%"
+ 	// Pixels to burn? Make rhs larger than 45%
+ 	// clientwidth
+ 	// table will not be larger than 550 or 45%, whichever is smaller...
+	detectConfig();
+ 	
+ 	// max width of card table...
+ 	// close but something's wrong...
+ 	// take a walk...
+ 	var cw = clientWidth;	// cf: clientWidth, scrWidth and scrInnerWidth
+ 	var m = .55 * cw;
+ 	var m2 = maxFeltWidth;	// scroll bar...
+ 	if (m > m2)
+ 		m = m2; 
+ 	var pixelsRemaining = Math.round(cw - m);
+ 	var percentRemaining = pixelsRemaining / cw;
+ 	var pixelWidth = "" + pixelsRemaining + "px"
+ 	if (percentRemaining > .45)
+ 		div.style.width = pixelWidth;
+ 	setInfoMessage("scrwidth=" + scrWidth 
+ 				+ " innerWidth=" + innerWidth
+ 				+ " clientWidth=" + clientWidth);
+ 	//setInfoMessage("newWidth =" + pixelWidth + "remain=" + percentRemaining + "%");
+ 	// set button text to <<expand
+ 	var btn=document.getElementById("resizeButton");
+ 	btn.innerText = "<< expand"
+ 	//btn.style = "text-align: left";
+ 	bExpanded = false;	
+ }
+ function expandDiv(event) {
+ 	var div=document.getElementById("handArea");
+ 	div.style.width = "70%"
+ 	//
+ 	// set button text to shrink>>
+ 	var btn=document.getElementById("resizeButton");
+ 	btn.innerText = "shrink panel >>"
+ 	//btn.style = "text-align: left";
+ 	bExpanded = true;	
+ 	setInfoMessage("scrwidth=" + scrWidth 
+				+ " innerWidth=" + innerWidth
+				+ " clientWidth=" + clientWidth);
+ }
+
+ function setInfoMessage(s) {
+	 	var p=document.getElementById("infoMessage");
+	 	p.innerText = s; // "Got it."
+	 
+ }
+ function expandContractDiv(event) {
+ 	//var p=document.getElementById("infoMessage");
+ 	//p.innerText = "Got it."
+	setInfoMessage("Got it...");
+ 	if (bExpanded)
+ 		contractDiv(event);
+ 	else
+ 		expandDiv(event);
+
+ }
+ 
 </script>
 
 </body>
 <body>
 
+<div class="column1"> 
 <h2>FullyModal Example</h2>
 xx
+<!--Modal / Modal content wrapper -->
 <div id="myGenericModal" class="modal">
-  <!-- Modal content -->
   <div class="modal-content">
-    <span id="spanCloseXXX" class="close">&times;</span>
+    <span class="close">&times;</span>
     <p>Some text in the Modal..</p>
     <p> Completely broken. Button doesn't close. "open fullymodal" does nothing. </p>
     <p>Something's wrong. You shouldn't see this until you press the button...</p>
-        <p>fixed...</p>
+        <p>fixed... At least until you bring up the score dialog... </p>
   </div>
 </div>
 
+
 xx
 <!-- Trigger/Open The FullyModal -->
-<button id="modelModalBtn">Open FullyModal</button>
+<button onclick="showModalGalert();" id="modelModalBtn">Open FullyModal</button>
+</div>
 
-<!-- The FullyModal -->
-<div id="scoreDialogDiv" class="fullymodal">
+	<!-- The FullyModal -->
+	<div id="scoreDialogDiv" class="fullymodal">
+		<!-- FullyModal content -->
+		<div class="fullymodal-content">
+			<span class="close">&times;</span>
+			<p id="passMsg" style="text-align: center">Player Scores</p>
+			<div class="scoreGrid" id="scoreDiv"
+				style="align-items: center; background-color: var(- -blue1);">
+		<table id=formattedScoreTable>
+			<tr>
+				<th id="strC1">player</th>
+				<th id="strC2">points</th>
+				<th id="scrC3">total</th>
+			</tr>
+			<tr id="scoreTableRow0">
+				<td id="playerp0">Human Player 1</td>
+				<td id="p0s0">0</td>
+				<td id="p0s1">0</td>
+			</tr>
+			<tr id="scoreTableRow1">
+				<td id="playerp1">Robot Player 0</td>
+				<td id="p1s0">0</td>
+				<td id="p1s1">0</td>
+			</tr>
+			<tr id="scoreTableRow2">
+				<td id="playerp2">Robot Player 1</td>
+				<td id="p2s0">0</td>
+				<td id="p2s1">0</td>
+			</tr>
+			<tr id="scoreTableRow3">
+				<td id="playerp3">Robot Player 2</td>
+				<td id="p3s0">0</td>
+				<td id="p3s1">0</td>
+			</tr>
+			<tr id="scoreTableRow4">
+				<td id="playerp4">Robot Player 3</td>
+				<td id="p4s0">0</td>
+				<td id="p4s1">0</td>
+			</tr>
+			<tr id="scoreTableRow5">
+				<td id="playerp5">Robot Player 4</td>
+				<td id="p5s0">0</td>
+				<td id="p5s1">0</td>
+			</tr>
+		</table>
+	</div>
 
-  <!-- FullyModal content -->
-  <div class="fullymodal-content">
-    <span class="fclose">&times;</span>
-    <!-- 
-    <p>Some text in the FullyModal..</p>
-     -->
-    	<p id="passMsg" style="text-align: center">Player Scores</p>
-	<div class="scoreGrid" id="passDiv"
-		style="align-items: center;  background-color: powderblue;">
-    
+	</div>
+	</div>
+</body>
 <script>
 /*
  * Note that code must be AFTER all the items that are referenced...
@@ -582,84 +1075,108 @@ xx
  * init is called on it...
  */
 
-function initModelModalCode() {
-	// Get the fullymodal
-	var fullymodal = document.getElementById("myGenericModal");
+ function shrinkHandAreaDeleteMe() {
+	 contractHandArea();
+	 return;
+	 var handArea = document.getElementById("handArea")
+	  //handArea.style.width = "20%";
+	  handArea.style = "width:20%; float: none;"
+ }
+ /*
+ function expandHandArea() {
+	  var handArea = document.getElementById("handArea")
+	  //handArea.style.width = "50%";	 	
+	  //handArea.style.float = "left"
+	  handArea.style = "width:50%; float: left;"
+ }
+ */
+	function gAlertOK(event) {
+		closeModalGalert(event);
+	}
+	function gAlert(htmlMsg) {
+		console.log("galert: New code.")
+		//contractHandArea();
+		var msg = document.getElementById("gAlertHTMLMessage");
+		msg.innerText = htmlMsg;
 
-	// don't forget to hook the button to open the div
-	// it's modelModalBtn ... xxx
-	var btn = document.getElementById("modelModalBtn");
-		btn.onclick = function() {
-		fullymodal.style.display = "block";
+		// elevate frame
+		var alertDialog = document.getElementById("gAlertDiv");
+		alertDialog.style.display = "block";
+		console.log("galert->zIndex=" + alertDialog.style.zIndex);
+		alertDialog.style.zIndex = 6;
+		//alertDialog.ParentNode.style.display = "block";
 	}
 
-	// Get the <span> element that closes the fullymodal
-	// tricky because gets by type and assumes this if the first one...
-	// so make sure that the classname is unique
-	var span = document.getElementsByClassName("close")[0];
+	// deprecated... Not part of galert see id/name...
+	function showModalGalert(event) {
+		console.log("galert: New code.")
+		/*
+		 * Slide the handDiv to the right...
+		 */
+		contractHandArea();
+		var alertDialog = document.getElementById("myGenericModal");
+		alertDialog.style.display = "block";
+	}
+	function closeModalGalert(event) {
+		console.log("galert: close. just implemented...");
+		///xxx yyy 
+		event.target.parentNode.parentNode.style.display = "none";
 
-	var span = document.getElementById("spanCloseXXX");
-	// When the user clicks on <span> (x), close the fullymodal
-	span.onclick = function() {
-		console.log("X click.");
-		fullymodal.style.display = "none";
+		/*
+		var alertDialog = document.getElementById("gAlertDiv");
+		alertDialog.parentNode.style.display = "none";
+		*/
+
+	}
+
+	function initModelModalCode() {
+		// Get the fullymodal
+		var fullymodalVariableNotUsed = document
+				.getElementById("myGenericModal");
+
+		// thing 2.
+		// ++ experiment with addevent listener
+		// genericmodal...
+		/* document.getElementById("myBtn").addEventListener("click", function(){
+		 document.getElementById("demo").innerHTML = "Hello World";
+		 }); */
+		// --
+		// ++ (re)imported from MLLLogin
+		var closees = document.getElementsByClassName("close");
+		for (var i = 0; i < closees.length; i++)
+			closees[i].onclick = function(event) {
+				console.log("generic Xclose...");
+				event.target.parentNode.parentNode.style.display = "none";
+			}
+
+		// --
+
+		/*
+		var span = document.getElementById("spanCloseXXX");
+		// When the user clicks on <span> (x), close the fullymodal
+		span.onclick = function() {
+			console.log("X click.");
+			fullymodal.style.display = "none";
+		 */
 	}
 
 	// When the user clicks anywhere outside of the fullymodal, close it
 	window.onclick = function(event) {
-		if (event.target == fullymodal) {
-			fullymodal.style.display = "none";
+
+		var classes = event.target.classList;
+		// so click is on the window outside the frame
+		// hosting the dialog or on the x... (No you need to get parent of x)
+		for (var i = 0; i < classes.length; i++) {
+			var c = classes[i];
+			if (c.id == "modelModalBtn")
+				closeModalGalert(event);
+			else if (classes[i] == "modal")
+				event.target.style.display = "none";
 		}
+
 	}
 
-}
-
-initModelModalCode();
-
+	initModelModalCode();
+	initWebSocket();
 </script>
-    
-<table id=formattedScoreTable>
-  <tr>
-    <th id="strC1">player</th>
-    <th id="strC2">points</th>
-    <th id="scrC3">total</th>
-  </tr>
-  <tr id="scoreTableRow0">
-    <td id="playerp0">Human Player 1</td>
-    <td id="p0s0">0</td>
-    <td id="p0s1">0</td>
-  </tr>
-  <tr id="scoreTableRow1">
-    <td id="playerp1">Robot Player 0</td>
-    <td id="p1s0">0</td>
-    <td id="p1s1">0</td>
-  </tr>
-  <tr id="scoreTableRow2">
-    <td id="playerp2">Robot Player 1</td>
-    <td id="p2s0">0</td>
-    <td id="p2s1">0</td>
-  </tr>
-  <tr id="scoreTableRow3">
-    <td id="playerp3">Robot Player 2</td>
-    <td id="p3s0">0</td>
-    <td id="p3s1">0</td>
-  </tr>
-  <tr id="scoreTableRow4">
-    <td id="playerp4">Robot Player 3</td>
-    <td id="p4s0">0</td>
-    <td id="p4s1">0</td>
-  </tr>
-  <tr id="scoreTableRow5">
-    <td id="playerp5">Robot Player 4</td>
-    <td id="p5s0">0</td>
-    <td id="p5s1">0</td>
-  </tr>
-</table>	
-    
-  </div>
-
-</div>
-</div>
-</body>
-
 </html>

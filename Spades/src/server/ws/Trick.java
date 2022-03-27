@@ -10,7 +10,7 @@ public class Trick {
 	int trickid=0;
 	int winner=-1;
 	int leader=0; // 0-nPlayers who could have lead the trick or winner if closed
-	boolean bHeartsBroken=false;
+	boolean bSuitBroken=false;
 	boolean bClosed=false; // Is this trick the final one (closed) or just a table update for the user
 	Subdeck subdeck=new Subdeck();
 	
@@ -18,13 +18,31 @@ public class Trick {
 		trickid = t;
 		}
 	
-	void breakHearts() {
-		bHeartsBroken = true;
+	/*
+	 * called by CardGame.trickupdate() and brokenness is propagated in each new trick 
+	 */
+	void breakSuit() {
+		bSuitBroken = true;
 		}
 	
-	boolean heartsBroken() {
-		return bHeartsBroken;		
+	/*
+	 * should be part of gameinterface, no?
+	 */
+	boolean suitBroken() {
+		return bSuitBroken;		
 		}
+	
+	/*
+	 * true if card has been played on this trick false otherwise
+	 *  -- note -- doesn't consider whether it's sloughed as opposed 
+	 *  to played and viing for the lead.
+	 */
+	boolean cardPlayed(Card card) {
+		for (Card c : subdeck.subdeck)
+			if (c.equals(card))
+				return true;
+		return false;
+	}
 	
 	String encode(boolean tVerbose) {
 		if (!tVerbose)
@@ -35,7 +53,7 @@ public class Trick {
 			// ! nn L W B [subdeck] for trick-id Leader Winner H.Broken [Cards+]
 			String id="" + trickid;
 			if (id.length() < 2)	id = '0' + id;
-			if (bHeartsBroken) hb = "T"; else hb = "F";
+			if (bSuitBroken) hb = "T"; else hb = "F";
 			s = "Trick:" + id + " L:" + leader + " W:" + winner +  " HBroken:" + hb + "[" + subdeck.encode() + "]";
 			return s;
 			
@@ -46,7 +64,7 @@ public class Trick {
 		// ! nn L W B [subdeck] for trick-id Leader Winner H.Broken [Cards+]
 		String id="" + trickid;
 		if (id.length() < 2)	id = '0' + id;
-		if (bHeartsBroken) hb = "T"; else hb = "F";
+		if (bSuitBroken) hb = "T"; else hb = "F";
 		s = id + leader + winner +  hb + "[" + subdeck.encode() + "]";
 		return s;
 		}

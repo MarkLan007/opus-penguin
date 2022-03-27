@@ -3,9 +3,9 @@
  */
 'use strict';
 /*
- * Naming: wsXXX - routines that involve web socket sending or receiving
- * messages ...DialogWindow -- dialog done the window way (TODO: move to retired
- * code) ...DialogDiv -- dialog done with divs (better.)
+ * xyzzy... Naming: wsXXX - routines that involve web socket sending or
+ * receiving messages ...DialogWindow -- dialog done the window way (TODO: move
+ * to retired code) ...DialogDiv -- dialog done with divs (better.)
  */
 const minorVersion = "1b";
 const versionString1 = "OneUtils.js version 0." +
@@ -15,6 +15,79 @@ const versionString1 = "OneUtils.js version 0." +
 console.warn(versionString1);
 console.log("Loading OneUtils version 1.0" + minorVersion + "...");
 
+var bIsMobile = false; // assume desktop-like connection
+var scrWidth = window.screen.width;
+var scrHeight = window.screen.height;
+var scrInnerWidth = window.innerWidth;
+var clientWidth = 0;	// window-width without scrollbars, etc.
+var clientHeight = 0;
+
+/*
+ * Mozilla: Note that not all of the width given by this property may be
+ * available to the window itself. When other widgets occupy space that cannot
+ * be used by the window object, there is a difference in window.screen.width
+ * and window.screen.availWidth. See also screen.height.
+ */
+function detectConfig() {
+	var bIsMobile = false; // initiate as false
+	// device detection
+	if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|ipad|iris|kindle|Android|Silk|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(navigator.userAgent) 
+	    || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(navigator.userAgent.substr(0,4))) { 
+		bIsMobile = true;
+	}
+	scrInnerWidth = window.innerWidth;
+
+	return bIsMobile;
+}
+
+function setWide() {
+	var buttonGridArray = document.getElementsByClassName("buttonGrid");
+	for (var i=0; i<buttonGridArray.length; i++) {
+		// ordinarily... grid-template-columns: repeat(5, 1fr);
+		var bg=buttonGridArray[i];
+		bg.style.gridTemplateColumns = "repeat(5, 1fr)";
+	}
+	// buttonGrid.style.gridTemplateColumns = "repeat(4, 1fr)";
+}
+
+function setNarrow() {
+	var buttonGridArray = document.getElementsByClassName("buttonGrid");
+	for (var i=0; i<buttonGridArray.length; i++) {
+		// ordinarily... grid-template-columns: repeat(5, 1fr);
+		var bg=buttonGridArray[i];
+		bg.style.gridTemplateColumns = "repeat(4, 1fr)";
+	}
+	// buttonGrid.style.gridTemplateColumns = "repeat(4, 1fr)";
+}
+
+function narrowConfig() {
+	if (scrWidth < 420) {
+		setNarrow();
+		return true;
+	}
+	return false;
+}
+
+// ++
+function displayWindowSize(){
+    // Get width and height of the window excluding scrollbars
+    var w = document.documentElement.clientWidth;
+    var h = document.documentElement.clientHeight;
+    clientWidth = w;
+    clientHeight = h;
+	xstatusUpdate("config=" + "Width(client:inner)=(" + w +  ":" + scrInnerWidth  + ") height:" + h);
+
+	// keep handarea on the right...
+	resizeHandArea(clientWidth, scrInnerWidth);
+}
+ 
+// Attaching the event listener function to window's resize event
+window.addEventListener("resize", displayWindowSize);
+
+// Calling the function for the first time
+displayWindowSize();
+
+// --
 const Rank = {
 	ACE: 1,
 	DEUCE: 2,
@@ -169,34 +242,49 @@ function decodeCard(sRank, sSuit) {
 }
 
 // From the HTML page
+function cardIndexFromButtonName(sname) {
+	var digitString = sname.replace(/\D/g, "");
+	var cardIndex = parseInt(digitString);
+	return cardIndex;
+}
 
 // show the players hand
 var handWindow = null;
 const maxCardsInHand = 52;
 function cardSelected(event) {
 	var t = event.target;
+	/*
+	 * Mark the button as selected for the user by setting the opacity .. only
+	 * do this if in a pass. .. the delete comes back quickly and unsetting this
+	 * in case of an error is too complicated right now...
+	 */
+	if (bPassingCardsInProgress)
+		t.style.opacity = 0.5;
 	var buttonName = event.target.id;
-	var uniqueId = t.type + t.id;
-	var special = t.textContent;
+	// var uniqueId = t.type + t.id;
+	// var special = t.textContent;
 	// console.log("Whoa!" + uniqueId+ "->" + t.textContent);
 	// alert("Whoa Nellie! in called with" + t.id + special);
-	var digitString = buttonName.replace(/\D/g, "");
-	var cardIndex = parseInt(digitString);
+	// var digitString = buttonName.replace(/\D/g, "");
+	// var cardIndex = parseInt(digitString);
+	var cardIndex=cardIndexFromButtonName(buttonName);
 	//
 	// if the pass dialog is up, pass it.
 	// otherwise play it
 	if (bPassingCardsInProgress)
 		// addCardToPassDialogWindow(cardIndex);
 		addCardToPassDialogDiv(cardIndex);
-	else
+	else {
 		sendCardFromButtonPress(cardIndex);
+		contractHandArea();
+	}
 }
 
 function cardSelected2(event) {
 	var t = event.target;
 	var uniqueId = t.type + t.id;
-	console.log("Double Whoa!" + uniqueId);
-	alert("Whoa Nellie! a doubleclick was seen in:" + t.id);
+	console.log("Double click: Whoa Nellie!" + uniqueId);
+	// alert("Whoa Nellie! a doubleclick was seen in:" + t.id);
 	// sendCardFromButtonPress(parseInt(t.id, 10));
 }
 
@@ -215,6 +303,7 @@ function wsHandInit() {
 	for (i = 0; i < maxCardsInHand; i++) {
 		// only way to do cardBtn = new Button();
 		cardBtn = document.createElement("Button");
+		// no workee... cardBtn.style = "margin: 0px;" // xxx works?
 		if (cardBtn == null) {
 			alert("ButtonCreate failed on attempt=" + i);
 			console.log("ButtonCreate failed on attempt=" + i);
@@ -298,9 +387,20 @@ function addCardToHand(cardindex) {
 		console.log("Error: Somehow can't find handbutton, cardindex=" + cardindex);
 		return false;
 	}
+	// ++
+	// yea!
+	card.handButton.className = "hoverBtn";
+	// --
+	card.handButton.style.opacity = 1.0; 
 	card.handButton.style.visibility = "visible";
-	card.handButton.style.height = "150px";	// was 75px
-	card.handButton.style.width = "100px";	// was 54px xxx
+	if (narrowConfig()) {
+		card.handButton.style.height = "75px";	// was 75px
+		card.handButton.style.width = "54px";	// was 54px xxx
+	}
+	else {
+		card.handButton.style.height = "150px";	// was 75px
+		card.handButton.style.width = "100px";	// was 54px xxx
+	}
 	//
 	// get the right div, and insert it.
 	//
@@ -376,7 +476,7 @@ function wsFeltInit() {
 		feltCanvas.height = canvasHeight;
 		feltContext = feltCanvas.getContext("2d");
 		if (feltContext) {
-			feltContext.fillStyle = "ForestGreen";
+			feltContext.fillStyle = backgroundGreen;
 			feltContext.strokeStyle = "blue";
 			feltContext.lineWidth = 5;
 			feltContext.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -448,7 +548,7 @@ function wsShowFelt() {
 
 	feltWindow.onload =
 		function() {
-			var html = '<dev style="font-size:30px">Welcome!</div>';
+			var html = '<div style="font-size:30px">Welcome!</div>';
 			feltWindow.document.body.insertAdjacentHTML('afterbegin', html);
 			feltCanvas = feltWindow.document.getElementById("Canvas1");
 			if (feltCanvas && feltCanvas.getContext) {
@@ -456,7 +556,7 @@ function wsShowFelt() {
 				feltCanvas.height = 600;
 				feltContext = feltCanvas.getContext("2d");
 				if (feltContext) {
-					feltContext.fillStyle = "ForestGreen";
+					feltContext.fillStyle = backgroundGreen;
 					feltContext.strokeStyle = "blue";
 					feltContext.lineWidth = 5;
 					// splat the playing felt
@@ -625,7 +725,7 @@ function clearCardTable(bResetTrick) {
 		feltCanvas.height = canvasHeight;
 		feltContext = feltCanvas.getContext("2d");
 		if (feltContext) {
-			feltContext.fillStyle = "ForestGreen";
+			feltContext.fillStyle = backgroundGreen;
 			feltContext.strokeStyle = "blue";
 			feltContext.lineWidth = 5;
 			feltContext.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -1001,7 +1101,7 @@ function turnover1card4(card, position) { // New rotation
 	// animator();
 	// aaa
 	// check isbusy and start animator, if not?
-	// animateMaybe();
+	animateMaybe();
 	}
 
 
@@ -1097,6 +1197,7 @@ function gamestatusUpdate(sMsg) {
  */
 
 // old AnimationGestault and basic unit AnimatableCard
+var SerialCard=0;
 class AnimatableCard {
 	// compute the geometry of where the card goes
 	constructor(imagefile, rotation, trX, trY, x, y, w, h,
@@ -1113,7 +1214,7 @@ class AnimatableCard {
 		this.tgty = tgty;
 		this.tgtwidth = tgtwidth;
 		this.tgtheight = tgtheight;
-		this.friendlyName = "debugMe";
+		this.friendlyName = "debugMe" + SerialCard++;
 	}
 
 	// pc = new AnimatableCard(imagefile, 0, 0, 0, firstx, firsty, cardwidth,
@@ -1143,6 +1244,8 @@ class AnimatableCard {
 	}
 }
 
+var backgroundGreen = "#27ae60";	// --var(green2) nephritis
+
 /*
  * old... Anything with gestault in the name is the old way scene is the new
  * way... frame is part of the actual system. (don't create routines with frame
@@ -1171,8 +1274,8 @@ class AnimationGestault {
 				ctx.translate(c.trX, c.trY);
 			if (c.rotation != 0)
 				ctx.rotate(c.rotation);
-			if (bBackground) {
-				ctx.fillStyle = "ForestGreen";
+			if (bBackground) {	// var(--green3);
+				ctx.fillStyle = backgroundGreen;
 				ctx.fillRect(c.tgtx, c.tgty, c.tgtwidth, c.tgtheight);
 			}
 			else {
@@ -1301,6 +1404,7 @@ class TrickAnimation extends AnimationScene {
 		this.leader = 0;	// should always be a valid seat
 		this.winner = 0;
 		this.bIsClosed = false;
+		this.friendlyName = "trick"
 	}
 	size() {
 		return this.list.length;
@@ -1398,6 +1502,8 @@ class SpecialEffect extends AnimationScene {
 // only one instance can be running at a time
 var bAnimatorIdle = true;
 // must be global for visibility to lambda function...
+var bDontStartAnimatorYet = false;
+
 var animationItemX;	// animation item
 var gStart = 0;
 var gLast = 0;
@@ -1406,8 +1512,14 @@ function animateMaybe() {
 		return;
 	if (qEmpty())
 		return;
+	if (bDontStartAnimatorYet)
+		return;
 	animator();
 }
+/*
+ * animator - animate items using the theQueue and RAF sets idle when queue is
+ * empty.
+ */
 function animator() {
 	
 	if (!bAnimatorIdle) {
@@ -1421,15 +1533,14 @@ function animator() {
 		return;
 	}
 	console.log("Animating:" + animationItemX.friendlyName);
-	// while (animationItemX != null) {
 		animationItemX.init();
 
 		/*
 		 * keep drawing frames (and requesting a new animation frame) as long as
 		 * there are items in the queue
 		 */
-		// let promise = new Promise(function(resolve, reject) {
 		(function paintAnimationFrames(timestamp) {
+			// timestamp not really used
 			if (gStart == 0)
 				gStart = timestamp;
 			else
@@ -1445,12 +1556,11 @@ function animator() {
 				}
 			if (animationItemX != null)
 				requestAnimationFrame(paintAnimationFrames);
+			else
+				bAnimatorIdle = true;
 		})();
-		// });
-	// }
-	bAnimatorIdle = true;
-}
 
+}
 
 /*
  * (new) addCardToTrick using the new animation routines. stillborn.
@@ -1684,6 +1794,12 @@ function processCardString(cardString) {
 			card = decodeCard(cardString.charAt(i),
 				cardString.charAt(i + 1));
 			var user = parseInt(cardString.charAt(1), 10);
+			bDontStartAnimatorYet = false;
+			for (var j=0; j<cardString.length; j++)
+				if (cardString.charAt(j) == '.')
+					bDontStartAnimatorYet = true;
+			// bDontStartAnimatorYet = false;
+
 			switch (nTableSize) {
 				case 4:
 					turnover1card4(card, user);
@@ -1705,23 +1821,56 @@ function processCardString(cardString) {
 			// clearCardTable(true);
 			break;
 		case '%':
-			// console.log("%error:" + cardString);
-			// report user error
-			gamestatusUpdate("error:" + cardString);
+			// %0%MSG or %0%INF
+			// extract msgtype with slice(...)
+			var msgtype = cardString.slice(3,7);
+			var msg=cardString.slice(7);
+			if (msg.charAt(msg.length-2) == '%')
+				msg = msg.slice(0,-2); // lop off trailing %
+
+			// %inf: Seat:Name:Score::
+			// var inf=cardString.slice(5);
+			if (msgtype == 'INF:') {
+				// process info string
+				// just a gamescore string
+				wsParseInfo(msg);
+				break;
+			}
+			else if (msgtype == 'MSG:') {
+				// process msg/info string
+				gAlert(msg);
+				gamestatusUpdate("error:" + cardString);
+				break;
+			}
+			else {
+				// unrecognized info string
+				console.warn("MSG/INFO Unrecognized:"+msgtype);
+				console.warn(msg);
+			}
+			/*
+			 * // default case: error // console.log("%error:" + cardString); //
+			 * report user error var msg=cardString.slice(7); if
+			 * (msg.charAt(msg.length-2) == '%') msg = msg.slice(0,-2); // lop
+			 * off trailing %
+			 */
 			break;
 		case 'Q':
 		case 'B':
-			gameStatusUpdate("Hearts are Broken!");
+			gamestatusUpdate("Hearts are Broken!");
 			break;
 		case '$':
+			// msgtype = "$0"...
+			msg=cardString.slice(2);
+			if (msg.charAt(msg.length-2) == '%')
+				msg = msg.slice(0,-2); // lop off trailing %
 			console.log("Starting scoredialog...");
-			wsScoreDialog(cardString);
+			wsScoreDialog(msg);
 			break;
 		case '~':
 			// cardString of the form 'NCards to pass left' where N is the
 			// actual number
 			// just know 3 for now...
-			//console.log("Pass message.. working on it...");
+			// console.log("Pass message.. working on it...");
 			parseDialogStringMessage(cardString);
 			wsPassDialog();
 			break;
@@ -1786,7 +1935,16 @@ function enableScoreCloseWindowButton() {
 var tempHeaders=["_Player", "_Points", "_Total", "???"];
 
 function formatScore(score) {
-	var w=scoreWindow;	
+	formatScore(score, true)
+}
+
+// bDialog is true if you want it to update the score html table modal dialog
+// false if you just want to update the scores as from an %INF: msg
+function formatScore(score, bDialog) {
+	// var w=scoreWindow;
+	// potstickers must be initialized as scores may show up in 2 ways.
+	// from setnames and from score dialogs, either from user command or end of hand
+	initPotsticker4();
 	var name="",row=0;
 	var handscore="", gamescore="";
 	var c, prefix, elem;
@@ -1794,7 +1952,7 @@ function formatScore(score) {
 	// 
 	// looking at {$name=x.y$}+
 	// scan upto $
-	for (i=1;i<score.length;i++)
+	for (i=0;i<score.length;i++)
 		if (score.charAt(i) == '$')
 			break;
 	// i points at $ (at top and bottom of loop; pre-increment)
@@ -1833,14 +1991,22 @@ function formatScore(score) {
 		// j points at '$'
 		i = j;
 		//
-		// post up result in table
-		prefix = "p" + row;
-		elem = "player" + prefix;
-		document.getElementById(elem).innerText = name;
-		elem = prefix + "s0";
-		document.getElementById(elem).innerText = handscore;
-		elem = prefix + "s1";
-		document.getElementById(elem).innerText = gamescore;
+		// post up result in (modal-dialog) table
+		if (bDialog) {
+			prefix = "p" + row;
+			elem = "player" + prefix;
+			document.getElementById(elem).innerText = name;
+			elem = prefix + "s0";
+			document.getElementById(elem).innerText = handscore;
+			elem = prefix + "s1";
+			document.getElementById(elem).innerText = gamescore;
+			}
+//		else {
+			// xyzzy
+			// always update the playernames and scores...
+			playerNames[row] = name;
+			playerScores[row] = gamescore;
+//			}
 		}
 	// Headers at the end of the string
 	// have a header if i is pointing at #
@@ -1931,10 +2097,6 @@ function scoreHandlerInstall() {
 	closeBtn.addEventListener("click", dismissScoreDialogWindow);
 }
 
-/*
- * experimentalFunction stub for experimenting with new elements invoked from
- * index.html
- */
 function showModal() {
 	var modal = document.getElementById("myExperimentalModal");
 	modal.style.display = "block";
@@ -1980,6 +2142,15 @@ function passDialogDivBtnCall(n, sMsg) {
 function showPassDialogDiv() {
 	var modal = document.getElementById("passMsgDiv");
 	modal.style.display = "block";
+	/* modal.classList.add("semModalLeft:Final"); */
+	/*
+	 * modal.classList.add("left"); modal.classList.add("slideout");
+	 */
+	if (narrowConfig()) 
+		modal.style.width = "50%";	// take up more screen if narrow...
+	else
+		modal.style.width = "30%";
+	expandHandArea();
 	}
 
 function hidePassDialogDiv() {
@@ -2001,7 +2172,9 @@ function initPassDialogDiv(nCards, sMsg) {
 
 	// Get the button that opens the modalDiv
 	var btn = document.getElementById("passCardsButton");
-
+	// Make sure btn is disabled after it is pressed once
+	btn.disabled = true;
+	
 	// Get the <span> element that closes the modalDiv
 	// var span = document.getElementsByClassName("closePassDialogDiv")[0];
 	var span = document.getElementById("closePassDialogDiv");
@@ -2051,6 +2224,78 @@ function initPassDialogDiv(nCards, sMsg) {
 }
 
 /*
+ * wsParseInfo(sMsg) ++ new code ++ being tested
+ */
+var bShowDivs4=false;
+
+function wsParseInfo(sMsg) {
+	formatScore(sMsg, false);	// parse info into arrays
+	//makedivs4(true);	// always display
+	//bShowdivs4 = true;
+	updatePotstickers4();	// put parsed info into the divs
+}
+
+/*
+ * New code. Never debugged or tested. See above...
+ */
+function wsParseInfoDeadCode(sMsg) {
+	// xxx
+	// %inf:0:Name:Score:: ...
+	var i=5; // index in string
+	for (; i<sMsg.length; i++) {
+		var sSeat="";
+		var sName="";
+		var sScore="";
+		var c="";
+		// :
+		if (sMsg.charAt[i] == ':')
+			i++;	// good
+		else {
+			; // uh oh
+		}
+		// Seat no :
+		for (;i<sMsg.length; ) {// i points to a num or terminator
+			c = sMsg.charAt[i];
+			if (c == ':')
+				break;
+			sSeat += c;
+		}
+		var seat = sSeat.parseInt();
+		
+		// Player name :
+		for (;i<sMsg.length; i++) {
+			c = sMsg.charAt[i];
+			if (c == '.')
+				break;
+			sName += c;			
+		}
+		
+		// Score :
+		for (;i<sMsg.length; i++) {
+			c = sMsg.charAt[i];
+			if (c == ':')
+				break;
+			sScore += c;			
+		}
+
+		// trailing :
+		for (;i<sMsg.length; i++) {
+			c = sMsg.charAt[i];
+			if (c == ':')
+				break;
+			sScore += c;			
+		}
+
+		playerName[seat] = sName;
+		playerScore[seat] = sScore;
+		// Update seat info on screen...
+		// rewrite the div for the appropriate potsticker...
+		// maybe just a showdiv4?
+	}
+		
+}
+
+/*
  * wsScoreDialogDiv - pass the score fully modal score over the play field
  */
 function wsScoreDialog(sMsg) {
@@ -2058,6 +2303,8 @@ function wsScoreDialog(sMsg) {
 	// wsScoreDialogWindow(sMsg);
 }
 
+//
+// Review: TODO: Delete this code...
 function initScoreDialogDiv() {
 	// Get the fullymodal
 	var fullymodal = document.getElementById("scoreDialogDiv");
@@ -2077,23 +2324,21 @@ function initScoreDialogDiv() {
 	 */
 
 	// When the user clicks on <span> (x), close the fullymodal
-	span.onclick = function() {
-		initScoreDialogDiv();
-		fullymodal.style.display = "none";
-	}
-
-	// When the user clicks anywhere outside of the fullymodal, close it
-	window.onclick = function(event) {
-		initScoreDialogDiv();		
-		if (event.target == fullymodal) {
-			fullymodal.style.display = "none";
-		}
-	}
+	/*
+	 * No workee... related to remodeling of modals...
+	 * 
+	 * span.onclick = function() { initScoreDialogDiv();
+	 * fullymodal.style.display = "none"; } // When the user clicks anywhere
+	 * outside of the fullymodal, close it window.onclick = function(event) {
+	 * initScoreDialogDiv(); if (event.target == fullymodal) {
+	 * fullymodal.style.display = "none"; } }
+	 */
 
 }
 
 function wsScoreDialogDiv(score) {
-	initScoreDialogDiv();
+	// initscore no longer needed...
+	// initScoreDialogDiv();
 	
 	var fullymodal = document.getElementById("scoreDialogDiv");
 	// both block and inline-block seem to work
@@ -2102,15 +2347,266 @@ function wsScoreDialogDiv(score) {
 	var s="fjkasd$buzz=0.0$joe=93.95$laura=3.3$anne=0.26$bob=0.26$patti=0.26$";
 	if (score == "")
 		score = s;
-	formatScore(score);	
+	formatScore(score, true);	
 }
 
-function experimentalFunction(score) {
-	wsScoreDialogDiv(score);
+/*
+ * function experimentalFunction(score) { wsScoreDialogDiv(score); }
+ */
+/*
+ * experimentalFunction stub for experimenting with new elements invoked from
+ * index.html
+ */
+
+var bToggle = true;
+function experimentalFunctionScore(score) {
+	// toggleHandArea();
+	if (bToggle)
+		expandHandArea();
+	else
+		contractHandArea();
+	bToggle = !bToggle;
+	}
+
+var xScale6=[1/3, 1/2 + 1/6, 5/6, 2/3, 1/3, 0];
+var yScale6=[0, 1/6, 1/2, 5/6, 4/5, 1/2];
+// hastily added potsticker4 dimensions
+// positioned at 1st, 3rd, 4th and 6th seats
+// buzz
+var xScale4=[1/3, 5/6, 2/3, 0];
+var yScale4=[0, 1/2, 5/6, 1/2];
+var colors=[ 'PEACHPUFF', // #FFDAB9
+	 'LEMONCHIFFON', // #FFFACD
+	 'LIGHTSTEELBLUE', // #B0C4DE
+	 'PEACHPUFF', // #FFDAB9
+	 'LEMONCHIFFON', // #FFFACD
+	 'LIGHTSTEELBLUE', // #B0C4DE
+];
+/*
+ * 'LAVENDER', // #E6E6FA 'LIGHTSALMON', // #FFA07A 'LIGHTCYAN', // #E0FFFF
+ * 
+ */
+
+var bDivToggle=false;
+var potsticker6=null;
+var potsticker4=null;
+
+var playerNames=null;
+var playerScores=null;
+
+function makedivs6() {
+	var i;
+	if (potsticker6 == null)
+		;
+	else if (!bDivToggle) {	// already on; turn off;
+		for (i=0;i<6; i++)
+			potsticker6[i].style.visibility = "visible";		
+		bDivToggle = true;
+		return;
+	} else {	// onoff is false;
+		// just turn them off
+		for (i=0; i<6; i++)
+			potsticker6[i].style.visibility = "hidden";
+		bDivToggle = false;
+		return;
+	}
+	
+	potsticker6=new Array(6);
+	bDivToggle = true;
+	// feltDiv in gedenken3...
+	// var iDiv = document.getElementById("outerParent");
+	var iDiv = document.getElementById("TextScrollDiv");
+
+	var width = 500;	// givens; should use real values
+	var height = 500;
+	var xoffset = 50;
+	var yoffset = 60;
+	for (i=0; i<6; i++) {
+		// Create inner div then appending to the
+		var innerDiv = document.createElement('div');
+		innerDiv.className = 'potSticker';
+		var p1=document.createElement('p');
+		p1.innerText = "Name" + i;	// "Name0" etc. 0 of 6
+		innerDiv.appendChild(p1);
+		var x = xScale6[i] * width;
+		if (x > 0)
+			x -= xoffset;
+		var y = yScale6[i] * height;
+		if (y > 0)
+			y -= yoffset;
+		innerDiv.style.left = (x) + "px";
+		innerDiv.style.top = (y) + "px";
+		/*
+		 * // Ok... serious debugging... width += 10; top += 10;
+		 * innerDiv.style.left = width + "px"; innerDiv.style.top = top + "px";
+		 */
+		innerDiv.style.backgroundColor = colors[i];
+		innerDiv.style.visibility = "block";
+		iDiv.appendChild(innerDiv);
+		potsticker6[i] = innerDiv;
+	}
+	
 }
 
-function experimentalFunction1(s) {
+function initPotsticker4XXX() {
+
+	if (potsticker4 != null)
+		return;
+	potsticker4 = new Array(4);
+	playerNames = new Array(6); 	// 6. why not?
+	playerScores = new Array(6); 	// 6. why not?
+	for (var i=0; i<6; i++) {
+		playerNames[i] = "";
+		playerScores[i] = 0;
+	}
+	playerNames[3]="big-brother";
+
+	// bDivToggle = true;
+	var iDiv = document.getElementById("TextScrollDiv");
+
+	var width = 500;	// givens; should use real values
+	var height = 500;	// these are ignored. See .potSticker class
+	var xoffset = 50;
+	var yoffset = 60;
+	for (i=0; i<4; i++) {
+		// Create inner div then appending to the
+		var innerDiv = document.createElement('div');
+		innerDiv.className = 'potSticker';
+		var p1=document.createElement('p');
+		var t1=/*"Name:" + */playerNames[i];	// Name0 etc 0 of 4.
+		var t2=/*"Score:" + */playerScores[i];
+		
+		p1.innerHTML = "<p>" + t1 + "</p>" + "<p>" + t2 + "</p>";	// "Name0"
+																	// etc. 0 of
+																	// // 6
+		innerDiv.appendChild(p1);
+
+		var x = xScale4[i] * width;
+		if (x > 0)
+			x -= xoffset;
+		var y = yScale4[i] * height;
+		if (y > 0)
+			y -= yoffset;
+		innerDiv.style.left = (x) + "px";
+		innerDiv.style.top = (y) + "px";
+		/*
+		 * // Ok... serious debugging... width += 10; top += 10;
+		 * innerDiv.style.left = width + "px"; innerDiv.style.top = top + "px";
+		 */
+		innerDiv.style.backgroundColor = colors[i];
+		innerDiv.style.visibility = "block";
+		iDiv.appendChild(innerDiv);
+		potsticker4[i] = innerDiv;
+	}
+
+}
+
+function initPotsticker4() {
+
+	if (potsticker4 != null)
+		return;
+	potsticker4 = new Array(4);
+	playerNames = new Array(6); 	// 6. why not?
+	playerScores = new Array(6); 	// 6. why not?
+	for (var i=0; i<6; i++) {
+		playerNames[i] = "";
+		playerScores[i] = 0;
+	}
+	playerNames[3]="big-brother";
+
+	updatePotstickers4();
+}
+
+function updatePotstickers4() {
+	var iDiv = document.getElementById("TextScrollDiv");
+
+	// so if there are childred of iDiv, delete them...
+	// const item = document.querySelector('#itemId')
+	var arr=iDiv.getElementsByClassName('potSticker');
+	//var len=arr.length;	// otherwise you don't get them all... duh
+	// it's really a trip that I have to delete these like this...
+	for (var i=0; arr.length>0; i++) {
+		arr[0].remove();
+		arr=iDiv.getElementsByClassName('potSticker');
+		}
+	
+	// these are ignored. See .potSticker class
+	var width = 500;	// givens; should use real values
+	var height = 500;	// new size 500x300
+	var xoffset = 50;
+	var yoffset = 60;
+	for (var i=0; i<4; i++) {
+		// Create inner div then appending to the
+		var innerDiv = document.createElement('div');
+		innerDiv.className = 'potSticker';
+		var p1=document.createElement('p');
+		var t1=/*"Name:" + */ playerNames[i];	// Name0 etc 0 of 4.
+		var t2=/*"Score:" +*/ playerScores[i];
+
+		// two-line printout
+		//p1.innerHTML = "<p style=\"text-align:center\">" + t1 + "</p>" + "<p style=\"text-align:center\">" + t2 + "</p>";
+		// one-line printout
+		p1.innerHTML = "<p style=\"text-align:center\">" + t1 + ":" + t2 + "</p>";	
+		innerDiv.appendChild(p1);
+
+		var x = xScale4[i] * width;
+		if (x > 0)
+			x -= xoffset;
+		var y = yScale4[i] * height;
+		if (y > 0)
+			y -= yoffset;
+		innerDiv.style.left = (x) + "px";
+		innerDiv.style.top = (y) + "px";
+		/*
+		 * // Ok... serious debugging... width += 10; top += 10;
+		 * innerDiv.style.left = width + "px"; innerDiv.style.top = top + "px";
+		 */
+		innerDiv.style.backgroundColor = colors[i];
+		innerDiv.style.visibility = "block";
+		iDiv.appendChild(innerDiv);
+		potsticker4[i] = innerDiv;
+	}
+
+}
+
+function toggleDivs4() {
+	bShowDivs4 = !bShowDivs4;
+	makedivs4(bShowDivs4);
+// makedivs4(false);
+}
+
+/*
+ * makedivs4 creates if they don't exist and if !bVisible makes invisible
+ */
+function makedivs4(bVisible) {
+	var i;
+	initPotsticker4();
+	if (bVisible) {	// already on; turn off;
+		for (i=0;i<4; i++)
+			potsticker4[i].style.visibility = "visible";		
+		return;
+	} else {	// onoff is false;
+		// just turn them off
+		for (i=0; i<4; i++)
+			potsticker4[i].style.visibility = "hidden";
+		return;
+	}
+	
+}
+
+/*
+ * box-o-chocolates
+ */
+function experimentalFunction(s) {
 	console.log("You never know what you're going to get");
+	makedivs6();
+	// makedivs4(false); // toggle; don't force
+	//toggleDivs4();
+}
+
+function toggleRealTimeScore() {
+	toggleDivs4();
+
 }
 
 /*
@@ -2128,8 +2624,8 @@ formatScore(sMsg);	// harmless in window version... the div is still there...
 
 
 /*
- * wsPassDialog - call either the window or div version of the routines
- *  -- note args here are obsolete. See wsPassDialog() function
+ * wsPassDialog - call either the window or div version of the routines -- note
+ * args here are obsolete. See wsPassDialog() function
  */
 function wsPassDialog(nCards, sMsg) {
 	console.log("Modal div for passing cards" + sMsg);
@@ -2137,8 +2633,7 @@ function wsPassDialog(nCards, sMsg) {
 	showPassDialogDiv();
 }
 /*
- * this is the current way to do this...
- *  call parseDialogStringMessage first
+ * this is the current way to do this... call parseDialogStringMessage first
  */
 function wsPassDialog() {
 	initPassDialogDiv(nCardsToPass, passDialogString);
@@ -2227,7 +2722,10 @@ function passCardSelected(event) {
 	div.removeChild(cardBtn);
 	// Was never actually removed from hand...
 	// if it is removed from hand, add it back here...
-	
+	var cardIndex = cardIndexFromButtonName(event.target.id);
+	var card = theDeck[cardIndex];
+	card.handButton.style.opacity = 1.0; 
+
 	// remove from the pass array
 	// decrement cards in the dialog
 	var i, j, nfound=0;
@@ -2243,6 +2741,12 @@ function passCardSelected(event) {
 		passCards[i] = temp[i];
 	iCurrentFreeCardInPass -= nfound;
 	
+	// Bob Blazak's Bug!
+	// since card has been returned to the hand,
+	// disable the pass button!
+	var btn = document.getElementById("passCardsButton");
+	btn.disabled = true;
+
 	console.log("passCard:Click Seen in dialog. Card (sort of) returned to hand...");
 }
 
@@ -2303,7 +2807,7 @@ function addCardToPassDialogWindow(cardindex) {
 		// trying to select more cards to pass than is legal
 		// alert("Warning: Can only pass " + iPassSize + " cards. i=" + i);
 		alert("Click on card to return it to hand. Can only pass " + iPassSize + " cards. i=" + i);
-		//setPassDialogErrorString("Can only pass " + iPassSize + " cards.")
+		// setPassDialogErrorString("Can only pass " + iPassSize + " cards.")
 		return;
 	}
 	//
@@ -2331,9 +2835,14 @@ function addCardToPassDialogWindow(cardindex) {
 	 */
 	cardBtn.name = card.shortName;
 	cardBtn.style.visibility = "visible";
-	cardBtn.style.height = "250px";	// was "75px" "250px" by "180px" works but
+	// was
+	// cardBtn.style.height = "250px"; // was "75px" "250px" by "180px" works
+	// but
+	// cardBtn.style.width = "180px"; // was "54px"
+	// try:
+	cardBtn.style.height = "125px";	// was "75px" "250px" by "180px" works but
 									// is big..
-	cardBtn.style.width = "180px";	// was "54px"
+	cardBtn.style.width = "60px";	// was "54px"
 
 	iCurrentFreeCardInPass++;
 	// iPassSize cards? enable the send button
@@ -2351,7 +2860,7 @@ function resetPassDialogErrorString() {
 }
 
 function setPassDialogErrorString(s) {
-	//alert(s);
+	// alert(s);
 	var p=document.getElementById("passDialogErrorString");
 	p.innerText = s;
 }
@@ -2367,7 +2876,8 @@ function addCardToPassDialogDiv(cardindex) {
 		// Ooh. Bad User. Can't add one more card.
 		// trying to select more cards to pass than is legal
 		// alert("Warning: Can only pass " + iPassSize + " cards. i=" + i);
-		// alert("Click on card to return it to hand. Can only pass " + iPassSize + " cards. i=" + i);
+		// alert("Click on card to return it to hand. Can only pass " +
+		// iPassSize + " cards. i=" + i);
 		setPassDialogErrorString("Can only pass " + iPassSize + " cards.")
 		return;
 	}
@@ -2377,7 +2887,7 @@ function addCardToPassDialogDiv(cardindex) {
 		// is it a dup?
 		btn = passCards[j];
 		if (btn.name == card.shortName) {
-			//setPassDialogErrorString("Duplicate card selected");
+			// setPassDialogErrorString("Duplicate card selected");
 			setPassDialogErrorString("Card must be unique.");
 			return;
 		}		
@@ -2477,7 +2987,8 @@ var sHost = "172.98.72.44:8080";	// determined at runtime or set by user with
 // var sPort=":8080"; // can't be set by user, yet
 var sRoot = "/Spades";	// was sServiceName
 var sEndPoint = "/server/ws";
-var sUser = "";
+//var sUser = "/ClientNameXyzzy01";
+var sUser = "/Guest01";
 var sConnectionString = "";	// constructed by formatConnectionString
 
 /*
@@ -2535,11 +3046,30 @@ function setUser(s) {
 	sUser = s;
 }
 
+/*
+ * xxx Add cookie string to send here... (maybe?)
+ */
+function initWebSocket() {
+	openWebSocket();
+	// serverWrite("Hello world!");
+}
+
 // var sService = "ws://127.0.0.1:8080/"
 function openWebSocket() {
+	/*
+	 * retrieve the ?id=XXX component and use XXX as /XXX
+	 * by sSetUser = XXX
+	 */
+	sUser = "/GuestUser";
+	var id=window.location.search;
+	console.log("user="+id);
+	sUser = "/"+id.slice(4);
 	formatConnectionString();
 	console.log("opening:" + sConnectionString + "...");
 	// appendTextToTextArea("connecting to " + sConnectionString + "...");
+	/*
+	 * retrieve the ?id=XXX component and use XXX as /XXX
+	 */
 	echoText.value = "connecting to " + sConnectionString + "..." + echoText.value;
 	/*
 	 * webSocket = new WebSocket("ws://localhost.net:8080/" + sServiceName +
@@ -2740,14 +3270,14 @@ function reorgButtonsInDiv(sdiv) {
 	dumpButtonlist(sdiv, buttonList, j);
 	sortByAscendingCardOrder(buttonList, j);
 	dumpButtonlist(sdiv, buttonList, j);
-	//var span=document.createElement("span");
+	// var span=document.createElement("span");
 	for (i=0; i<j; i++) {
 		var cardBtn=buttonList[i];
 		div.prepend(cardBtn);
 	}		
-	//div.prepend(span);
+	// div.prepend(span);
 	div.className = "buttonGrid";
-	//div.className = "alignLeft";
+	// div.className = "alignLeft";
 	// alignRight is another interesting option...
 	// except it doesn't work if there are more than 4 cards
 	// div.className = "alignRight";
@@ -2834,9 +3364,10 @@ stringArrayOfDivNames[DIAMONDS] = "DiamondsInHandDiv";
 stringArrayOfDivNames[HEARTS] = "HeartsInHandDiv";
 stringArrayOfDivNames[SPADES] = "SpadesInHandDiv";
 
-/* for (var key in stringArrayOfDivNames) {
-	console.log(key + "->" + stringArrayOfDivNames[key]);
-} */
+/*
+ * for (var key in stringArrayOfDivNames) { console.log(key + "->" +
+ * stringArrayOfDivNames[key]); }
+ */
 
 // zzz
 function getSuitDiv(card) {
@@ -2866,8 +3397,54 @@ function clearDivs() {
 	}
 }
 
+
+// xxx
+function resizeHandArea(width, innerwidth) {
+	expandHandArea();
+}
+
+function expandHandArea() {
+	var div=document.getElementById("handArea");
+	var startx = 160;	// 160?
+	div.x = startx;
+	div.width = clientWidth - startx;
+	if (div.style.zIndex != 3)
+		console.log("handarea.zindex=" + div.style.zIndex + " Yikdes!");
+	div.style.zIndex = 3;
+	// div.css("z-index", 4);
+}
+
+// this is really just hide hand area...
+function contractHandArea() {
+	var div=document.getElementById("handArea");
+	var startx = clientWidth * .8;	// 160?
+	div.x = startx;
+	div.width = 20; // was... clientWidth - startx;
+
+	div.style.zIndex = 3;	// keep at 3...
+	
+	// need to make column1 area really big???
+	// ???
+	
+	// bring playfelt (canvas1) to the top
+	feltCanvas = document.getElementById("Canvas1");
+	// Never change playfext zindex! mll 6/2/20
+	feltCanvas.style.zIndex = 2;	// keep under handarea...
+	}
+
+// Not used...
+function toggleHandAreaXXXX() {
+	var div=document.getElementById("handArea");
+
+	if (div.style.zIndex > 2)
+		div.style.zIndex = 0;
+	else
+		div.style.zIndex = 3;
+}
+
 function arrangeCardsInDivs() {
-		console.log("Uh oh. I shouldn't be called. Ever.");
+		// console.log("Uh oh. I shouldn't be called. Ever.");
+		console.log("ArrangeCardsInDivs");
 		var always=true;
 		if (always)
 			return;
@@ -2935,6 +3512,29 @@ function processLocalCommand(line) {
 				xstatusUpdate("Invalid table parameter. ignored");
 			}
 		}
+	} else if (line.includes("param")) {
+		var param=window.location.href;
+		xstatusUpdate("params=" + param);
+	} else if (line.includes("config")) {
+		var flag = detectConfig();
+		if (flag)
+			xstatusUpdate("config=" + "mobile width/inner:" + scrWidth +  ":" + scrInnerWidth  + " height:" + scrHeight);
+		else
+			xstatusUpdate("config=" + "desktop width/inner:" + scrWidth + ":" + scrInnerWidth  +  " height:" + scrHeight);
+	} else if (line.includes("narrow")) {
+		var flag = detectConfig();
+		if (flag)
+			xstatusUpdate("config=" + "mobile width/inner:" + scrWidth +  ":" + scrInnerWidth  + " height:" + scrHeight);
+		else
+			xstatusUpdate("config=" + "desktop width/inner:" + scrWidth + ":" + scrInnerWidth  +  " height:" + scrHeight);
+		setNarrow();
+	} else if (line.includes("wide")) {
+		var flag = detectConfig();
+		if (flag)
+			xstatusUpdate("config=" + "mobile width/inner:" + scrWidth +  ":" + scrInnerWidth  + " height:" + scrHeight);
+		else
+			xstatusUpdate("config=" + "desktop width/inner:" + scrWidth + ":" + scrInnerWidth  +  " height:" + scrHeight);
+		setWide();
 	} else if (line.includes("grab=")) {
 		var matches = line.match(/(\d+)/); // if a number at all...
 		if (matches) {
@@ -3060,6 +3660,10 @@ function processLocalCommand(line) {
 	} else if (line.includes("last")) {
 		repaint(saveGestault);
 		xstatusUpdate("Last trick...");
+	} else if (line.includes("galert")) {
+		var param = line.slice(8);	// HTML string for inner html...
+		gAlert(param);
+		xstatusUpdate("galert...");
 	} else {
 		xstatusUpdate("*** Unrecognized command. ignored ***");
 	}
@@ -3096,29 +3700,81 @@ function wsSendMessage() {
 /*
  * menuDropdown
  */
-function menuDropDown() {
-	console.log("menuDropDown...");
-	document.getElementById("item1-menu").classList.toggle("show");
-}
-function mouseExitDropDownMenu(event) {
-	console.log("exit mouseExitDropDownMenu.../Do nothing right now...");
-	console.log("arg=" + event);
-	menuDropDown();	// toggle show value...
-}
-/*
- * dropDown - When the user clicks on the button, toggle between hiding and
- * showing the dropdown content
- */
-function dropDown() {
-	console.log("myDropdown...");
-	document.getElementById("myDropdown").classList.toggle("show");
+
+function deactivateMenu(menu) {
+	menu.style = "display:none;";
+	return;
 }
 
-function mouseExitMenu(event) {
-	console.log("exit myDropdown.../Do nothing right now...");
-	console.log("arg=" + event);
-	dropDown();	// toggle show value...
-
+var activeDropdown=null;
+function pinDropDown(sMenuName, event) {
+	var menu=document.getElementById(sMenuName);
+	if (activeDropdown != null && menu != activeDropdown)
+		deactivateMenu(activeDropdown);
+	menu.style = "display:block;";
+	activeDropdown = menu;
+	return;
 }
+
+function unpinDropDown(sMenuName, event) {
+	var menu=document.getElementById(sMenuName);
+	if (activeDropdown == menu)
+		activeDropdown = null;
+	deactivateMenu(menu);
+}
+
+function pinmenuSelect2(sMenu, event) {
+	console.log("not quiteto the darkest depths of Mordor...")
+	console.log("party on:" + event.hash);
+}
+
+function pinmenuSelect(sMenu, event) {
+	//console.log("Welcome to the darkest depths of Mordor...")
+	// ToDo: perform action...
+	console.log("Act on:" + event.hash);
+	// i.e. close menu when item is selected...
+	switch (event.hash) {
+	// Game Menu
+	case "#reconnect":
+		serverWrite("Hello world!");
+		break;
+	case "#join":
+		serverWrite("//join");
+		break;
+	case "#start":
+		serverWrite("//start");
+		break;	
+	case "#new":
+		serverWrite("//new");
+		break;
+	case "#misdeal":
+		serverWrite("//misdeal");
+		break;
+	case "#resetGame":
+		serverWrite("//reset");
+		break;
+	case "#replay":
+		serverWrite("//replay");
+		break;
+	// Action Menu
+	case "#refresh":
+		serverWrite("//refresh");
+		break;
+	case "#scores":
+		serverWrite("//score");
+		break;
+	case "#who":
+	case "#status":
+	case "#about":
+	default:
+		xstatusUpdate("Command:" + event.hash + "Not yet implemented.");
+	}
+	unpinDropDown(sMenu,event);
+	// var menu=document.getElementById(sMenu);
+/* menu.style.display = "none"; */
+}
+
+
 
 console.log("OneUtils loaded [done].");
+

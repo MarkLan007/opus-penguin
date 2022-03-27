@@ -7,9 +7,18 @@ package server.ws;
  */
 class Card {
 	int cardindex;
+	String sname="";
 	Rank rank=Rank.ACE;		// Default Card AS
 	Suit suit=Suit.SPADES;
-	
+
+	static final Card deuceOfClubs = new Card(Rank.DEUCE, Suit.CLUBS);
+	//Card deuceOfClubs = new Card(Rank.DEUCE, Suit.CLUBS);
+	static final Card aceOfSpades = new Card(Rank.ACE, Suit.SPADES);
+	static final Card kingOfSpades = new Card(Rank.KING, Suit.SPADES);
+	static final Card queenOfSpades = new Card(Rank.QUEEN, Suit.SPADES);
+	static final Card deuceOfHearts = new Card(Rank.DEUCE, Suit.HEARTS);
+	static final Card threeOfHearts = new Card(Rank.THREE, Suit.HEARTS);
+
 	public Card(int iOrdinal) {
 		int iCard = iOrdinal % 13;
 		int iSuit = iOrdinal / 13;
@@ -17,6 +26,8 @@ class Card {
 
 		rank = Rank.values()[iCard];
 		suit = Suit.values()[iSuit];
+		sname = rank.name() + "-" + suit.name();
+
 		}
 	
 	static Card cardBack() {
@@ -34,7 +45,18 @@ class Card {
 			return c;
 		return this;
 	}
-	
+
+	// new... 6/8/20
+	public Card lowerCard(Card c) {
+		if (c.rank == Rank.ACE)
+			return this;
+		else if (rank == Rank.ACE)
+			return c;
+		if (c.rank.ordinal() < rank.ordinal())
+			return c;
+		return this;
+	}
+
 	private void computeCardIndex(Rank rk, Suit st) {
 		int base = st.ordinal();
 		int i = rk.ordinal();
@@ -46,6 +68,7 @@ class Card {
 		rank = rk;
 		suit = st;
 		computeCardIndex(rk, st);
+		sname = rk.name() + "-" + st.name();
 		}
 
 	public boolean equals(Rank r, Suit st) {
@@ -94,6 +117,8 @@ class Card {
 		// Otherwise default card is AS, as initialized
 		// TODO: throw hissy fit.
 		computeCardIndex(rank, suit);
+		sname = rank.name() + "-" + suit.name();
+
 		}
 	
 	/*

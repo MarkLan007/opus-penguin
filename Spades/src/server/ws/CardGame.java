@@ -5,9 +5,9 @@ package server.ws;
 //import java.nio.channels.SocketChannel;
 //import java.util.LinkedList;
 
-public class CardGame implements GameInterface {
+public abstract class CardGame implements GameInterface {
 	int nPlayers = 4;
-	private int nCurrentTurn = -1; // index of player with current turn or -1 if undefined
+	protected int nCurrentTurn = -1; // index of player with current turn or -1 if undefined
 	int nTricksPerHand = 52 / nPlayers;
 	Trick[] trickArray = new Trick[(nTricksPerHand) + 1];
 	Trick currentTrick = null;
@@ -15,19 +15,33 @@ public class CardGame implements GameInterface {
 	final int LAST_TRICK = (52 / nPlayers);
 	MailBoxExchange.PassType currentPass = MailBoxExchange.first();
 	MailBoxExchange mbx = null;
-	private int nTrickId = 0;
+	boolean bPassDisabled = false;
+	void disablePass() { bPassDisabled = true; }
+	protected int nTrickId = 0;
+	static int gameAtom=0;
+	int gameId=0;
 
+	private Suit suitThatMustBeBroken = Suit.HEARTS;
+	protected void setSuitThatMustBeBroken(Suit st) {
+		suitThatMustBeBroken = st;
+	}
+	public Suit getSuitThatMustBeBroken() {
+		return suitThatMustBeBroken;
+	}
+	
 	public int getCurrentTrickId() {
 		return nTrickId;
 	}
 
-	boolean bDebugCardCf = true;
+	static boolean bDebugCardCf = false;
 	boolean bGameAborted = false;
 	boolean bHandOver = false;
 	boolean bGameInProgress = true;
 
 	String sGameName = "_AnonHearts";
-
+	String sGameType = "hearts";
+	public String nameOfTheGame() { return sGameType; }
+	
 	public boolean gameInProgress() {
 		return bGameInProgress;
 	}
@@ -37,7 +51,7 @@ public class CardGame implements GameInterface {
 	 * there is only one game for now, and it is created in ttyhandler or WsServer
 	 * Let him who is without sin cast the first stone. (Hey, I'll fix it soon...)
 	 */
-	static public CardGame theGame = null;
+	//static public CardGame theGame = null;
 
 	Trick getCurrentTrick() {
 		return currentTrick;
@@ -51,33 +65,9 @@ public class CardGame implements GameInterface {
 	final Card deuceClubs=new Card(Rank.DEUCE, Suit.CLUBS);
 	final Card queenSpades=new Card(Rank.QUEEN, Suit.SPADES);
 	
-	/*
-	 * true if in this GAME cfirst is higher than csecond; assume csecond was the
-	 * one lead (or beat the one lead) isHigher(2C,AC) -> false isHigher(2C,3C) ->
-	 * false isHigher(AC,3C) -> true isHigher(AH,2C) -> false
-	 */
-	boolean isHigher(Card cfirst, Card csecond) {
-		/*
-		 * if the suits are different the first card wins
-		 */
-		if (bDebugCardCf)
-			gameErrorLog("?isHigher(" + cfirst.encode() + "," + csecond.encode() + ")");
-
-		if (cfirst.suit != csecond.suit)
-			return false;
-		/*
-		 * otherwise compare ranks, not ace is high
-		 */
-		if (csecond.rank == Rank.ACE)
-			return false;
-		if (cfirst.rank == Rank.ACE)
-			return true;
-		if (cfirst.rank.ordinal() > csecond.rank.ordinal())
-			return true;
-		else
-			return false;
-	}
-
+ // ishigher goes here...
+	public abstract boolean isHigher(Card cfirst, Card csecond);
+	
 	/*
 	 * The hack that never got implemented: See "step" in ttyhandler boolean
 	 * bStepTurns = false; // this and game stepping isn't really completely
@@ -107,23 +97,84 @@ public class CardGame implements GameInterface {
 	 */
 
 	// create players list, a deck (without faces), and names
-	CardGame() {
+	private CardGame() {
+		gameId = gameAtom ++;
+	}
+
+	CardGame(String gamename) {
+		this();
+		setName(gamename);
+		setGameType(gamename);	// "nameOfTheGame"
 		populatePlayers();
 		resetGameScores();
+	}
+
+	public void setBid(int n, int nseat) {
+		Player p = getPlayer(nseat);
+		int partner = (nseat + nPlayers/2) % nPlayers;
+		boolean setNil=false;
+		if (p == null)
+			return;
+		p.setBid(n);
+		// now determine consequences...
+		// if n > 0, set partner = 0
+		if (n > 0) {
+			p = getPlayer(partner);
+			p.setBid(0);
+			setNil = true;
+		}
+		System.out.println("Player(" + nseat + ")" + "->" + n + ".");
+		if (setNil)
+			System.out.println("Player(" + partner + ")" + "->" + "nil" + ".");
+	}
+	
+	public int getBid(int nseat) {
+		Player p = getPlayer(nseat);
+		if (p == null)
+			return -1;
+		return p.getBid();
+	}
+	
+	public int getTricks(int nseat) {
+		Player p = getPlayer(nseat);
+		if (p == null)
+			return -1;
+		return p.iTricks;
+	}
+	
+	public int getGameId() {
+		return gameId;
 	}
 
 	public void setName(String s) {
 		sGameName = s;
 	}
 
+	public void setName(int pid, String sname) {
+		Player p=null;
+		boolean success=false;
+		if (pid >= 0 && pid < nPlayers) {
+			p = playerArray[pid];
+			p.setName(sname);
+			success=true;
+		}
+		if (success)
+			updatePlayerInfo();
+
+	}
+	
 	public String getName() {
 		return sGameName;
 	}
 
-	CardGame(String gamename) {
-		this();
-		setName(gamename);
+	public String getGameType() {
+		return sGameType;
 	}
+	
+	void setGameType(String sname) {
+		sGameType = sname;
+	}
+
 
 	private void populatePlayers() {
 		//
@@ -147,7 +198,7 @@ public class CardGame implements GameInterface {
 
 	// No longer need NIOClientSessions since websockets are full duplex
 	// NIOClientSession[] humanPlayers=new NIOClientSession[10];
-	private int humanPlayerFree = 0;
+	// private int humanPlayerFree = 0;
 
 	/*
 	 * channelHasOwner -- take an accepted channel, and assume that it belongs to
@@ -241,7 +292,7 @@ public class CardGame implements GameInterface {
 		System.out.println("Canot find player in game to resend to:" + us.username);
 	}
 
-	void gameErrorLog(String sError) {
+	static void gameErrorLog(String sError) {
 		MainServer.ttyLogString(sError);
 	}
 
@@ -319,7 +370,7 @@ public class CardGame implements GameInterface {
 		// This sends to client; fine;
 		// pause before processing any response when stepping
 		/*
-		 * This message should included the cards already played in the trick.. xxx ,,,
+		 * This message should included the cards already played in the trick.. 
 		 * No it shouldn't. But it should send a %msg text attachment if first move,
 		 * ?0%msg: lead the 2c if leading, ?0%msg: your lead else ?0%msg: your turn
 		 */
@@ -327,12 +378,13 @@ public class CardGame implements GameInterface {
 		 * TODO: should not send your turn if the game is over...
 		 */
 		String msg;
-		if (nCurrentTurn == -1 && (currentTrick == null || currentTrick.subdeck.size() == 0))
-			msg = "%Play the 2 of clubs";
+		if (p.has(deuceClubs))
+			msg = "Lead the 2 of clubs!";
 		else if (currentTrick == null || currentTrick.subdeck.size() == 0) // i.e. your leading, and not first trick
-			msg = "%Your lead.";
+			msg = "Your lead.";
 		else
-			msg = "%Your turn.";
+			msg = "Your turn.";
+		// xxx
 		pm.setUsertext(msg);
 		p.sendToClient(pm);
 		if (nCurrentTurn == -1) {
@@ -378,17 +430,36 @@ public class CardGame implements GameInterface {
 	 * broadcastUpdate - send the same message to all the players works even if
 	 * there is no current turn... i.e. during pass
 	 */
+	/*
+	private Player nextp(int i) {
+		i = (i + 1) % nPlayers;
+		return playerArray[i];
+	} */
+
 	void broadcastUpdate(ProtocolMessage pmsg) {
 		int i, j;
+		
+		/*
+		 * hack the message so that if the person who plays
+		 * after this card is a robot, tell the client 
+		 * 'don't start the animator' yet (i.e. collect the messages because
+		 * they will be coming quickly.)
+		 */
+		if (pmsg.type == ProtocolMessageTypes.CURRENT_TRICK ) {
+			int sender = pmsg.sender;
+			int nextplayer = (sender + 1) % nPlayers;
+			Player np = playerArray[nextplayer];
+			if (np.isRobot()) // next player after this is a robot
+				pmsg.setUsertext(".");
+		}
 		if (nCurrentTurn > -1)
 			j = nCurrentTurn;
 		else
 			j = 0;
 		for (i = 0; i < nPlayers; i++) {
-			Player p = playerArray[j++];
+			Player p = playerArray[j];
 			p.sendToClient(pmsg);
-			if (j >= nPlayers)
-				j = 0;
+			j = (j + 1) % nPlayers;
 		}
 	}
 	
@@ -417,7 +488,9 @@ public class CardGame implements GameInterface {
 	 * so game (or robots) can send messages to humans
 	 */
 	public void snark(String s) {
-		broadcast(true, s);
+		//broadcast(true, s);
+		ProtocolMessage pm=newErrorMsg(false, s);
+		broadcastUpdate(pm);
 	}
 
 	boolean validPid(int pid) {
@@ -467,6 +540,39 @@ public class CardGame implements GameInterface {
 		return "(" + length + ")" + cardString + handString;
 	}
 
+	/*
+	 * info messages are processed silently
+	 * otherwise they look like error messages with a leading '%INF:'
+	 */
+	/*
+	 * TODO: Don't really need it's own type. Just process it as an error message...
+	 */
+	static ProtocolMessage newInfoMsg(String sErrorText) {
+		String prefix = "%INF:";
+		ProtocolMessage pm=new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR, 
+				prefix + sErrorText + "%");	// Wrap in %MSG:/%ERR: %
+		return pm;
+	}
+	
+	static ProtocolMessage newErrorMsg(boolean bJustInformational, String sErrorText) {
+		String prefix = "%MSG:";
+		if (bJustInformational)
+			prefix = "%MSG:";
+		else
+			prefix = "%ERR:";
+		ProtocolMessage pm=new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR, 
+				prefix + sErrorText + "%");	// Wrap in %MSG:/%ERR: %
+		return pm;
+	}
+	static String getFormattedAlertMsg(String msg) {
+/*		String spm="";	// Wrap in %MSG: %
+		ProtocolMessage pm=new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR, 
+				"%MSG:" + msg + "%");
+				*/
+		ProtocolMessage pm = newErrorMsg(true, msg);
+		String formattedErrorMsg = pm.encode();
+		return formattedErrorMsg;
+	}
 	String getFormattedPlayerInfo() {
 		int i;
 		String sTemp = "";
@@ -497,25 +603,11 @@ public class CardGame implements GameInterface {
 		return sTemp;
 	}
 
-	String getFormattedGameScore() {
-		int i;
-		String sTemp = "";
-		boolean bGameInProgress = nCurrentTurn != -1;
-		String x = "";
-		for (i = 0; i < nPlayers; i++) {
-			if (bGameInProgress && i == nCurrentTurn)
-				x = "*";
-			else
-				x = "";
-			sTemp = sTemp + "$" + x + playerArray[i].getName() + "=" + playerArray[i].handScore + "."
-					+ playerArray[i].totalScore;
-		}
-		return sTemp + '$' + "#Player#Points#Totals#";
-	}
+	abstract String getFormattedGameScore();
 
 	private int gensymName = 1;
 
-	String uniqueName(String fname) {
+	public String uniqueName(String fname) {
 		for (int i = 0; i < nPlayers; i++)
 			if (playerArray[i].playerName.equalsIgnoreCase(fname))
 				return fname + gensymName++;
@@ -526,48 +618,7 @@ public class CardGame implements GameInterface {
 	 * totalHandScores - total the scores for the hand checks for moonshooting and
 	 * game-end
 	 */
-	void totalHandScores() {
-		int i, iTrickTotal;
-		for (i = 0; i < nTrickId; i++) {
-			Trick t = trickArray[i];
-			// sum up the no of hearts in the trick, the QS and give to the winner
-			iTrickTotal = 0;
-			for (Card c : t.subdeck.subdeck) {
-				if (c.suit == Suit.HEARTS)
-					iTrickTotal++ ;
-				else if (c.rank == Rank.QUEEN && c.suit == Suit.SPADES)
-					iTrickTotal = iTrickTotal + 13;
-			}
-			playerArray[t.winner].handScore = playerArray[t.winner].handScore + iTrickTotal;
-		}
-		/*
-		 * Check to see if someone shot the moon! shot the moon if p[i] has pts && no
-		 * one else does so count the number of nonzero pts
-		 */
-		int playersWithPts = 0;
-		int moonShooter = -1;
-		for (i = 0; i < nPlayers; i++)
-			if (playerArray[i].handScore > 0) {
-				playersWithPts++;
-				moonShooter = i;
-			}
-		if (playersWithPts == 1) {
-			// then moonShooter is not -1 and shot the moon
-			for (i = 0; i < nPlayers; i++)
-				if (i == moonShooter)
-					playerArray[i].handScore = 0;
-				else
-					playerArray[i].handScore = 26;
-		}
-		/*
-		 * Not here... do this in turn if (winnerDetermined) handOver();
-		 *   Wait, shouldn't I do a resetHand here?
-		 *   scores are totaled but players are not notified.
-		 */
-		// resetHand();
-		// ToDo:
-		// should sort by total score...
-	}
+	abstract void totalHandScores();
 
 	/*
 	 * Update the trick with the (legally played) card, send updated trick to
@@ -578,8 +629,8 @@ public class CardGame implements GameInterface {
 		 * add the card to the trick's subdeck, and see if hearts are broken
 		 */
 		currentTrick.subdeck.add(card);
-		if (card.suit == Suit.HEARTS) {
-			currentTrick.breakHearts();
+		if (card.suit == suitThatMustBeBroken) {	// suitThatMustBeBroken
+			currentTrick.breakSuit();
 		}
 
 		/*
@@ -598,29 +649,37 @@ public class CardGame implements GameInterface {
 			currentTrick.bClosed = true;
 			// Figure out who won, set bWinner;
 			int i = 0;
+			Suit st=null;
 			Card leadingCard = null;
 			/*
 			 * determine who won the trick, and set it closed
 			 */
 			for (Card c : currentTrick.subdeck.subdeck) {
 				// the actual player who won the trick is n players away from the leader or the
-				// leader
+				// leader REVIEW: ???
 				if (i == 0) {
 					leadingCard = c;
+					st = c.suit;
 					currentTrick.winner = currentTrick.leader;
-				} else if (isHigher(c, leadingCard)) { // true if c is higher than leadingcard
+				} else if (/* c.suit == st && */ 
+						isHigher(c, leadingCard)) { // true if c is higher than leadingcard
 					if (bDebugCardCf)
 						gameErrorLog("->T");
 					leadingCard = c;
+					st = c.suit;	// ++ so if the leader is now a trump, must be a trump to be considered...
 					currentTrick.winner = (i + currentTrick.leader) % nPlayers;
 				} else {
 					if (bDebugCardCf)
 						gameErrorLog("->F");
-					// card was sloughed
+					// card lower or sloughed
 				}
-				i++;
+				i++;				
 			}	// if trick is closed
 
+			//
+			// update the number of tricks taken by each player
+			playerArray[currentTrick.winner].iTricks ++;
+			
 			nTrickId++;
 			/*
 			 * now broadcast the completed trick with a CURRENT_TRICK message for the closed
@@ -637,8 +696,8 @@ public class CardGame implements GameInterface {
 			 * prepare for the next trick..
 			 */
 			currentTrick = new Trick(nTrickId);
-			if (previousTrick.heartsBroken())
-				currentTrick.breakHearts();
+			if (previousTrick.suitBroken())
+				currentTrick.breakSuit();
 			currentTrick.leader = previousTrick.winner; // the leader is the player who won the last trick...
 			trickArray[nTrickId] = currentTrick;
 			/*
@@ -663,6 +722,8 @@ public class CardGame implements GameInterface {
 
 	} // trickUpdate
 
+	abstract ProtocolMessage legalFirstPlay(Player p, Card c);
+	
 	/*
 	 * playCard - detect if the sender can legally play the card; emit error message
 	 * if not if legal, send updates and progress turn
@@ -679,7 +740,7 @@ public class CardGame implements GameInterface {
 		gameErrorLog("Msg<" + mtype + ">from(" + nsender + ") " 
 				+ p.subdeck.encode());	// pcards bugfix
 		if (c == null) {
-			returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR, "%MSG:Protocol error no card!%");
+			returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR, "%ERR:Protocol error no card!%");
 			p.sendToClient(returnMessage);
 			return;
 		}
@@ -689,7 +750,7 @@ public class CardGame implements GameInterface {
 			gameErrorLog("Housekeeping: find failed<" + c.encode() + "> from(" + nsender + ") subdeck size("
 					+ p.subdeck.size() + "){" + p.subdeck.encode() + "}");
 			returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
-					"%MSG:Player" + p.pid + " doesn't have <" + c.rank + c.suit + ">!%");
+					"%ERR:Player" + p.pid + " doesn't have <" + c.rank + c.suit + ">!%");
 			p.sendToClient(returnMessage);
 			return;
 		}
@@ -700,7 +761,7 @@ public class CardGame implements GameInterface {
 			// does the player have the 2c and didn't play it?
 			if (!c.equals(deuceClubs) && p.has(deuceClubs)) {
 				returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
-						"%MSG:Player" + p.pid + " must lead <" + deuceClubs.rank + deuceClubs.suit + ">!%");
+						"%ERR:Player" + p.pid + " must lead <" + deuceClubs.rank + deuceClubs.suit + ">!%");
 				p.sendToClient(returnMessage);
 				return;
 			}
@@ -709,19 +770,26 @@ public class CardGame implements GameInterface {
 		// did the player lay a qs?
 		// did the player lay a heart (and had non-hearts)
 		if (nTrickId == 0) {
-			if (c.suit == Suit.HEARTS) {
+			returnMessage = legalFirstPlay(p, c);
+			if (returnMessage != null) {
+				p.sendToClient(returnMessage);
+				return;				
+			}
+			/*
+			if (c.equals(queenSpades) || c.suit == Suit.HEARTS) {
 				// almost certainly a foul but check...
 				//int nonHearts=
-				int nonPoints = p.countNon(Suit.HEARTS);;
+				int nonPoints = p.countNon(Suit.HEARTS);
 				if (p.has(queenSpades))
 					nonPoints--;
 				if (nonPoints > 0) {
 					returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
-							"%MSG:Player" + p.pid + " Illegal:" + c.encode() + ". must play <Non-QS Non-Heart Card>!%");
+							"%ERR:Player" + p.pid + " Illegal:" + c.encode() + ". must play <Non-QS Non-Heart Card>!%");
 					p.sendToClient(returnMessage);
 					return;
 				}
-			}
+				
+			} */
 		}
 
 		// Is this a legal follow?
@@ -737,10 +805,10 @@ public class CardGame implements GameInterface {
 				// didn't follow lead. Is that ok?
 				if (!p.subdeck.isVoid(leadSuit)) {
 					// Uh oh. Player could have followed suit but didn't. Error detected!
-					String errorText = "%MSG:Robot-Player " + p.pid 
+					/*String errorText = "%MSG:Robot-Player " + p.pid 
 							+ " required to follow suit <"
-							+ leadSuit + "> but didn't.";
-					String errorString = "%MSG:Player" + p.pid 
+							+ leadSuit + "> but didn't."; */
+					String errorString = "%ERR:Player" + p.pid 
 							+ " required to follow suit <" 
 							+ leadSuit + ">!%";
 					returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
@@ -753,24 +821,27 @@ public class CardGame implements GameInterface {
 					} */
 					return;
 				}
-				if (c.suit == Suit.HEARTS) {
-					// Hearts are broken
-					currentTrick.breakHearts();
+				if (c.suit == suitThatMustBeBroken) {
+					// Hearts (or Spades) are broken
+					currentTrick.breakSuit();
 					// broadcast message?
 				}
 			}
 		} else { // lead...
 			// Is this a legal lead? hhh
 			// If it's a heart, then hearts must be broken, or only has hearts
-			if (c.suit == Suit.HEARTS) {
-				// lead a heart. Is that ok?
-				if (currentTrick.heartsBroken())
+			if (c.suit == suitThatMustBeBroken) {
+				// lead a heart/spade. Is that ok?
+				if (currentTrick.suitBroken())
 					; // ok
-				else if (p.subdeck.hasOnly(Suit.HEARTS))
+				else if (p.subdeck.hasOnly(suitThatMustBeBroken))
 					; // ok
 				else {
 					returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
-							"%MSG:Player" + p.pid + " Cannot lead a heart until hearts are broken!%");
+							"%ERR:Player" + p.pid + " Cannot lead " + suitThatMustBeBroken + " until "
+							+ suitThatMustBeBroken + " are broken!%"
+							//"%ERR:Player" + p.pid + " Cannot lead a heart until hearts are broken!%"
+							);
 					p.sendToClient(returnMessage);
 					return;
 				}
@@ -809,11 +880,14 @@ public class CardGame implements GameInterface {
 	public void sendPlayerUserErrorMsg(Player p, String sError) {
 		gameErrorLog("Error:" + p.pid + ")" + sError);
 		ProtocolMessageTypes mtype = ProtocolMessageTypes.PLAYER_ERROR;
-		ProtocolMessage pm = new ProtocolMessage(mtype, "%MSG:" + sError + "%");
+		ProtocolMessage pm = new ProtocolMessage(mtype, "%ERR:" + sError + "%");
 		p.sendToClient(pm);
 	}
 
 	public void declareMisdeal(int pid, String es) {
+		/*
+		 * TODO: make this use an actual error message...
+		 */
 		broadcast(true, "" + "%I%" + pid + "%" + es);
 		broadcast(true, "" + "%I%" + "Game paused. Suggest misdeal.");
 	}
@@ -824,6 +898,8 @@ public class CardGame implements GameInterface {
 	 * 
 	 * passCards - collect passed cards from players and robots
 	 *  when mbx is full, exchange them, and call go()
+	 *  
+	 *  TODO: modify this for spades with blind nil
 	 */
 	public void passCards(int nsender, Subdeck sd) {
 		int recipient = mbx.lookupRecipient(nsender);
@@ -839,7 +915,7 @@ public class CardGame implements GameInterface {
 			MailBoxExchange.MailBox mb = mbx.itemAt(i);
 			int from = mb.from, to = mb.to;
 			sd = mb.contents;
-			System.out.println("Passing:(" + sd.size() + ")=" + sd.encode());
+			System.out.println("Passing[" + from + "->" + to + "](" + sd.size() + ")=" + sd.encode());
 			Player p = playerArray[from];
 			/*
 			 * Actually delete the cards to the player's hand internally for (c: sd.subdeck)
@@ -917,6 +993,8 @@ public class CardGame implements GameInterface {
 	 * gneralized gameInterface (projected) not used in hearts
 	 *  projected use in spades (and others...)
 	 */
+	// why did I think this would take a subdeck? See iBid...
+	// see setbid, getbid
 	public void bidTricks(int nsender, Subdeck cards) {
 		gameErrorLog("Can't happen: Game received unimplemented BID request. Bidding not yet implemented.");
 	}
@@ -939,7 +1017,7 @@ public class CardGame implements GameInterface {
 	// Review: does this state (bPlayInitiated) add value?
 	private boolean bPlayInitiated = false;
 
-	void process(ProtocolMessage m) {
+	public void process(ProtocolMessage m) {
 		if (bMessageDebug)
 			System.out.println("CGProcess: " + m.type + ":" + m.usertext);
 
@@ -967,8 +1045,9 @@ public class CardGame implements GameInterface {
 			// update the turn, and send trick to next player
 			// is the sender the player with the turn?
 			if (nSender != nCurrentTurn) {
-				returnMessage = new ProtocolMessage(ProtocolMessageTypes.PLAYER_ERROR,
-						"%MSG:Not your turn player" + nSender + ". It's Player" + nCurrentTurn + "'s turn!%");
+				returnMessage = newErrorMsg(false, 
+						"Not your turn player" + nSender 
+						+ ". It's Player" + nCurrentTurn + "'s turn!");
 				p.sendToClient(returnMessage);
 				return;
 			}
@@ -1003,7 +1082,8 @@ public class CardGame implements GameInterface {
 			break;
 
 		case SUPER_USER:
-			String sStatus = getGameStatus();
+			//String sStatus = getGameStatus();
+			// this functionality is handled in WsServer JCL commands
 			break;
 		default:
 
@@ -1027,6 +1107,7 @@ public class CardGame implements GameInterface {
 	void logWinner() {}
 	
 	void gameOver() {
+		System.out.println("Game:" + gameId + " ended.");
 		bGameInProgress = false;
 		// todo
 		// log Winner in the database
@@ -1047,7 +1128,7 @@ public class CardGame implements GameInterface {
 	 * 
 	 * call reset at the end if game goes on
 	 */
-	void handOver() {
+	public void handOver() {
 		// make sure handover called only once per hand
 		if (bHandOver)
 			return;
@@ -1058,9 +1139,13 @@ public class CardGame implements GameInterface {
 
 		// total the hand scores...
 		totalHandScores();
+		// And then... Changed 8/14/20
 		// Total the game score
 		for (int i = 0; i < nPlayers; i++) {
 			playerArray[i].totalScore += playerArray[i].handScore;
+			// apply the "if you hit 100 exactly you now have 50 rule..."
+			if (playerArray[i].totalScore == 100)
+				playerArray[i].totalScore = 50;
 			if (playerArray[i].totalScore >= 100)
 				winnerDetermined = true;
 		}
@@ -1071,6 +1156,9 @@ public class CardGame implements GameInterface {
 		ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PLAYER_SCORES, sTemp);
 		broadcastUpdate(pm);
 
+		// Send %inf every time you update scores (here) and every setname (...)
+		updatePlayerInfo();
+		
 		/*
 		 * the only way to advance the current pass is to successfully complete a hand.
 		 * in reset...
@@ -1087,6 +1175,14 @@ public class CardGame implements GameInterface {
 		}
 	}
 
+	void updatePlayerInfo() {
+		String sTemp = getFormattedGameScore();
+		//ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PLAYER_INFO, sTemp);
+		ProtocolMessage pm = newInfoMsg(sTemp);
+		System.out.println("NewMsg->" + pm.encode());
+		broadcastUpdate(pm);		
+	}
+	
 	void abort() {
 		bGameAborted = true;
 		bGameInProgress = false;
@@ -1102,12 +1198,71 @@ public class CardGame implements GameInterface {
 	 * does NOT total scores
 	 * ready for start
 	 * cf handOver();
+	 * cf resetGame();
 	 */
 	public void reset() {
 		bPlayInitiated = false;
 		resetHand();
 	}
+	
+	
+	private Subdeck savedPack=null;
+	private MailBoxExchange.PassType savedPasstype=null;
+	private boolean bDuplicateMode=false;
 
+	void saveCurrentPack(Subdeck saveMe, MailBoxExchange.PassType pt) {
+		savedPack = saveMe;
+		savedPasstype = pt;
+	}
+	
+	Subdeck getDuplicatePack() {
+		return savedPack;
+	}
+	/*
+	 * replay mode
+	 */
+	public void replay() {
+		// get the current pack
+		// put it where the dealer will take it
+		reset();
+		bDuplicateMode = true;
+	}
+	
+	/*
+	 * resetGame -- something bad has happened, possibly?
+	 * essentially new game;
+	 */
+	public void resetGame() {
+		abort();
+		// indicate a new game is starting...
+		bGameInProgress = true;
+		populatePlayers();
+		resetGameScores();
+		currentPass = MailBoxExchange.first();
+		reset();
+
+		// xxx
+		// broadcast "game reseting..."
+		// reset
+	}
+
+	// jcl: //resume
+	public boolean resume() {
+		if (!bPlayInitiated) {
+			return false;
+		}
+		if (bGameAborted)
+			return false;
+		if (bHandOver)
+			return false;
+		if (nCurrentTurn == -1)
+			return false;
+		if (bPassingCardsInProgress)
+			return true;
+		go();	// ?
+		return true;
+	}
+	
 	// jcl: //start
 	public boolean start() {
 		if (bPlayInitiated) {
@@ -1128,7 +1283,8 @@ public class CardGame implements GameInterface {
 		}
 
 		deal();
-		if (currentPass == MailBoxExchange.PassType.Hold)
+		if (currentPass == MailBoxExchange.PassType.Hold ||
+				bPassDisabled)
 			go();
 		else
 			initiatePass(currentPass);
@@ -1180,6 +1336,7 @@ public class CardGame implements GameInterface {
 	 *  Now: just reset scores; 
 	 */
 	public void resetHand() {
+		bDuplicateMode = false; 
 		bPlayInitiated = false;
 		resetHandScores();
 	}
@@ -1203,6 +1360,16 @@ public class CardGame implements GameInterface {
 		//
 		Subdeck pack = new Subdeck(52);	// 52 - standard pack
 		pack.shuffle();
+		if (bDuplicateMode) {
+			pack = getDuplicatePack();
+			if (pack == null) {
+				System.out.println("Duplicate mode not available. No saved pack.");
+				pack = new Subdeck(52);
+			} else {	// i.e. successfully restored the pack; so restore passtype
+				currentPass = savedPasstype;
+			}
+		} 
+		saveCurrentPack(pack, currentPass);
 		//
 		// deal official copy of cards
 		//
@@ -1240,84 +1407,33 @@ public class CardGame implements GameInterface {
 		}
 
 	}
-	/*
-	 * send welcome message holding session information to get back into the game.
-	 * Then..
-	 * 
-	 * 1. Initiate a pass message to players ~ when pass is complete, game will
-	 * start 2. otherwise find the two commence play
-	 * 
-	 * Retrieve results Then start the game idea... Passing: waiting for... to
-	 * everyone then start... This is the first really asynch thing to be done...
-	 */
-
-	/*
-	 * deal, pass (if not hold), sendfirst move
-	 * no longer used.
-	 * duties split between start(reset players) and deal(shuffl)
-	 */
-	void initiatePlayXXX() {
-		int i;
-		Player p;
-		/*
-		 * Don't setup trick till after the (maybe) pass
-		 *
-		 */
-
-		//
-		// send (individual) welcome message
-		// shouldn't join do this? No because user might be waiting for multiple
-		// joins...
-		for (i = 0; i < nPlayers; i++) {
-			p = playerArray[i];
-			ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.PLAYER_WELCOME, p.getName());
-			p.sendToClient(pm);
-		}
-		//
-		// Now send the protocol message to add cards to the players hand
-		for (i = 0; i < nPlayers; i++) {
-			p = playerArray[i];
-			ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.ADD_CARDS, p.subdeck);
-			p.sendToClient(pm);
-		}
-
-		// Log the hands for later post-mortem diagnostics
-		for (i = 0; i < nPlayers; i++) {
-			Subdeck sd = playerArray[i].subdeck;
-			gameErrorLog("Housekeeping: subdeck size(" + sd.size() + "){" + sd.encode() + "}");
-		}
-
-		// So do the pass, if a pass hand.
-		// when the pass is complete it will call send next move
-		// otherwise sendnextmove
-		//
-		// Send the message to the first player to start...
-		//
-		if (currentPass != MailBoxExchange.PassType.Hold) {
-			initiatePass(currentPass);
-			// once pass cards messages are complete, the exchange will call go();
-		} else {
-			go();
-		}
-		bPlayInitiated = true;
-	}
 
 	/*
 	 * go - Cards dealt, Pass is complete. Start play
 	 */
 	int nHands = 0;
 	void go() {
+		System.out.println("Game:" + gameId + " passType:" + currentPass + " Play started.");
 		setFirstMove();
 		sendNextMove();
 	}
 
 	private void resetGameScores() {
-
 		nHands = 0;
 		for (int i = 0; i < nPlayers; i++) {
 			Player p = playerArray[i];
 			p.totalScore = 0;
 		}
+	}
+	
+	int humansInGame() {
+		int humans=0;
+		for (int i = 0; i < nPlayers; i++) {
+			Player p = playerArray[i];
+			if (!p.isRobot())
+				humans ++;
+		}
+		return humans;		
 	}
 
 	/*
@@ -1336,9 +1452,20 @@ public class CardGame implements GameInterface {
 		System.out.println("Disconnect: Seat(" + pid + ")" + p.getName());
 		copyPlayer(p, robot);
 		playerArray[pid] = robot;
+		/*
+		 * Check if there are ONLY robots in the game.
+		 * If so, pause...
+		 * i.e. go into the state where game is waiting for a 
+		 * start() to continue
+		 * xxx
+		 */
+		if (humansInGame() == 0) {
+			// wait for resume...
+			return;
+		}
 		if (nCurrentTurn == pid) {
 			ProtocolMessage pm = new ProtocolMessage(ProtocolMessageTypes.YOUR_TURN);
-			robot.process(pm);
+			robot.processLocalMessage(pm);
 		}
 	}
 

@@ -3,19 +3,7 @@ package server.ws;
 import java.util.Scanner;
 import java.util.Vector;
 
-
-/*
- * begin remodel and consolication of JCL. Currently 721 lines
- *  should be about 1/3 that...
- */
-/*
- * UserJCLCommand -- parse commands beginning with //
- * place into the structure with a type and name value pairs
- * for calls to getparam 
- * 
- */
-
-public class UserJCLCommand {
+public class NewUserJCLCommand {
 	public enum JCLType {
 		JCLNotJCL, // String is not a JCL command
 		JCLError, // JCL command but malformed
@@ -25,14 +13,11 @@ public class UserJCLCommand {
 		JCLJoin, // Join, Rejoin games
 		JCLLs,
 		JCLNew,		// create a new game
-		JCLNote,	// Make a note in the Catalina logfile
 		JCLStart,
-		JCLRejoin, 
-		JCLSu, 		// SuperUser was JCLSuperUser...
+		JCLRejoin, JCLSuperUser, // SuperUser
 		JCLRefresh,
 		JCLResend, JCLReset,
-		JCLNewdeal, JCLMisdeal, JCLReplay,
-		JCLBid,
+		JCLNewdeal, JCLMisdeal,
 		JCLShuffle,
 		JCLStatus,
 		JCLPeek,	// peek at a hand
@@ -102,7 +87,6 @@ public class UserJCLCommand {
 				}
 	}
 
-	boolean bJCLDebug=false;
 	void buildCommandStructure() {
 		/*
 		 * build structures with the enum value and the string to actually parse for
@@ -114,17 +98,6 @@ public class UserJCLCommand {
 			s = s.toLowerCase();
 			if (dontParse(t))
 				continue;
-			if (bJCLDebug) {
-				System.out.println("?" + s);
-				if (t == JCLType.JCLJoin)
-					;
-				if (JCLType.JCLJoin == t)
-					echo("Join... found");
-				if (JCLType.JCLSu == t)
-					echo("Su... found");
-				if (JCLType.JCLNote == t)
-					echo("Note... found");
-			}
 			c = new Command(t, s);
 			commandList.add(c);
 		}
@@ -177,7 +150,7 @@ public class UserJCLCommand {
 		return argv.get(index).value;
 	}
 	/*
-	 * argc() - wierd, huh? argc is a method. 
+	 * argc() - wierd, huh? argc is a function. 
 	 */
 	public int argc() {
 		return argv.size();	// + 1? Huh?
@@ -267,8 +240,7 @@ public class UserJCLCommand {
 			if (comp == 0) {
 				// it's a match. Set type.
 				this.type = c.type;
-				if (bJCLDebug)
-					System.out.println(verb + ".type->" + this.type);
+				System.out.println(verb + ".type->" + this.type);
 				// Now build argc and argv
 				// get blobs between whitespace
 				// TODO: if there is an equal sign, parse-up
@@ -307,7 +279,7 @@ public class UserJCLCommand {
 
 	}
 
-	UserJCLCommand(String commandstring) {
+	NewUserJCLCommand(String commandstring) {
 		this();
 		if (!isJCL(commandstring)) 
 			return;
@@ -320,7 +292,7 @@ public class UserJCLCommand {
 		type = JCLType.JCLError;
 	}
 	
-	UserJCLCommand() {
+	NewUserJCLCommand() {
 		if (!isInit) {
 			buildCommandStructure();
 			isInit = true;
@@ -384,9 +356,7 @@ public class UserJCLCommand {
 			} else {				
 				jcl = new NewUserJCLCommand(input);
 				System.out.println("Type->" + jcl.type);
-				int argc=jcl.argc();
-				System.out.println("Argc=" + argc + 
-						((argc > 1) ? " Parameters..." : "."));
+				System.out.println("Parameters...");
 				for (int j=0; j<jcl.argc(); j++)
 					System.out.println("Arg" + j 
 							+ ">" +jcl.getName(j) + "=" + jcl.getValue(j));

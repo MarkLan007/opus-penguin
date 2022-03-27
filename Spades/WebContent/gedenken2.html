@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gedenken Experiments</title>
+<style type="text/css">
+:root {
+    --mllGrey: #E5E8E8; 
+    --mllLightblue: #3ADAE1; 
+    --mllFeltGreen: #3AE15E;
+    
+    --teal1: #2ecc71;
+    --teal2: #16a085;
+    
+    --green1:#2ecc71; /* emerald */
+    --green2:#27ae60; /* nephritis */ 
+	--green3: #228B22;
+	
+	--yellow1: #f1c40f; /* sunflower */
+	--yellow2: #f39c12; /* orange */
+	
+	--orange1: #e67e22;	/* carrot */
+	--orange2:  #d35400;/* pumpkin */
+	
+	--red1: #e74c3c;	/* alizarin */
+	--red2: #c0392b;	/* pomegranate */
+	
+    --blue1:#3498db; /* peter-river */
+    --blue2:#2980b9; /* belize-hole */
+    
+    --purple1: #9b59b6; /* .amethyst { color: #9b59b6; } */
+    --purple2: #8e44ad /* wisteria */
+    
+    --black1: #34495e; /* wet-asphalt { color: #34495e; */
+    --black2: #2c3e50; /* midnight-blue */
+
+	--grey1: #95a5a6; /* concrete */
+	--grey2: #7f8c8d; /* asbestos */
+}
+
+.parent {
+    position: relative;
+}
+
+.child {
+    position: absolute;
+}
+
+.centerParagraph {
+	text-align: center;
+}
+.box1 {
+	float: left;
+	background-color: var(--green1);
+	cursor: grabbed;
+}
+
+.box2 {
+	float:	left;
+	background-color: var(--blue1);
+	cursor: grabbing;
+	}
+
+.box3 {
+	float: right;
+	background-color: var(--yellow1);
+	cursor: pointer;
+}
+
+.box4 {
+	float: none;
+	background-color: var(--grey1);
+	cursor: move;
+}
+
+.whiteBox {
+	background-color: white;
+	}
+	
+.rectangle {
+  height: 50px;
+  width: 100px;
+  /* background-color: #555; */
+}
+
+.potsticker {
+	background-color: var(--red1);
+	/*
+	 * --- added at run time, unfortunately ---
+	onmousedown:"mouseDown(event);";
+	ondragend: "mouseUp(event);";
+	ondrag: "mouseDrag(event);";
+	*/
+}
+.center {
+	float: left;
+	}
+
+/* so rhs and rhs-content */
+.rhs {
+	position: fixed;
+	right: 0;
+	z-index: 0;	/* see comment on column1 */
+	width: 50%;
+	/* left: 550px; */
+	float: right; /* ??? */
+	background-color: var(--blue1);
+	/* opacity: .99; */
+	/* see https://philipwalton.com/articles/what-no-one-told-you-about-z-index/ */
+}
+.rhsContent {
+	display: grid;
+	/* grid-template-rows: 80px 80px 80px 80px 80px 80px auto; */
+	/* grid-template-rows: 60px 60px 60px 60px 60px 60px auto; */
+	grid-template-rows: auto; 
+	/* transition: right 3s; */
+}
+</style>
+<script type="text/javascript">
+'use strict';
+function mouseDown(event) {
+	console.log("here(" + event.clientX 
+			+ "," + event.clientY + ")");
+}
+function mouseUp(event) {
+	console.log("released at ->(" + event.clientX 
+			+ "," + event.clientY + ")");
+	var ct=event.currentTarget;
+	var x=event.clientX, y=event.clientY;
+	console.log("<" + ct.id + ">");
+	var div=document.getElementById(ct.id);
+	x += 10;
+	y +=10;
+	div.style.left = "" + x + "px";
+	div.style.top = "" + y + "px";
+}
+var bFirst=true;
+function moveDiv(event) {
+	if (bFirst) {
+		classInit();
+		bFirst = false;
+	}
+	var div=document.getElementById("potsticker1");
+	div.style.left = 250 + "px";
+	div.style.top = 250 + "px";
+}
+function mouseDrag(event) {
+	console.log("here(" + event.clientX 
+			+ "," + event.clientY + ")");
+}
+var potstickerDivs=["r1", "r2", "r3"];
+
+function classInit() {
+
+	// This should work...
+	for (var i=0; i < potstickerDivs.length; i++) {
+	    //elements[i].addEventListener('click', myFunction, false);
+	    var div = document.getElementById(potstickerDivs[i]);
+	    div.draggable = true;
+	    div.addEventListener('onmousedown', mouseDown);
+		//onmousedown:"mouseDown(event);";
+	    div.addEventListener('ondragend', mouseUp);
+		//ondragend: "mouseUp(event);";
+	    div.addEventListener('ondrag', mouseDrag);
+		//ondrag: "mouseDrag(event);";
+	    div.addEventListener('touchstart', mouseDown);
+	    div.addEventListener('ontouchstart', mouseDown);
+		//touchstart="mouseDrag(event);"
+	    div.addEventListener('touchend', mouseUp);
+	    div.addEventListener('ontouchend', mouseUp);
+
+		//touchend="mouseUp(event);"
+	}
+
+
+	/* Ok, so this way doesn't actually work. Fine.
+	var elements = document.getElementsByClassName("potsticker");
+	var myFunction = function() {
+	    var attribute = this.getAttribute("data-myattribute");
+	    alert(attribute);
+	};
+
+	for (var i=0; i < elements.length; i++) {
+	    //elements[i].addEventListener('click', myFunction, false);
+	    elements[i].addEventListener('onmousedown', mouseDown);
+		//onmousedown:"mouseDown(event);";
+	    elements[i].addEventListener('ondragend', mouseUp);
+		//ondragend: "mouseUp(event);";
+	    elements[i].addEventListener('ondrag', mouseDrag);
+		//ondrag: "mouseDrag(event);";
+	    elements[i].addEventListener('touchstart', mouseDown);
+		//touchstart="mouseDrag(event);"
+	    elements[i].addEventListener('touchend', mouseUp);
+		//touchend="mouseUp(event);"
+
+	}
+	*/
+}
+//classInit();
+/*
+ * toggle expand or contract
+ */
+var bExpanded = false;
+function contractDiv(event) {
+	var div=document.getElementById("handArea");
+	div.style.width = "20%"
+	// set button text to <<expand
+	var btn=document.getElementById("resizeButton");
+	btn.innerText = "<< expand"
+	//btn.style = "text-align: left";
+	bExpanded = false;	
+}
+function expandDiv(event) {
+	var div=document.getElementById("handArea");
+	div.style.width = "70%"
+	//
+	// set button text to shrink>>
+	var btn=document.getElementById("resizeButton");
+	btn.innerText = "shrink panel >>"
+	//btn.style = "text-align: left";
+	bExpanded = true;	
+}
+
+function expandContractDiv(event) {
+	var p=document.getElementById("infoMessage");
+	p.innerText = "Got it."
+
+	if (bExpanded)
+		contractDiv(event);
+	else
+		expandDiv(event);
+
+}
+</script>
+
+</head>
+<body>
+<div class="parent">
+
+<!-- 
+
+To actually move them they must be members of the child class...
+i.e. suspectable to positioning...
+
+ -->
+<div id="r1" class="rectangle box1 centerParagraph potsticker">
+<p> R1. Some (draggable?) text. </p>
+</div>
+
+<div id="r2" class="rectangle box2 centerParagraph potsticker">
+<p> r2. </p>
+</div>
+
+<div id="r3" class="rectangle box3 centerParagraph poststicker">
+<p> Box3. I stay on the right. </p>
+</div>
+
+<div draggable="true" id="potsticker1" class="rectangle box4 centerParagrph child"
+	onmousedown="mouseDown(event);"
+		mousedown="mouseDown(event);"
+	ondragend="mouseUp(event);"
+		dragend="mouseUp(event);"
+	ondrag="mouseDrag(event);"
+	touchstart="mouseDrag(event);"
+	touchend="mouseUp(event);"
+	>
+<p class="centerParagraph"> Actually drag me around... </p>
+<div id="handArea" class="rhs"
+	swiperight="contractDiv(event);"
+	>
+<div class="rhsContent">
+<button id="resizeButton" style="text-align: left" onclick="expandContractDiv(event);">
+&lt;&lt; Expand/Contract &gt;&gt;
+</button>
+<p id="infoMessage"> Stuff. </p>
+
+</div>
+</div>
+
+</div>
+<br>
+<div class="center rectangle whitebox">
+<button onclick="moveDiv(event);">
+Go ahead, Press Me! (If you want to make items draggable)
+</button>
+</div>
+</div>	<!-- Enclosing parent (abosolute) div -->
+</body>
+</html>

@@ -76,6 +76,7 @@ public class Subdeck implements Iterable<Card> {
 
 		}
 	
+	
 	boolean isVoid(Suit st) {
 		for (Card c: subdeck)
 			if (c.suit == st)
@@ -109,7 +110,12 @@ public class Subdeck implements Iterable<Card> {
 	public String encode() {
 		String s="";
 		for (Card c: subdeck)
-			s = s + c.encode();
+			if (c == null) {
+				System.out.println("encode: unexpected null");
+				s = s + "??";
+			}
+			else
+				s = s + c.encode();
 		return s;
 		}
 
@@ -134,6 +140,23 @@ public class Subdeck implements Iterable<Card> {
 				return true;
 		return false;
 		}
+	
+	/*
+	 * zero-based access; supports negative indices
+	 */
+	Card elementAt(int index) {
+		int len=subdeck.size();
+		if (index < 0)
+			index = len + index;	// note that reverse is sort of 1-based
+		if (index >= len || index < 0)
+			return null;
+		int i=0;
+		for (Card card : subdeck) {
+			if (i++ == index)
+				return card;
+		}
+		return null;		
+	}
 	
 	public boolean find(Rank rk, Suit sd) {
 		for (Card c: subdeck)
@@ -223,9 +246,22 @@ public class Subdeck implements Iterable<Card> {
 		}
 
 	public void add(Card c) {
-		subdeck.add(c);
+		if (c == null) {
+			System.out.println("sudeck::add: Unexpected null card. (ignored)");
+			return;
 		}
-	
+		subdeck.add(c);
+		isSorted = false;
+		}
+
+	public boolean addWithMax(Card c, int maxsize) {
+		if (subdeck.size() > maxsize)
+			return false;
+		subdeck.add(c);
+		isSorted = false;
+		return true;
+		}
+
 	/*
 	 * set is generally dangerous...
 	 * only done by shuffle to exchange places
@@ -440,6 +476,14 @@ public class Subdeck implements Iterable<Card> {
 	    	else if (c1.suit.ordinal() < c2.suit.ordinal())
 	    		return 1;
 	    	else {	// suits are equal
+	    		// Ace high...
+	    		if (c1.rank == Rank.ACE && c2.rank == Rank.ACE)
+	    			return 0;
+	    		if (c1.rank == Rank.ACE)
+	    			return -1;
+	    		if (c2.rank == Rank.ACE)
+	    			return 1;
+	    		// otherwise ordinal is the higher card
 	    		if (c1.rank.ordinal() > c2.rank.ordinal())
 	    			return -1;
 	    		else if (c1.rank.ordinal() < c2.rank.ordinal())
@@ -451,6 +495,9 @@ public class Subdeck implements Iterable<Card> {
 		}
 	    
 	
+/*
+ * sort - sort cards from highest to lowest
+ */
 public void sort() {
 	subdeck.sort(new SortbyCardvalue());
 	isSorted = true;

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<style>
+
+div:first-child {
+  opacity: .99;	/* wtf!? puts red below everything... */
+}
+
+
+.red, .green, .blue {
+  position: absolute;
+  width: 100px;
+  color: white;
+  line-height: 100px;
+  text-align: center;
+}
+
+.red {
+  z-index: 1;  
+  top: 20px;
+  left: 20px;
+  background: red;
+}
+
+.green {
+  top: 60px;
+  left: 60px;
+  background: green;
+}
+
+.blue {
+  top: 100px;
+  left: 100px;
+  background: blue;
+}</style>
+<body>
+<div>
+  <span class="red">Red</span>
+</div>
+<div>
+  <span class="green">Green</span>
+</div>
+<div>
+  <span class="blue">Blue</span>
+</div>
+<br>
+<br>
+<div style="float: right;">
+<p> 
+<pre>
+Here’s the challenge: try to see if you can 
+make the red &lt;span&gt; 
+element stack behind the blue and 
+green  &lt;span> elements without breaking 
+any of the following rules:
+
+Do not alter the HTML markup in any way.
+Do not add/change the z-index property of any element.
+Do not add/change the position property of any element.
+</pre>
+</p>
+</div>
+</body>
+</html>

@@ -56,7 +56,10 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		/*
 		 * Just digest and process the message synchronously
 		 */
-		if (pm.type == ProtocolMessageTypes.PLAYER_ERROR) {
+		if (pm.type == ProtocolMessageTypes.PLAYER_ERROR &&
+				pm.usertext.startsWith("%ERR:")) {
+			// i.e. don't treat informational MSG: messages as 
+			// calling for approbrium.
 			int trickid;
 			if (cardGame != null)
 				trickid = cardGame.getCurrentTrickId();
@@ -146,17 +149,26 @@ public class RobotPlayer extends Player implements PlayerInterface {
 	static int iSym = 0;
 
 	RobotBrain robotBrain = null; // new RobotBrain();
-
+	int mySeat=-1;
 	RobotPlayer(int pid, GameInterface gameInterfaceCallbacks) {
 		// super();
 		setAsynch(false); // { Because I am a robot, I can be called synchronously }
 		isRobotPlayer = true;
 		//xhand = new Subdeck();
-		robotBrain = new RobotBrain();
+		String sGameName = gameInterfaceCallbacks.nameOfTheGame();
+		String roboname="robot";
+		if (sGameName.equalsIgnoreCase("spades")) {
+			robotBrain = new SpadesRobotBrain(pid, gameInterfaceCallbacks);
+			roboname = "spadesbot";
+		}
+		else if (sGameName.equalsIgnoreCase("hearts"))
+			robotBrain = new HeartsRobotBrain(pid, gameInterfaceCallbacks);
+		else 
+			robotBrain = new HeartsRobotBrain(pid, gameInterfaceCallbacks);
 		robotBrain.setPID(pid);
 		setPID(pid);
 		setCardgame(gameInterfaceCallbacks);
-		setName("robot" + iSym++);
+		setName(roboname + iSym++);
 	}
 
 	/*
@@ -178,17 +190,16 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		if (c == null) {
 			// Uh oh... brain failed
 			// note cardLead and currentTrick
-			System.out.println(getName() + ": Catastrophic Brain failure on lead:"); 
+			System.out.println(getName() + ": Catastrophic Brain failure:");
 			robotBrain.brainDump(true);
 			c = robotBrain.getSomething();
-		} else if (!ssHasCard(c)) {
+		}
+		if (!ssHasCard(c)) {
 			// catastrophic error.
 			// There is discrepency between hand and the
 			// Player subdeck holds the official cards.
 			// complain loudly.
-			System.out.println(getName() + 
-					": Catastrophic Error: Cannot confirm card in hand: "
-					+ c.encode());
+			System.out.println(getName() + ": Catastrophic Error: Cannot confirm card in hand: " + c.encode());
 			System.out.println("Subdeck:<" + subdeck.size() + ">=" + subdeck.encode());
 			robotBrain.brainDump(true);
 		}
@@ -220,6 +231,14 @@ public class RobotPlayer extends Player implements PlayerInterface {
 	 */
 	// called from the server
 	// TODO: these should be sendAddCards, sendDeleteCards, shouldn't they?
+	/*
+	 * REVIEW:
+	 * TODO: neither deleteCard for addCards should be used
+	 * you should just delete or add them to robotbrain directly.
+	 * ... I don't believe either are actually used anymore...
+	 * ... Unfortunately they are part of player interface...
+	 * Buzz
+	 */
 	public void addCards(Subdeck sd) {
 		String sTemp = "";
 		playerErrorLog("RobotPlayer" + getPID() + ": adding " + sd.size() + " cards.");
@@ -284,10 +303,33 @@ public class RobotPlayer extends Player implements PlayerInterface {
 		robotPlay(sd);
 	}
 
+	/*
+	 * Ok, so yourPass is going to be a problem for generic robotbrain...
+	 *  So if ncards is 3, it's hearts. If it's {1,-1} then you are playing spades
+	 *  and if -1 you are passing your highest card (i.e. you're nill)
+	 *  and if 1 your lowest (i.e. you are taking tricks)
+	 */
 	public void yourPass(int ncards) {
 		// playerErrorLog("RobotPlayer" + "Passing Under Construction!");
 		// for now, get random cards and pass them...
-		Subdeck sd = robotBrain.getPass(3);
+		Subdeck sd = robotBrain.getPass(ncards);
+		if (sd.find(Card.deuceOfClubs)) {
+			System.out.println("Robot(" + pid + ")Passing the 2C... Har, har");
+		}
+		if (RobotBrain.bDebugPass) {
+			System.out.println("Passing: subdeck=" + sd.encode());
+		}
+
+		if (sd.size() != 3) {
+			// Heh, heh... A bit overzealous there...
+			// Ok fix it.
+			if (sd.size() > 3)
+				while (sd.size() > 3)
+					sd.pop();
+		}
+
+		if (sd.size() != 3) 
+			cardGame.declareMisdeal(pid, playerName + ":" + "Mr. Robot");
 		cardGame.passCards(self(), sd);
 	}
 
@@ -314,20 +356,20 @@ public class RobotPlayer extends Player implements PlayerInterface {
 			robotBrain.addCards(m.subdeck);
 			break;
 		case DELETE_CARDS: // CARD+
-			//len = m.subdeck.size();
-			/* clobbers the subdeck!!!
-			for (i = 0; i < len; i++) {
-				c = m.subdeck.pop();
-				// playerErrorLog("RobotPlayer" + getPID() + ": + <" + c.rank + c.suit + ">.");
-				sTemp = sTemp + "<" + c.rank + c.suit + ">";
-				deleteCard(c);
-				robotBrain.deleteCard(c);
-			} */
+			// len = m.subdeck.size();
+			/*
+			 * clobbers the subdeck!!! for (i = 0; i < len; i++) { c = m.subdeck.pop(); //
+			 * playerErrorLog("RobotPlayer" + getPID() + ": + <" + c.rank + c.suit + ">.");
+			 * sTemp = sTemp + "<" + c.rank + c.suit + ">"; deleteCard(c);
+			 * robotBrain.deleteCard(c); }
+			 */
+			if (m.subdeck == null || m.subdeck.subdeck == null)
+				break;
 			for (Card goner : m.subdeck.subdeck) {
-				deleteCard(goner);
-				robotBrain.deleteCard(goner);
-			} 
-break;
+				// deleteCard(goner);
+				robotBrain.hand.deleteCard(goner);
+			}
+			break;
 		case TRICK_CLEARED:
 			robotBrain.trickCleared(m.trick);
 			// TODO: parse and use the actual trick
@@ -349,19 +391,12 @@ break;
 			c = m.subdeck.subdeck.peek();
 			notePlayed(m.sender, c); // TODO: Isn't it a bit redundant to have BOTH ofo these???
 			robotBrain.cardPlayed(m.sender, c);
-			// notePlayed(tm.player, c); // TODO: Isn't it a bit redundant to have BOTH ofo
-			// these???
-			// robotBrain.cardPlayed(tm.player, c);
-			// Isn't
-			// the
-			// message
-			// sender
-			// the
-			// player
-			// of
-			// this
-			// card?
-
+			/*
+			 * notePlayed(tm.player, c); // TODO: Isn't it a bit redundant to have BOTH ofo
+			 * these??? robotBrain.cardPlayed(tm.player, c); 
+			 * Isn't the message sender the
+			 * player of this card?
+			 */
 			playerErrorLog("RobotPlayer" + getPID() + "***Trick" + robotBrain.currentTrickId() + ": Player" + m.sender + 
 					": Card<" + m.subdeck.encode() + "> ***");
 			/*

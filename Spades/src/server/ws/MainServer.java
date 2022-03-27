@@ -263,7 +263,8 @@ public class MainServer {
 				case JCLWhoAmI:
 					echo("JCLWhoAmI<noargs>");
 					break;
-				case JCLSuperUser:
+				case JCLSu:
+					// https://sexu.com/2610259/?ad=awn
 					echo("SU:<"+ "no-args" + ">");
 					break;
 				case JCLCommandNotImplemented:
