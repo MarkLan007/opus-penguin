@@ -3,6 +3,18 @@ package server.ws;
 import java.util.Scanner;
 import java.util.Vector;
 
+
+/*
+ * begin remodel and consolication of JCL. Currently 721 lines
+ *  should be about 1/3 that...
+ */
+/*
+ * UserJCLCommand -- parse commands beginning with //
+ * place into the structure with a type and name value pairs
+ * for calls to getparam 
+ * 
+ */
+
 public class UserJCLCommand {
 	public enum JCLType {
 		JCLNotJCL, // String is not a JCL command
